@@ -1,0 +1,16 @@
+{
+  "name": "echarts-liquidfill",
+  "version": "1.0.2",
+  "description": "ECharts liquid fill extension",
+  "main": "index.js",
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "echarts": "^3.2.2",
+    "zrender": "^3.1.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ecomfe/echarts-wordcloud.git"
+  }
+}

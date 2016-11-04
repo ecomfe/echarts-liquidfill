@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src='https://cdn.bootcss.com/echarts/3.2.2/echarts.simple.js'></script>
+        <script src='../dist/echarts-liquidfill.js'></script>
+    </head>
+    <body>
+        <style>
+            html, body, #main {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+            }
+        </style>
+        <div id='main'></div>
+        <script>
+            var chart = echarts.init(document.getElementById('main'));
+            var option = {
+                tooltip: {},
+                series: [{
+                    type: 'liquidFill',
+                    data: []
+                }]
+            };
+            chart.setOption(option);
+        </script>
+    </body>
+</html>

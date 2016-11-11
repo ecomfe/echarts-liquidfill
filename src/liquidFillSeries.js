@@ -23,6 +23,9 @@ echarts.extendSeriesModel({
         center: ['50%', '50%'],
         radius: '80%',
         borderWidth: 10,
-        padding: 10
+        padding: 10,
+        amplitude: 10,
+        waveLength: '50%',
+        phase: 0
     }
 });

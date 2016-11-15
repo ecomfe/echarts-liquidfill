@@ -20,9 +20,11 @@
                 series: [{
                     type: 'liquidFill',
                     data: [0.6],
-                    amplitude: 10,
+                    amplitude: [8, 16],
                     waveLength: '80%',
-                    radius: 250
+                    radius: 250,
+                    phase: 0,
+                    speed: 3000
                 }]
             };
             chart.setOption(option);

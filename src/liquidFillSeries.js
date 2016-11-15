@@ -22,10 +22,28 @@ echarts.extendSeriesModel({
     defaultOption: {
         center: ['50%', '50%'],
         radius: '80%',
-        borderWidth: 10,
-        padding: 10,
         amplitude: 10,
         waveLength: '50%',
-        phase: 0
+        phase: 0,
+        speed: 2000,
+
+        itemStyle: {
+            normal: {
+                waterColor: 'red',
+                backgroundColor: 'yellow',
+                borderColor: 'blue',
+                borderWidth: 10,
+                borderDistance: 10,
+                opacity: 1
+            },
+            emphasis: {
+                waterColor: 'red',
+                backgroundColor: 'yellow',
+                borderColor: 'blue',
+                borderWidth: 10,
+                borderDistance: 10,
+                opacity: 1
+            }
+        }
     }
 });

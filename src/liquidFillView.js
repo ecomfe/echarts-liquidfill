@@ -13,7 +13,6 @@ echarts.extendChartView({
     type: 'liquidFill',
 
     render: function (seriesModel, ecModel, api) {
-        var start = new Date();
         var group = this.group;
         group.removeAll();
 
@@ -23,8 +22,16 @@ echarts.extendChartView({
 
         var center = itemModel.get('center');
         var radius = itemModel.get('radius');
-        var borderWidth = itemModel.get('borderWidth');
-        var padding = itemModel.get('padding');
+        var phase = itemModel.get('phase');
+        var speed = itemModel.get('speed');
+
+        var normal = itemModel.get('itemStyle.normal');
+        var waterColor = normal.waterColor;
+        var backgroundColor = normal.backgroundColor;
+        var borderColor = normal.borderColor;
+        var borderWidth = normal.borderWidth;
+        var borderDistance = normal.borderDistance;
+        var opacity = normal.opacity;
 
         var width = api.getWidth();
         var height = api.getHeight();
@@ -34,7 +41,7 @@ echarts.extendChartView({
         var borderWidth = parsePercent(borderWidth, size);
         var outterRadius = parsePercent(radius, size) / 2;
         var innerRadius = outterRadius - borderWidth;
-        var paddingRadius = parsePercent(padding, size);
+        var paddingRadius = parsePercent(borderDistance, size);
 
         var borderRing = new echarts.graphic.Ring({
             shape: {
@@ -52,6 +59,8 @@ echarts.extendChartView({
         var radius = innerRadius - paddingRadius;
         var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
         var amplitude = itemModel.get('amplitude');
+        amplitude = typeof amplitude === 'number' ? [amplitude, amplitude]
+            : amplitude;
         var left = cx - radius;
         var top = cy - radius;
         var waterLevel = radius - data.get('value', 0) * radius * 2;
@@ -75,9 +84,10 @@ echarts.extendChartView({
                 cx: 0,
                 cy: 0,
                 waterLevel: waterLevel,
-                amplitude: amplitude,
+                amplitude: amplitude[1],
                 borderWidth: borderWidth,
-                padding: paddingRadius
+                borderDistance: paddingRadius,
+                phase: phase
             },
             style: {
                 fill: '#2D99D9'
@@ -91,23 +101,37 @@ echarts.extendChartView({
                 r: radius
             }
         }));
+        wave.animate('shape', true)
+            .when(0, {
+                phase: 0,
+                amplitude: amplitude[1]
+            })
+            .when(speed / 2, {
+                phase: Math.PI,
+                amplitude: amplitude[0]
+            })
+            .when(speed, {
+                phase: Math.PI * 2,
+                amplitude: amplitude[1]
+            })
+            .start();
+
         group.add(wave);
 
         var text = new echarts.graphic.Text({
             style: {
                 text: Math.ceil(data.get('value', 0) * 100) + '%',
                 x: cx,
-                y: waterLevel + cy - 20,
+                y: waterLevel + cy - 30,
                 fill: '#2D99D9',
                 textAlign: 'center',
                 textVerticalAlign: 'middle',
-                textFont: '24px Arial'
+                textFont: '32px Arial'
             },
             silent: true
         });
         group.add(text);
 
-        console.log(new Date() - start);
         // data.setItemGraphicEl(0, borderRing);
     }
 });

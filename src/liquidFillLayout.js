@@ -11,7 +11,8 @@ module.exports = echarts.graphic.extendShape({
         waterLevel: 0,
         amplitude: 0,
         borderWidth: 0,
-        padding: 0
+        borderDistance: 0,
+        phase: 0
     },
 
     style: {
@@ -26,10 +27,11 @@ module.exports = echarts.graphic.extendShape({
 
 
 function drawWave(ctx, shape) {
-    var curves = Math.ceil(2 * shape.radius / shape.waveLength * 4);
+    var curves = Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2;
     var controls = [[0, 0]];
     var positions = [];
-    var left = shape.cx - shape.radius;
+    var phase = shape.phase / Math.PI / 2 * shape.waveLength;
+    var left = shape.cx - shape.radius + phase - shape.radius * 2;
 
     ctx.moveTo(left, shape.waterLevel);
 

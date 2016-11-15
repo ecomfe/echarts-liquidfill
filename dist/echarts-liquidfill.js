@@ -2386,8 +2386,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    defaultOption: {
 	        center: ['50%', '50%'],
 	        radius: '80%',
-	        borderWidth: 10,
-	        padding: 10
+	        amplitude: 10,
+	        waveLength: '50%',
+	        phase: 0,
+	        speed: 2000,
+
+	        itemStyle: {
+	            normal: {
+	                waterColor: 'red',
+	                backgroundColor: 'yellow',
+	                borderColor: 'blue',
+	                borderWidth: 10,
+	                borderDistance: 10,
+	                opacity: 1
+	            },
+	            emphasis: {
+	                waterColor: 'red',
+	                backgroundColor: 'yellow',
+	                borderColor: 'blue',
+	                borderWidth: 10,
+	                borderDistance: 10,
+	                opacity: 1
+	            }
+	        }
 	    }
 	});
 
@@ -2470,6 +2491,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var numberUtil = __webpack_require__(8);
 	var parsePercent = numberUtil.parsePercent;
 
+	var LiquidLayout = __webpack_require__(14);
+
 	function getShallow(model, path) {
 	    return model && model.getShallow(path);
 	}
@@ -2488,7 +2511,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var center = itemModel.get('center');
 	        var radius = itemModel.get('radius');
-	        var borderWidth = itemModel.get('borderWidth');
+	        var phase = itemModel.get('phase');
+	        var speed = itemModel.get('speed');
+
+	        var normal = itemModel.get('itemStyle.normal');
+	        var waterColor = normal.waterColor;
+	        var backgroundColor = normal.backgroundColor;
+	        var borderColor = normal.borderColor;
+	        var borderWidth = normal.borderWidth;
+	        var borderDistance = normal.borderDistance;
+	        var opacity = normal.opacity;
 
 	        var width = api.getWidth();
 	        var height = api.getHeight();
@@ -2498,6 +2530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var borderWidth = parsePercent(borderWidth, size);
 	        var outterRadius = parsePercent(radius, size) / 2;
 	        var innerRadius = outterRadius - borderWidth;
+	        var paddingRadius = parsePercent(borderDistance, size);
 
 	        var borderRing = new echarts.graphic.Ring({
 	            shape: {
@@ -2505,17 +2538,188 @@ return /******/ (function(modules) { // webpackBootstrap
 	                cy: cy,
 	                r: innerRadius,
 	                r0: outterRadius
+	            },
+	            style: {
+	                fill: '#2D99D9'
 	            }
 	        });
-	        borderRing.setStyle({
-	            fill: '#f00'
-	        });
-
 	        group.add(borderRing);
 
-	        data.setItemGraphicEl(0, borderRing);
+	        var radius = innerRadius - paddingRadius;
+	        var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
+	        var amplitude = itemModel.get('amplitude');
+	        amplitude = typeof amplitude === 'number' ? [amplitude, amplitude]
+	            : amplitude;
+	        var left = cx - radius;
+	        var top = cy - radius;
+	        var waterLevel = radius - data.get('value', 0) * radius * 2;
+
+	        var backCircle = new echarts.graphic.Circle({
+	            shape: {
+	                cx: cx,
+	                cy: cy,
+	                r: radius
+	            },
+	            style: {
+	                fill: '#C8FFFB'
+	            }
+	        });
+	        group.add(backCircle);
+
+	        var wave = new LiquidLayout({
+	            shape: {
+	                waveLength: waveLength,
+	                radius: radius,
+	                cx: 0,
+	                cy: 0,
+	                waterLevel: waterLevel,
+	                amplitude: amplitude[1],
+	                borderWidth: borderWidth,
+	                borderDistance: paddingRadius,
+	                phase: phase
+	            },
+	            style: {
+	                fill: '#2D99D9'
+	            },
+	            position: [cx, cy]
+	        });
+	        wave.setClipPath(new echarts.graphic.Circle({
+	            shape: {
+	                cx: 0,
+	                cy: 0,
+	                r: radius
+	            }
+	        }));
+	        wave.animate('shape', true)
+	            .when(0, {
+	                phase: 0,
+	                amplitude: amplitude[1]
+	            })
+	            .when(speed / 2, {
+	                phase: Math.PI,
+	                amplitude: amplitude[0]
+	            })
+	            .when(speed, {
+	                phase: Math.PI * 2,
+	                amplitude: amplitude[1]
+	            })
+	            .start();
+
+	        group.add(wave);
+
+	        var text = new echarts.graphic.Text({
+	            style: {
+	                text: Math.ceil(data.get('value', 0) * 100) + '%',
+	                x: cx,
+	                y: waterLevel + cy - 30,
+	                fill: '#2D99D9',
+	                textAlign: 'center',
+	                textVerticalAlign: 'middle',
+	                textFont: '32px Arial'
+	            },
+	            silent: true
+	        });
+	        group.add(text);
+
+	        // data.setItemGraphicEl(0, borderRing);
 	    }
 	});
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var echarts = __webpack_require__(2);
+
+	module.exports = echarts.graphic.extendShape({
+	    type: 'ec-liquid-fill',
+
+	    shape: {
+	        waveLength: 0,
+	        radius: 0,
+	        cx: 0,
+	        cy: 0,
+	        waterLevel: 0,
+	        amplitude: 0,
+	        borderWidth: 0,
+	        borderDistance: 0,
+	        phase: 0
+	    },
+
+	    style: {
+	        fill: '#0f0'
+	    },
+
+	    buildPath: function (ctx, shape) {
+	        drawWave(ctx, shape);
+	    }
+	});
+
+
+
+	function drawWave(ctx, shape) {
+	    var curves = Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2;
+	    var controls = [[0, 0]];
+	    var positions = [];
+	    var phase = shape.phase / Math.PI / 2 * shape.waveLength;
+	    var left = shape.cx - shape.radius + phase - shape.radius * 2;
+
+	    ctx.moveTo(left, shape.waterLevel);
+
+	    // top wave
+	    for (var c = 0; c < curves; ++c) {
+	        var stage = c % 4;
+	        var pos = getWaterPositions(c * shape.waveLength / 4, stage,
+	            shape.waveLength, shape.amplitude);
+	        ctx.bezierCurveTo(pos[0][0] + left, -pos[0][1] + shape.waterLevel,
+	            pos[1][0] + left, -pos[1][1] + shape.waterLevel,
+	            pos[2][0] + left, -pos[2][1] + shape.waterLevel);
+	    }
+
+	    ctx.lineTo(shape.cx + shape.radius, shape.cy + shape.radius);
+	    ctx.lineTo(shape.cx - shape.radius, shape.cy + shape.radius);
+	    ctx.lineTo(shape.cx - shape.radius, shape.waterLevel);
+
+	    ctx.stroke();
+	}
+
+
+
+	function getWaterPositions(x, stage, waveLength, amplitude) {
+	    if (stage === 0) {
+	        return [
+	            [x + 1 / 2 * waveLength / Math.PI / 2, amplitude / 2],
+	            [x + 1 / 2 * waveLength / Math.PI,     amplitude],
+	            [x + waveLength / 4,                   amplitude]
+	        ];
+	    }
+	    else if (stage === 1) {
+	        return [
+	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 2),
+	            amplitude],
+	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 1),
+	            amplitude / 2],
+	            [x + waveLength / 4,                   0]
+	        ]
+	    }
+	    else if (stage === 2) {
+	        return [
+	            [x + 1 / 2 * waveLength / Math.PI / 2, -amplitude / 2],
+	            [x + 1 / 2 * waveLength / Math.PI,     -amplitude],
+	            [x + waveLength / 4,                   -amplitude]
+	        ]
+	    }
+	    else {
+	        return [
+	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 2),
+	            -amplitude],
+	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 1),
+	            -amplitude / 2],
+	            [x + waveLength / 4,                   0]
+	        ]
+	    }
+	}
 
 
 /***/ }

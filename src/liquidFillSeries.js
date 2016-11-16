@@ -26,6 +26,7 @@ echarts.extendSeriesModel({
         waveLength: '50%',
         phase: 0,
         speed: 2000,
+        direction: 'right',
 
         itemStyle: {
             normal: {

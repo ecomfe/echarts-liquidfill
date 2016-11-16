@@ -36,6 +36,8 @@ function drawWave(ctx, shape) {
     ctx.moveTo(left, shape.waterLevel);
 
     // top wave
+    var waveLeft = 0;
+    var waveRight = 0;
     for (var c = 0; c < curves; ++c) {
         var stage = c % 4;
         var pos = getWaterPositions(c * shape.waveLength / 4, stage,
@@ -43,11 +45,15 @@ function drawWave(ctx, shape) {
         ctx.bezierCurveTo(pos[0][0] + left, -pos[0][1] + shape.waterLevel,
             pos[1][0] + left, -pos[1][1] + shape.waterLevel,
             pos[2][0] + left, -pos[2][1] + shape.waterLevel);
+
+        if (c === curves - 1) {
+            waveRight = pos[2][0];
+        }
     }
 
-    ctx.lineTo(shape.cx + shape.radius, shape.cy + shape.radius);
-    ctx.lineTo(shape.cx - shape.radius, shape.cy + shape.radius);
-    ctx.lineTo(shape.cx - shape.radius, shape.waterLevel);
+    ctx.lineTo(waveRight + left, shape.cy + shape.radius);
+    ctx.lineTo(left, shape.cy + shape.radius);
+    ctx.lineTo(left, shape.waterLevel);
 
     ctx.stroke();
 }

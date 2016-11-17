@@ -12,7 +12,8 @@ module.exports = echarts.graphic.extendShape({
         amplitude: 0,
         borderWidth: 0,
         borderDistance: 0,
-        phase: 0
+        phase: 0,
+        inverse: false
     },
 
     style: {
@@ -50,7 +51,7 @@ module.exports = echarts.graphic.extendShape({
         /**
          * top wave
          *
-         * ~~~~~~~~ <- draws this part
+         * ~~~~~~~~ <- draws this sine wave
          * |      |
          * +------+
          */
@@ -69,18 +70,38 @@ module.exports = echarts.graphic.extendShape({
             }
         }
 
-        /**
-         * left, right, and bottom lines
-         *
-         *                    ~~~~~~~~
-         * draws this part -> |      | <- draws this part
-         *                    +------+ <- draws this part
-         */
-        ctx.lineTo(waveRight + left, shape.cy + shape.radius);
-        ctx.lineTo(left, shape.cy + shape.radius);
-        ctx.lineTo(left, shape.waterLevel);
+        if (shape.inverse) {
+            /**
+             * top-right corner
+             *                  2. draws this line
+             *                          |
+             *                       +------+
+             * 3. draws this line -> |      | <- 1. draws this line
+             *                       ~~~~~~~~
+             */
+            ctx.lineTo(waveRight + left, shape.cy - shape.radius);
+            ctx.lineTo(left, shape.cy - shape.radius);
+            ctx.lineTo(left, shape.waterLevel);
+        }
+        else {
+            /**
+             * top-right corner
+             *
+             *                       ~~~~~~~~
+             * 3. draws this line -> |      | <- 1. draws this line
+             *                       +------+
+             *                          ^
+             *                          |
+             *                  2. draws this line
+             */
+            ctx.lineTo(waveRight + left, shape.cy + shape.radius);
+            ctx.lineTo(left, shape.cy + shape.radius);
+            ctx.lineTo(left, shape.waterLevel);
+        }
 
-        ctx.stroke();
+        ctx.closePath();
+
+        // ctx.stroke();
     }
 });
 

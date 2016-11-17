@@ -10,6 +10,7 @@
                 width: 100%;
                 height: 100%;
                 margin: 0;
+                background: #fcfcfc;
             }
         </style>
         <div id='main'></div>
@@ -19,13 +20,18 @@
                 tooltip: {},
                 series: [{
                     type: 'liquidFill',
-                    data: [0.6, 0.4],
-                    amplitude: [8, 16],
+                    data: [0.8, 0.65, 0.5, 0.35],
+                    amplitude: [10, 20],
                     waveLength: '80%',
                     radius: 250,
                     phase: 0,
-                    speed: 3000,
-                    direction: 'left'
+                    speed: 4000,
+                    direction: 'left',
+                    itemStyle: {
+                        normal: {
+                            borderDistance: 5
+                        }
+                    }
                 }]
             };
             chart.setOption(option);

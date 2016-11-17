@@ -20,6 +20,7 @@ echarts.extendSeriesModel({
     },
 
     defaultOption: {
+        color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
         center: ['50%', '50%'],
         radius: '80%',
         amplitude: 10,
@@ -31,17 +32,32 @@ echarts.extendSeriesModel({
         itemStyle: {
             normal: {
                 skyColor: '#C8FFFB',
-                borderColor: '#293c55',
+                borderColor: '#294D99',
                 borderWidth: 10,
                 borderDistance: 10,
                 opacity: 1
             },
             emphasis: {
                 skyColor: '#293c55',
-                borderColor: 'blue',
+                borderColor: '#294D99',
                 borderWidth: 10,
                 borderDistance: 10,
                 opacity: 1
+            }
+        },
+
+        label: {
+            normal: {
+                show: true,
+                position: 'outer',
+                textStyle: {
+                    color: '#294D99',
+                    insideColor: '#fff',
+                    fontSize: 50,
+                    fontWeight: 'bold'
+                },
+                textAlign: 'center',
+                textVerticalAlign: 'middle'
             }
         }
     }

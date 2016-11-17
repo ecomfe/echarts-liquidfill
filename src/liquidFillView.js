@@ -23,7 +23,7 @@ echarts.extendChartView({
         var center = itemModel.get('center');
         var radius = itemModel.get('radius');
         var phase = itemModel.get('phase');
-        var speed = itemModel.get('speed');
+        var maxSpeed = itemModel.get('speed');
         var direction = itemModel.get('direction');
 
         // itemStyle
@@ -44,6 +44,8 @@ echarts.extendChartView({
         var outterRadius = parsePercent(radius, size) / 2;
         var innerRadius = outterRadius - borderWidth;
         var paddingRadius = parsePercent(borderDistance, size);
+
+        var wavePath = null;
 
         var borderRing = new echarts.graphic.Ring({
             shape: {
@@ -69,15 +71,14 @@ echarts.extendChartView({
         group.add(getBackground());
 
         // each data item for a wave
+        var waves = [];
         data.each(function (idx) {
-            var waterLevel = radius - data.get('value', idx) * radius * 2;
-            var phase = idx * Math.PI / 4;
-            var waterColor = data.getItemVisual(idx, 'color');
-            console.log(idx, waterColor);
-            group.add(getWave(waterLevel, phase, waterColor));
+            var wave = getWave(idx, false);
+            group.add(wave);
+            waves.push(wave);
         });
 
-        group.add(getText());
+        group.add(getText(waves));
 
         // data.setItemGraphicEl(0, borderRing);
 
@@ -100,7 +101,16 @@ echarts.extendChartView({
         /**
          * wave shape
          */
-        function getWave(waterLevel, phase, waterColor) {
+        function getWave(idx, isInverse) {
+            var value = data.get('value', idx);
+            var value0 = data.get('value', 0);
+
+            var waterLevel = radius - value * radius * 2;
+            var phase = idx * Math.PI / 3;
+            var waterColor = data.getItemVisual(idx, 'color');
+            var cnt = data.count();
+            var speed = value0 === 0 ? maxSpeed : maxSpeed * value / value0;
+
             var x = direction === 'left' ? radius * 2 : 0;
 
             var wave = new LiquidLayout({
@@ -113,7 +123,8 @@ echarts.extendChartView({
                     amplitude: amplitude[1],
                     borderWidth: borderWidth,
                     borderDistance: paddingRadius,
-                    phase: phase
+                    phase: phase,
+                    inverse: isInverse
                 },
                 style: {
                     fill: waterColor
@@ -159,6 +170,11 @@ echarts.extendChartView({
                     phase: phaseOffset * 2 + phase,
                     amplitude: amplitude[1]
                 })
+                .during(function () {
+                    if (wavePath) {
+                        wavePath.dirty(true);
+                    }
+                })
                 .start();
 
             return wave;
@@ -167,19 +183,57 @@ echarts.extendChartView({
         /**
          * text on wave
          */
-        function getText() {
-            return new echarts.graphic.Text({
-                style: {
-                    text: Math.ceil(data.get('value', 0) * 100) + '%',
-                    x: cx,
-                    y: cy - 30,
-                    fill: '#2D99D9',
-                    textAlign: 'center',
-                    textVerticalAlign: 'middle',
-                    textFont: '32px Arial'
-                },
+        function getText(waves) {
+            var labelModel = itemModel.getModel('label.normal');
+            var textStyle = labelModel.getModel('textStyle');
+
+            var insideStyle = {
+                text: Math.ceil(data.get('value', 0) * 100) + '%',
+                x: cx,
+                y: cy - 50,
+                fill: labelModel.get('textStyle').color,
+                textAlign: labelModel.get('textAlign'),
+                textVerticalAlign: labelModel.get('textVerticalAlign'),
+                textFont: textStyle.getFont()
+            };
+
+            var outsideText = new echarts.graphic.Text({
+                style: insideStyle,
                 silent: true
             });
+            console.log(outsideText.getBoundingRect());
+
+            var insideStyle = Object.assign({}, insideStyle);
+            insideStyle.fill = labelModel.get('textStyle').insideColor;
+            var insideText = new echarts.graphic.Text({
+                style: insideStyle,
+                silent: true
+            });
+
+            // clip out waves for insideText
+            var boundingCircle = new echarts.graphic.Circle({
+                shape: {
+                    cx: 0,
+                    cy: 0,
+                    r: radius
+                }
+            });
+
+            wavePath = new echarts.graphic.CompoundPath({
+                shape: {
+                    paths: waves
+                },
+                position: [cx, cy]
+            });
+
+            wavePath.setClipPath(boundingCircle);
+            insideText.setClipPath(wavePath);
+
+            var group = new echarts.graphic.Group();
+            group.add(outsideText);
+            group.add(insideText);
+
+            return group;
         }
     }
 });

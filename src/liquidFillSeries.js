@@ -30,16 +30,14 @@ echarts.extendSeriesModel({
 
         itemStyle: {
             normal: {
-                waterColor: 'red',
-                backgroundColor: 'yellow',
-                borderColor: 'blue',
+                skyColor: '#C8FFFB',
+                borderColor: '#293c55',
                 borderWidth: 10,
                 borderDistance: 10,
                 opacity: 1
             },
             emphasis: {
-                waterColor: 'red',
-                backgroundColor: 'yellow',
+                skyColor: '#293c55',
                 borderColor: 'blue',
                 borderWidth: 10,
                 borderDistance: 10,

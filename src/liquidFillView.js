@@ -26,9 +26,10 @@ echarts.extendChartView({
         var speed = itemModel.get('speed');
         var direction = itemModel.get('direction');
 
+        // itemStyle
         var normal = itemModel.get('itemStyle.normal');
         var waterColor = normal.waterColor;
-        var backgroundColor = normal.backgroundColor;
+        var skyColor = normal.skyColor;
         var borderColor = normal.borderColor;
         var borderWidth = normal.borderWidth;
         var borderDistance = normal.borderDistance;
@@ -52,7 +53,7 @@ echarts.extendChartView({
                 r0: outterRadius
             },
             style: {
-                fill: '#2D99D9'
+                fill: borderColor
             }
         });
         group.add(borderRing);
@@ -64,14 +65,25 @@ echarts.extendChartView({
             : amplitude;
         var left = cx - radius;
         var top = cy - radius;
-        var waterLevel = radius - data.get('value', 0) * radius * 2;
 
         group.add(getBackground());
-        group.add(getWave());
+
+        // each data item for a wave
+        data.each(function (idx) {
+            var waterLevel = radius - data.get('value', idx) * radius * 2;
+            var phase = idx * Math.PI / 4;
+            var waterColor = data.getItemVisual(idx, 'color');
+            console.log(idx, waterColor);
+            group.add(getWave(waterLevel, phase, waterColor));
+        });
+
         group.add(getText());
 
         // data.setItemGraphicEl(0, borderRing);
 
+        /**
+         * sky circle for wave
+         */
         function getBackground() {
             return new echarts.graphic.Circle({
                 shape: {
@@ -80,12 +92,15 @@ echarts.extendChartView({
                     r: radius
                 },
                 style: {
-                    fill: '#C8FFFB'
+                    fill: skyColor
                 }
             });
         }
 
-        function getWave() {
+        /**
+         * wave shape
+         */
+        function getWave(waterLevel, phase, waterColor) {
             var x = direction === 'left' ? radius * 2 : 0;
 
             var wave = new LiquidLayout({
@@ -101,7 +116,7 @@ echarts.extendChartView({
                     phase: phase
                 },
                 style: {
-                    fill: '#2D99D9'
+                    fill: waterColor
                 },
                 position: [cx, cy]
             });
@@ -116,15 +131,15 @@ echarts.extendChartView({
             }));
 
             // phase for moving left/right
-            var halfPhase = 0;
+            var phaseOffset = 0;
             if (direction === 'right' || direction == undefined) {
-                halfPhase = Math.PI;
+                phaseOffset = Math.PI;
             }
             else if (direction === 'left') {
-                halfPhase = -Math.PI;
+                phaseOffset = -Math.PI;
             }
             else if (direction === 'none') {
-                halfPhase = 0;
+                phaseOffset = 0;
             }
             else {
                 console.error('Illegal direction value for liquid fill.');
@@ -133,15 +148,15 @@ echarts.extendChartView({
             // wave animation of moving left/right and changing amplitude
             wave.animate('shape', true)
                 .when(0, {
-                    phase: 0,
+                    phase: phase,
                     amplitude: amplitude[1]
                 })
                 .when(speed / 2, {
-                    phase: halfPhase,
+                    phase: phaseOffset + phase,
                     amplitude: amplitude[0]
                 })
                 .when(speed, {
-                    phase: halfPhase * 2,
+                    phase: phaseOffset * 2 + phase,
                     amplitude: amplitude[1]
                 })
                 .start();
@@ -149,12 +164,15 @@ echarts.extendChartView({
             return wave;
         }
 
+        /**
+         * text on wave
+         */
         function getText() {
             return new echarts.graphic.Text({
                 style: {
                     text: Math.ceil(data.get('value', 0) * 100) + '%',
                     x: cx,
-                    y: waterLevel + cy - 30,
+                    y: cy - 30,
                     fill: '#2D99D9',
                     textAlign: 'center',
                     textVerticalAlign: 'middle',
@@ -165,7 +183,3 @@ echarts.extendChartView({
         }
     }
 });
-
-
-
-

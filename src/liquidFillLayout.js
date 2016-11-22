@@ -100,8 +100,6 @@ module.exports = echarts.graphic.extendShape({
         }
 
         ctx.closePath();
-
-        // ctx.stroke();
     }
 });
 

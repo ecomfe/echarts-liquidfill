@@ -71,16 +71,41 @@ echarts.extendChartView({
         group.add(getBackground());
 
         // each data item for a wave
+        var oldData = this._data;
         var waves = [];
-        data.each(function (idx) {
-            var wave = getWave(idx, false);
-            group.add(wave);
-            waves.push(wave);
-        });
+        data.diff(oldData)
+            .add(function (idx) {
+                var wave = getWave(idx, false, true);
+                setWaveAnimation(idx, wave);
+
+                group.add(wave);
+                data.setItemGraphicEl(idx, wave);
+                waves.push(wave);
+            })
+            .update(function (newIdx, oldIdx) {
+                var oldWave = oldData.getItemGraphicEl(oldIdx);
+
+                // new wave is used to calculate position, but not added
+                var newWave = getWave(newIdx, false);
+                // update old wave with parameters of new wave
+                echarts.graphic.updateProps(oldWave, {
+                    shape: newWave.shape
+                }, seriesModel);
+
+                setWaveAnimation(newIdx, oldWave);
+                group.add(oldWave);
+                data.setItemGraphicEl(newIdx, oldWave);
+                waves.push(oldWave);
+            })
+            .remove(function (idx) {
+                var wave = oldData.getItemGraphicEl(idx);
+                group.remove(wave);
+            })
+            .execute();
 
         group.add(getText(waves));
 
-        // data.setItemGraphicEl(0, borderRing);
+        this._data = data;
 
         /**
          * sky circle for wave
@@ -101,15 +126,11 @@ echarts.extendChartView({
         /**
          * wave shape
          */
-        function getWave(idx, isInverse) {
+        function getWave(idx, isInverse, zeroLevel) {
             var value = data.get('value', idx);
-            var value0 = data.get('value', 0);
-
             var waterLevel = radius - value * radius * 2;
             var phase = idx * Math.PI / 3;
             var waterColor = data.getItemVisual(idx, 'color');
-            var cnt = data.count();
-            var speed = value0 === 0 ? maxSpeed : maxSpeed * value / value0;
 
             var x = direction === 'left' ? radius * 2 : 0;
 
@@ -119,7 +140,7 @@ echarts.extendChartView({
                     radius: radius,
                     cx: x,
                     cy: 0,
-                    waterLevel: waterLevel,
+                    waterLevel: zeroLevel ? 0 : waterLevel,
                     amplitude: amplitude[1],
                     borderWidth: borderWidth,
                     borderDistance: paddingRadius,
@@ -131,6 +152,7 @@ echarts.extendChartView({
                 },
                 position: [cx, cy]
             });
+            wave.shape._waterLevel = waterLevel;
 
             // clip out the part outside the circle
             wave.setClipPath(new echarts.graphic.Circle({
@@ -140,6 +162,16 @@ echarts.extendChartView({
                     r: radius
                 }
             }));
+
+            return wave;
+        }
+
+        function setWaveAnimation(idx, wave) {
+            var value = data.get('value', idx);
+            var value0 = data.get('value', 0);
+            var phase = idx * Math.PI / 3;
+            var cnt = data.count();
+            var speed = cnt === 0 ? maxSpeed : maxSpeed * (idx + 1) / cnt;
 
             // phase for moving left/right
             var phaseOffset = 0;
@@ -176,8 +208,6 @@ echarts.extendChartView({
                     }
                 })
                 .start();
-
-            return wave;
         }
 
         /**
@@ -201,7 +231,6 @@ echarts.extendChartView({
                 style: insideStyle,
                 silent: true
             });
-            console.log(outsideText.getBoundingRect());
 
             var insideStyle = Object.assign({}, insideStyle);
             insideStyle.fill = labelModel.get('textStyle').insideColor;

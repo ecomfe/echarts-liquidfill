@@ -20,8 +20,8 @@
                 tooltip: {},
                 series: [{
                     type: 'liquidFill',
-                    data: [0.8, 0.65, 0.5, 0.35],
-                    amplitude: [10, 20],
+                    data: [0.8, 0.6],
+                    amplitude: [10, 30],
                     waveLength: '80%',
                     radius: 250,
                     phase: 0,
@@ -35,6 +35,22 @@
                 }]
             };
             chart.setOption(option);
+
+            setInterval(function () {
+                var max = 1;
+                var cnt = Math.floor(Math.random() * 5) + 2;
+                var data = [];
+                for (var i = 0; i < cnt; ++i) {
+                    var v = Math.random() * max;
+                    data.push(v);
+                    max = v;
+                }
+                chart.setOption({
+                    series: [{
+                        data: data
+                    }]
+                });
+            }, 3000);
         </script>
     </body>
 </html>

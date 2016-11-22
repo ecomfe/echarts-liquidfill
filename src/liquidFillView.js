@@ -22,18 +22,12 @@ echarts.extendChartView({
 
         var center = itemModel.get('center');
         var radius = itemModel.get('radius');
-        var phase = itemModel.get('phase');
-        var maxSpeed = itemModel.get('speed');
-        var direction = itemModel.get('direction');
 
         // itemStyle
-        var normal = itemModel.get('itemStyle.normal');
-        var waterColor = normal.waterColor;
-        var skyColor = normal.skyColor;
-        var borderColor = normal.borderColor;
-        var borderWidth = normal.borderWidth;
-        var borderDistance = normal.borderDistance;
-        var opacity = normal.opacity;
+        var skyColor = itemModel.get('itemStyle.normal.skyColor');
+        var borderColor = itemModel.get('itemStyle.normal.borderColor');
+        var borderWidth = itemModel.get('itemStyle.normal.borderWidth');
+        var borderDistance = itemModel.get('itemStyle.normal.borderDistance');
 
         var width = api.getWidth();
         var height = api.getHeight();
@@ -62,9 +56,6 @@ echarts.extendChartView({
 
         var radius = innerRadius - paddingRadius;
         var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
-        var amplitude = itemModel.get('amplitude');
-        amplitude = typeof amplitude === 'number' ? [amplitude, amplitude]
-            : amplitude;
         var left = cx - radius;
         var top = cy - radius;
 
@@ -75,7 +66,15 @@ echarts.extendChartView({
         var waves = [];
         data.diff(oldData)
             .add(function (idx) {
-                var wave = getWave(idx, false, true);
+                var wave = getWave(idx, false);
+
+                var waterLevel = wave.shape.waterLevel;
+                wave.shape.waterLevel = radius;
+                echarts.graphic.initProps(wave, {
+                    shape: {
+                        waterLevel: waterLevel
+                    }
+                }, seriesModel);
                 setWaveAnimation(idx, wave);
 
                 group.add(wave);
@@ -86,7 +85,7 @@ echarts.extendChartView({
                 var oldWave = oldData.getItemGraphicEl(oldIdx);
 
                 // new wave is used to calculate position, but not added
-                var newWave = getWave(newIdx, false);
+                var newWave = getWave(newIdx, false, oldWave);
                 // update old wave with parameters of new wave
                 echarts.graphic.updateProps(oldWave, {
                     shape: newWave.shape
@@ -126,10 +125,17 @@ echarts.extendChartView({
         /**
          * wave shape
          */
-        function getWave(idx, isInverse, zeroLevel) {
+        function getWave(idx, isInverse, oldWave) {
+            var itemModel = data.getItemModel(idx);
+
+            var phase = itemModel.get('phase');
+            var direction = itemModel.get('direction');
+            var amplitude = itemModel.get('amplitude');
+            var opacity = itemModel.get('itemStyle.normal.opacity');
+
             var value = data.get('value', idx);
             var waterLevel = radius - value * radius * 2;
-            var phase = idx * Math.PI / 3;
+            var phase = oldWave ? oldWave.shape.phase : idx * Math.PI / 4;
             var waterColor = data.getItemVisual(idx, 'color');
 
             var x = direction === 'left' ? radius * 2 : 0;
@@ -140,15 +146,16 @@ echarts.extendChartView({
                     radius: radius,
                     cx: x,
                     cy: 0,
-                    waterLevel: zeroLevel ? 0 : waterLevel,
-                    amplitude: amplitude[1],
+                    waterLevel: waterLevel,
+                    amplitude: amplitude,
                     borderWidth: borderWidth,
                     borderDistance: paddingRadius,
                     phase: phase,
                     inverse: isInverse
                 },
                 style: {
-                    fill: waterColor
+                    fill: waterColor,
+                    opacity: opacity
                 },
                 position: [cx, cy]
             });
@@ -167,11 +174,17 @@ echarts.extendChartView({
         }
 
         function setWaveAnimation(idx, wave) {
+            var itemModel = data.getItemModel(idx);
+
+            var maxSpeed = itemModel.get('speed');
+            var direction = itemModel.get('direction');
+
             var value = data.get('value', idx);
             var value0 = data.get('value', 0);
-            var phase = idx * Math.PI / 3;
+            var phase = wave.shape.phase || idx * Math.PI / 3;
             var cnt = data.count();
-            var speed = cnt === 0 ? maxSpeed : maxSpeed * (idx + 1) / cnt;
+            var speed = cnt === 0 ? maxSpeed : maxSpeed *
+                (0.2 + (idx + 1) / cnt * 0.8);
 
             // phase for moving left/right
             var phaseOffset = 0;
@@ -188,19 +201,20 @@ echarts.extendChartView({
                 console.error('Illegal direction value for liquid fill.');
             }
 
-            // wave animation of moving left/right and changing amplitude
-            wave.animate('shape', true)
+            // wave animation of moving left/right
+            wave
+                .animate()
+                .stop();
+            wave
+                .animate('shape', true)
                 .when(0, {
-                    phase: phase,
-                    amplitude: amplitude[1]
+                    phase: phase
                 })
                 .when(speed / 2, {
-                    phase: phaseOffset + phase,
-                    amplitude: amplitude[0]
+                    phase: phaseOffset + phase
                 })
                 .when(speed, {
-                    phase: phaseOffset * 2 + phase,
-                    amplitude: amplitude[1]
+                    phase: phaseOffset * 2 + phase
                 })
                 .during(function () {
                     if (wavePath) {

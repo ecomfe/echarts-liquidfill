@@ -20,12 +20,25 @@
                 tooltip: {},
                 series: [{
                     type: 'liquidFill',
-                    data: [0.8, 0.6],
-                    amplitude: [10, 30],
+                    data: [{
+                        value: 0.8,
+                        amplitude: 10
+                    },
+                    0.6,
+                    0.4,
+                    {
+                        value: 0.2,
+                        itemStyle: {
+                            normal: {
+                                opacity: 0.5
+                            }
+                        }
+                    }],
+                    amplitude: 20,
                     waveLength: '80%',
                     radius: 250,
                     phase: 0,
-                    speed: 4000,
+                    speed: 5000,
                     direction: 'left',
                     itemStyle: {
                         normal: {
@@ -37,20 +50,18 @@
             chart.setOption(option);
 
             setInterval(function () {
-                var max = 1;
-                var cnt = Math.floor(Math.random() * 5) + 2;
                 var data = [];
-                for (var i = 0; i < cnt; ++i) {
-                    var v = Math.random() * max;
-                    data.push(v);
-                    max = v;
+                var last = 1;
+                for (var i = 0; i < 4; ++i) {
+                    last = last * Math.random();
+                    data.push(last);
                 }
                 chart.setOption({
                     series: [{
                         data: data
                     }]
                 });
-            }, 3000);
+            }, 5000);
         </script>
     </body>
 </html>

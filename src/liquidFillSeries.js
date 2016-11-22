@@ -29,13 +29,18 @@ echarts.extendSeriesModel({
         speed: 2000,
         direction: 'right',
 
+        animationEasing: 'linear',
+        animationEasingUpdate: 'linear',
+        animationDuration: 2000,
+        animationDurationUpdate: 1000,
+
         itemStyle: {
             normal: {
                 skyColor: '#C8FFFB',
                 borderColor: '#294D99',
                 borderWidth: 10,
                 borderDistance: 10,
-                opacity: 1
+                opacity: 0.95
             },
             emphasis: {
                 skyColor: '#293c55',

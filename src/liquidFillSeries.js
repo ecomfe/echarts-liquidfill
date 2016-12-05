@@ -22,11 +22,11 @@ echarts.extendSeriesModel({
     defaultOption: {
         color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
         center: ['50%', '50%'],
-        radius: '80%',
-        amplitude: 10,
-        waveLength: '50%',
+        radius: '50%',
+        amplitude: 20,
+        waveLength: '80%',
         phase: 0,
-        speed: 2000,
+        speed: 5000,
         direction: 'right',
 
         animationEasing: 'linear',
@@ -63,6 +63,14 @@ echarts.extendSeriesModel({
                 },
                 textAlign: 'center',
                 textVerticalAlign: 'middle'
+            },
+            emphasis: {
+                textStyle: {
+                    color: '#156ACF',
+                    insideColor: '#EEE',
+                    fontSize: 50,
+                    fontWeight: 'bold'
+                }
             }
         }
     }

@@ -138,7 +138,7 @@ echarts.extendChartView({
             var phase = oldWave ? oldWave.shape.phase : idx * Math.PI / 4;
             var waterColor = data.getItemVisual(idx, 'color');
 
-            var x = direction === 'left' ? radius * 2 : 0;
+            var x = radius * 2;
 
             var wave = new LiquidLayout({
                 shape: {
@@ -182,9 +182,14 @@ echarts.extendChartView({
             var value = data.get('value', idx);
             var value0 = data.get('value', 0);
             var phase = wave.shape.phase || idx * Math.PI / 3;
-            var cnt = data.count();
-            var speed = cnt === 0 ? maxSpeed : maxSpeed *
-                (0.2 + (idx + 1) / cnt * 0.8);
+
+            var defaultSpeed = function (maxSpeed) {
+                var cnt = data.count();
+                return cnt === 0 ? maxSpeed : maxSpeed *
+                    (0.2 + (cnt - idx) / cnt * 0.8);
+            };
+            var speed = typeof maxSpeed === 'function'
+                ? maxSpeed(value, idx) : defaultSpeed(maxSpeed);
 
             // phase for moving left/right
             var phaseOffset = 0;
@@ -229,29 +234,39 @@ echarts.extendChartView({
          */
         function getText(waves) {
             var labelModel = itemModel.getModel('label.normal');
+            var labelHoverModel = itemModel.getModel('label.emphasis');
             var textStyle = labelModel.getModel('textStyle');
+            var textHoverStyle = labelHoverModel.getModel('textStyle');
 
-            var insideStyle = {
+            var outsideStyle = {
                 text: Math.ceil(data.get('value', 0) * 100) + '%',
                 x: cx,
                 y: cy - 50,
-                fill: labelModel.get('textStyle').color,
+                fill: textStyle.get('color'),
                 textAlign: labelModel.get('textAlign'),
                 textVerticalAlign: labelModel.get('textVerticalAlign'),
                 textFont: textStyle.getFont()
             };
 
             var outsideText = new echarts.graphic.Text({
-                style: insideStyle,
-                silent: true
+                style: outsideStyle
             });
 
-            var insideStyle = Object.assign({}, insideStyle);
-            insideStyle.fill = labelModel.get('textStyle').insideColor;
+            var insideStyle = Object.assign({}, outsideStyle);
+            insideStyle.fill = textStyle.get('insideColor');
             var insideText = new echarts.graphic.Text({
-                style: insideStyle,
-                silent: true
+                style: insideStyle
             });
+
+            var hoverStyle = Object.assign({}, outsideStyle);
+            hoverStyle.fill = textHoverStyle.get('color');
+            hoverStyle.textFont = textHoverStyle.getFont();
+            outsideText.hoverStyle = hoverStyle;
+
+            var hoverInsideStyle = Object.assign({}, outsideStyle);
+            hoverInsideStyle.fill = textHoverStyle.get('insideColor');
+            hoverInsideStyle.textFont = textHoverStyle.getFont();
+            insideText.hoverStyle = hoverInsideStyle;
 
             // clip out waves for insideText
             var boundingCircle = new echarts.graphic.Circle({
@@ -275,6 +290,8 @@ echarts.extendChartView({
             var group = new echarts.graphic.Group();
             group.add(outsideText);
             group.add(insideText);
+
+            echarts.graphic.setHoverStyle(group);
 
             return group;
         }

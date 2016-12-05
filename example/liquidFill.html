@@ -25,7 +25,14 @@
                         amplitude: 10
                     },
                     0.6,
-                    0.4,
+                    {
+                        value: 0.4,
+                        itemStyle: {
+                            normal: {
+                                opacity: 0.75
+                            }
+                        }
+                    },
                     {
                         value: 0.2,
                         itemStyle: {
@@ -34,17 +41,29 @@
                             }
                         }
                     }],
-                    amplitude: 20,
-                    waveLength: '80%',
-                    radius: 250,
-                    phase: 0,
-                    speed: 5000,
-                    direction: 'left',
-                    itemStyle: {
+                    label: {
                         normal: {
-                            borderDistance: 5
+                            textStyle: {
+                                color: '#ff0'
+                            }
+                        },
+                        emphasis: {
+                            textStyle: {
+                                color: '#f00'
+                            }
                         }
                     }
+                    // amplitude: 20,
+                    // waveLength: '80%',
+                    // // radius: 250,
+                    // phase: 0,
+                    // speed: 5000,
+                    // direction: 'left',
+                    // itemStyle: {
+                    //     normal: {
+                    //         borderDistance: 5
+                    //     }
+                    // }
                 }]
             };
             chart.setOption(option);

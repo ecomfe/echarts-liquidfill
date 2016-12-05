@@ -36,18 +36,17 @@ echarts.extendSeriesModel({
 
         itemStyle: {
             normal: {
-                skyColor: '#C8FFFB',
+                skyColor: '#E3F7FF',
+                borderColor: '#294D99',
+                borderWidth: 10,
+                borderDistance: 10,
+                opacity: 0.9
+            },
+            emphasis: {
                 borderColor: '#294D99',
                 borderWidth: 10,
                 borderDistance: 10,
                 opacity: 0.95
-            },
-            emphasis: {
-                skyColor: '#293c55',
-                borderColor: '#294D99',
-                borderWidth: 10,
-                borderDistance: 10,
-                opacity: 1
             }
         },
 
@@ -67,7 +66,7 @@ echarts.extendSeriesModel({
             emphasis: {
                 textStyle: {
                     color: '#156ACF',
-                    insideColor: '#EEE',
+                    insideColor: '#E3F7FF',
                     fontSize: 50,
                     fontWeight: 'bold'
                 }

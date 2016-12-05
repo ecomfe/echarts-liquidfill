@@ -127,6 +127,7 @@ echarts.extendChartView({
          */
         function getWave(idx, isInverse, oldWave) {
             var itemModel = data.getItemModel(idx);
+            var itemStyleModel = itemModel.getModel('itemStyle');
 
             var phase = itemModel.get('phase');
             var direction = itemModel.get('direction');
@@ -160,6 +161,10 @@ echarts.extendChartView({
                 position: [cx, cy]
             });
             wave.shape._waterLevel = waterLevel;
+
+            var hoverStyle = itemStyleModel.getModel('emphasis').getItemStyle();
+            hoverStyle.lineWidth = 0;
+            echarts.graphic.setHoverStyle(wave, hoverStyle);
 
             // clip out the part outside the circle
             wave.setClipPath(new echarts.graphic.Circle({
@@ -241,7 +246,7 @@ echarts.extendChartView({
             var outsideStyle = {
                 text: Math.ceil(data.get('value', 0) * 100) + '%',
                 x: cx,
-                y: cy - 50,
+                y: cy,
                 fill: textStyle.get('color'),
                 textAlign: labelModel.get('textAlign'),
                 textVerticalAlign: labelModel.get('textVerticalAlign'),
@@ -286,6 +291,9 @@ echarts.extendChartView({
 
             wavePath.setClipPath(boundingCircle);
             insideText.setClipPath(wavePath);
+
+            insideText.z2 = 10;
+            outsideText.z2 = 10;
 
             var group = new echarts.graphic.Group();
             group.add(outsideText);

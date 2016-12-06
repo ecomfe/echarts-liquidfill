@@ -34,19 +34,21 @@ echarts.extendSeriesModel({
         animationDuration: 2000,
         animationDurationUpdate: 1000,
 
+        outline: {
+            borderDistance: 10,
+            itemStyle: {
+                borderColor: '#294D99',
+                borderWidth: 10
+            }
+        },
+
         itemStyle: {
             normal: {
-                skyColor: '#E3F7FF',
-                borderColor: '#294D99',
-                borderWidth: 10,
-                borderDistance: 10,
-                opacity: 0.9
+                backgroundColor: '#E3F7FF',
+                opacity: 0.8
             },
             emphasis: {
-                borderColor: '#294D99',
-                borderWidth: 10,
-                borderDistance: 10,
-                opacity: 0.95
+                opacity: 0.9
             }
         },
 

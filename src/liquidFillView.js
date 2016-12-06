@@ -24,10 +24,12 @@ echarts.extendChartView({
         var radius = itemModel.get('radius');
 
         // itemStyle
-        var skyColor = itemModel.get('itemStyle.normal.skyColor');
-        var borderColor = itemModel.get('itemStyle.normal.borderColor');
-        var borderWidth = itemModel.get('itemStyle.normal.borderWidth');
-        var borderDistance = itemModel.get('itemStyle.normal.borderDistance');
+        var backgroundColor = seriesModel.get(
+            'itemStyle.normal.backgroundColor'
+        );
+        var borderColor = seriesModel.get('outline.itemStyle.borderColor');
+        var borderWidth = seriesModel.get('outline.itemStyle.borderWidth');
+        var borderDistance = seriesModel.get('outline.borderDistance');
 
         var width = api.getWidth();
         var height = api.getHeight();
@@ -117,7 +119,7 @@ echarts.extendChartView({
                     r: radius
                 },
                 style: {
-                    fill: skyColor
+                    fill: backgroundColor
                 }
             });
         }
@@ -128,7 +130,6 @@ echarts.extendChartView({
         function getWave(idx, isInverse, oldWave) {
             var itemModel = data.getItemModel(idx);
             var itemStyleModel = itemModel.getModel('itemStyle');
-
             var phase = itemModel.get('phase');
             var direction = itemModel.get('direction');
             var amplitude = itemModel.get('amplitude');

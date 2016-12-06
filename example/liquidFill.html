@@ -1,7 +1,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <script src='https://cdn.bootcss.com/echarts/3.2.2/echarts.simple.js'></script>
+        <script src='https://cdn.bootcss.com/echarts/3.2.2/echarts.js'></script>
         <script src='../dist/echarts-liquidfill.js'></script>
     </head>
     <body>
@@ -17,12 +17,20 @@
         <script>
             var chart = echarts.init(document.getElementById('main'));
             var option = {
-                tooltip: {},
+                tooltip: {
+                    show: true
+                },
                 series: [{
+                    name: '水球图',
                     type: 'liquidFill',
                     data: [{
                         value: 0.8,
-                        amplitude: 10
+                        amplitude: 10,
+                        itemStyle: {
+                            normal: {
+                                opacity: 1
+                            }
+                        }
                     },
                     0.6,
                     {
@@ -49,7 +57,7 @@
                 var data = [];
                 var last = 1;
                 for (var i = 0; i < 4; ++i) {
-                    last = last * Math.random();
+                    last = Math.floor(last * Math.random() * 100) / 100;
                     data.push(last);
                 }
                 chart.setOption({

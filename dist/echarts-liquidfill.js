@@ -63,13 +63,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var echarts = __webpack_require__(2);
 
-	__webpack_require__(11);
-	__webpack_require__(13);
+	__webpack_require__(3);
+	__webpack_require__(6);
 
 
 	echarts.registerVisual(
 	    echarts.util.curry(
-	        __webpack_require__(15), 'liquidFill'
+	        __webpack_require__(9), 'liquidFill'
 	    )
 	);
 
@@ -81,8 +81,161 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 
 /***/ },
-/* 3 */,
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var completeDimensions = __webpack_require__(4);
+	var echarts = __webpack_require__(2);
+
+	echarts.extendSeriesModel({
+
+	    type: 'series.liquidFill',
+
+	    visualColorAccessPath: 'textStyle.normal.color',
+
+	    optionUpdated: function () {
+	        var option = this.option;
+	        option.gridSize = Math.max(Math.floor(option.gridSize), 4);
+	    },
+
+	    getInitialData: function (option, ecModel) {
+	        var dimensions = completeDimensions(['value'], option.data);
+	        var list = new echarts.List(dimensions, this);
+	        list.initData(option.data);
+	        return list;
+	    },
+
+	    defaultOption: {
+	        color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
+	        center: ['50%', '50%'],
+	        radius: '50%',
+	        amplitude: 20,
+	        waveLength: '80%',
+	        phase: 0,
+	        speed: 5000,
+	        direction: 'right',
+
+	        animationEasing: 'linear',
+	        animationEasingUpdate: 'linear',
+	        animationDuration: 2000,
+	        animationDurationUpdate: 1000,
+
+	        outline: {
+	            borderDistance: 10,
+	            itemStyle: {
+	                borderColor: '#294D99',
+	                borderWidth: 10
+	            }
+	        },
+
+	        itemStyle: {
+	            normal: {
+	                backgroundColor: '#E3F7FF',
+	                opacity: 0.8
+	            },
+	            emphasis: {
+	                opacity: 0.9
+	            }
+	        },
+
+	        label: {
+	            normal: {
+	                show: true,
+	                position: 'outer',
+	                textStyle: {
+	                    color: '#294D99',
+	                    insideColor: '#fff',
+	                    fontSize: 50,
+	                    fontWeight: 'bold'
+	                },
+	                textAlign: 'center',
+	                textVerticalAlign: 'middle'
+	            },
+	            emphasis: {
+	                textStyle: {
+	                    color: '#156ACF',
+	                    insideColor: '#E3F7FF',
+	                    fontSize: 50,
+	                    fontWeight: 'bold'
+	                }
+	            }
+	        }
+	    }
+	});
+
+
+/***/ },
 /* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Complete dimensions by data (guess dimension).
+	 */
+
+
+	    var zrUtil = __webpack_require__(5);
+
+	    /**
+	     * Complete the dimensions array guessed from the data structure.
+	     * @param  {Array.<string>} dimensions      Necessary dimensions, like ['x', 'y']
+	     * @param  {Array} data                     Data list. [[1, 2, 3], [2, 3, 4]]
+	     * @param  {Array.<string>} defaultNames    Default names to fill not necessary dimensions, like ['value']
+	     * @param  {string} extraPrefix             Prefix of name when filling the left dimensions.
+	     * @return {Array.<string>}
+	     */
+	    function completeDimensions(dimensions, data, defaultNames, extraPrefix) {
+	        if (!data) {
+	            return dimensions;
+	        }
+
+	        var value0 = retrieveValue(data[0]);
+	        var dimSize = zrUtil.isArray(value0) && value0.length || 1;
+
+	        defaultNames = defaultNames || [];
+	        extraPrefix = extraPrefix || 'extra';
+	        for (var i = 0; i < dimSize; i++) {
+	            if (!dimensions[i]) {
+	                var name = defaultNames[i] || (extraPrefix + (i - defaultNames.length));
+	                dimensions[i] = guessOrdinal(data, i)
+	                    ? {type: 'ordinal', name: name}
+	                    : name;
+	            }
+	        }
+
+	        return dimensions;
+	    }
+
+	    // The rule should not be complex, otherwise user might not
+	    // be able to known where the data is wrong.
+	    var guessOrdinal = completeDimensions.guessOrdinal = function (data, dimIndex) {
+	        for (var i = 0, len = data.length; i < len; i++) {
+	            var value = retrieveValue(data[i]);
+
+	            if (!zrUtil.isArray(value)) {
+	                return false;
+	            }
+
+	            var value = value[dimIndex];
+	            if (value != null && isFinite(value)) {
+	                return false;
+	            }
+	            else if (zrUtil.isString(value) && value !== '-') {
+	                return true;
+	            }
+	        }
+	        return false;
+	    };
+
+	    function retrieveValue(o) {
+	        return zrUtil.isArray(o) ? o : zrUtil.isObject(o) ? o.value: o;
+	    }
+
+	    module.exports = completeDimensions;
+
+
+
+/***/ },
+/* 5 */
 /***/ function(module, exports) {
 
 	/**
@@ -579,10 +732,321 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */,
-/* 6 */,
-/* 7 */,
-/* 8 */
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var echarts = __webpack_require__(2);
+	var numberUtil = __webpack_require__(7);
+	var parsePercent = numberUtil.parsePercent;
+
+	var LiquidLayout = __webpack_require__(8);
+
+	function getShallow(model, path) {
+	    return model && model.getShallow(path);
+	}
+
+	echarts.extendChartView({
+
+	    type: 'liquidFill',
+
+	    render: function (seriesModel, ecModel, api) {
+	        var group = this.group;
+	        group.removeAll();
+
+	        var data = seriesModel.getData();
+
+	        var itemModel = data.getItemModel(0);
+
+	        var center = itemModel.get('center');
+	        var radius = itemModel.get('radius');
+
+	        // itemStyle
+	        var backgroundColor = seriesModel.get(
+	            'itemStyle.normal.backgroundColor'
+	        );
+	        var borderColor = seriesModel.get('outline.itemStyle.borderColor');
+	        var borderWidth = seriesModel.get('outline.itemStyle.borderWidth');
+	        var borderDistance = seriesModel.get('outline.borderDistance');
+
+	        var width = api.getWidth();
+	        var height = api.getHeight();
+	        var size = Math.min(width, height);
+	        var cx = parsePercent(center[0], width);
+	        var cy = parsePercent(center[1], height);
+	        var borderWidth = parsePercent(borderWidth, size);
+	        var outterRadius = parsePercent(radius, size) / 2;
+	        var innerRadius = outterRadius - borderWidth;
+	        var paddingRadius = parsePercent(borderDistance, size);
+
+	        var wavePath = null;
+
+	        var borderRing = new echarts.graphic.Ring({
+	            shape: {
+	                cx: cx,
+	                cy: cy,
+	                r: innerRadius,
+	                r0: outterRadius
+	            },
+	            style: {
+	                fill: borderColor
+	            }
+	        });
+	        group.add(borderRing);
+
+	        var radius = innerRadius - paddingRadius;
+	        var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
+	        var left = cx - radius;
+	        var top = cy - radius;
+
+	        group.add(getBackground());
+
+	        // each data item for a wave
+	        var oldData = this._data;
+	        var waves = [];
+	        data.diff(oldData)
+	            .add(function (idx) {
+	                var wave = getWave(idx, false);
+
+	                var waterLevel = wave.shape.waterLevel;
+	                wave.shape.waterLevel = radius;
+	                echarts.graphic.initProps(wave, {
+	                    shape: {
+	                        waterLevel: waterLevel
+	                    }
+	                }, seriesModel);
+	                setWaveAnimation(idx, wave);
+
+	                group.add(wave);
+	                data.setItemGraphicEl(idx, wave);
+	                waves.push(wave);
+	            })
+	            .update(function (newIdx, oldIdx) {
+	                var oldWave = oldData.getItemGraphicEl(oldIdx);
+
+	                // new wave is used to calculate position, but not added
+	                var newWave = getWave(newIdx, false, oldWave);
+	                // update old wave with parameters of new wave
+	                echarts.graphic.updateProps(oldWave, {
+	                    shape: newWave.shape
+	                }, seriesModel);
+
+	                setWaveAnimation(newIdx, oldWave);
+	                group.add(oldWave);
+	                data.setItemGraphicEl(newIdx, oldWave);
+	                waves.push(oldWave);
+	            })
+	            .remove(function (idx) {
+	                var wave = oldData.getItemGraphicEl(idx);
+	                group.remove(wave);
+	            })
+	            .execute();
+
+	        group.add(getText(waves));
+
+	        this._data = data;
+
+	        /**
+	         * sky circle for wave
+	         */
+	        function getBackground() {
+	            return new echarts.graphic.Circle({
+	                shape: {
+	                    cx: cx,
+	                    cy: cy,
+	                    r: radius
+	                },
+	                style: {
+	                    fill: backgroundColor
+	                }
+	            });
+	        }
+
+	        /**
+	         * wave shape
+	         */
+	        function getWave(idx, isInverse, oldWave) {
+	            var itemModel = data.getItemModel(idx);
+	            var itemStyleModel = itemModel.getModel('itemStyle');
+	            var phase = itemModel.get('phase');
+	            var direction = itemModel.get('direction');
+	            var amplitude = itemModel.get('amplitude');
+	            var opacity = itemModel.get('itemStyle.normal.opacity');
+
+	            var value = data.get('value', idx);
+	            var waterLevel = radius - value * radius * 2;
+	            var phase = oldWave ? oldWave.shape.phase : idx * Math.PI / 4;
+	            var waterColor = data.getItemVisual(idx, 'color');
+
+	            var x = radius * 2;
+
+	            var wave = new LiquidLayout({
+	                shape: {
+	                    waveLength: waveLength,
+	                    radius: radius,
+	                    cx: x,
+	                    cy: 0,
+	                    waterLevel: waterLevel,
+	                    amplitude: amplitude,
+	                    borderWidth: borderWidth,
+	                    borderDistance: paddingRadius,
+	                    phase: phase,
+	                    inverse: isInverse
+	                },
+	                style: {
+	                    fill: waterColor,
+	                    opacity: opacity
+	                },
+	                position: [cx, cy]
+	            });
+	            wave.shape._waterLevel = waterLevel;
+
+	            var hoverStyle = itemStyleModel.getModel('emphasis').getItemStyle();
+	            hoverStyle.lineWidth = 0;
+	            echarts.graphic.setHoverStyle(wave, hoverStyle);
+
+	            // clip out the part outside the circle
+	            wave.setClipPath(new echarts.graphic.Circle({
+	                shape: {
+	                    cx: 0,
+	                    cy: 0,
+	                    r: radius
+	                }
+	            }));
+
+	            return wave;
+	        }
+
+	        function setWaveAnimation(idx, wave) {
+	            var itemModel = data.getItemModel(idx);
+
+	            var maxSpeed = itemModel.get('speed');
+	            var direction = itemModel.get('direction');
+
+	            var value = data.get('value', idx);
+	            var value0 = data.get('value', 0);
+	            var phase = wave.shape.phase || idx * Math.PI / 3;
+
+	            var defaultSpeed = function (maxSpeed) {
+	                var cnt = data.count();
+	                return cnt === 0 ? maxSpeed : maxSpeed *
+	                    (0.2 + (cnt - idx) / cnt * 0.8);
+	            };
+	            var speed = typeof maxSpeed === 'function'
+	                ? maxSpeed(value, idx) : defaultSpeed(maxSpeed);
+
+	            // phase for moving left/right
+	            var phaseOffset = 0;
+	            if (direction === 'right' || direction == undefined) {
+	                phaseOffset = Math.PI;
+	            }
+	            else if (direction === 'left') {
+	                phaseOffset = -Math.PI;
+	            }
+	            else if (direction === 'none') {
+	                phaseOffset = 0;
+	            }
+	            else {
+	                console.error('Illegal direction value for liquid fill.');
+	            }
+
+	            // wave animation of moving left/right
+	            wave
+	                .animate()
+	                .stop();
+	            wave
+	                .animate('shape', true)
+	                .when(0, {
+	                    phase: phase
+	                })
+	                .when(speed / 2, {
+	                    phase: phaseOffset + phase
+	                })
+	                .when(speed, {
+	                    phase: phaseOffset * 2 + phase
+	                })
+	                .during(function () {
+	                    if (wavePath) {
+	                        wavePath.dirty(true);
+	                    }
+	                })
+	                .start();
+	        }
+
+	        /**
+	         * text on wave
+	         */
+	        function getText(waves) {
+	            var labelModel = itemModel.getModel('label.normal');
+	            var labelHoverModel = itemModel.getModel('label.emphasis');
+	            var textStyle = labelModel.getModel('textStyle');
+	            var textHoverStyle = labelHoverModel.getModel('textStyle');
+
+	            var outsideStyle = {
+	                text: Math.ceil(data.get('value', 0) * 100) + '%',
+	                x: cx,
+	                y: cy,
+	                fill: textStyle.get('color'),
+	                textAlign: labelModel.get('textAlign'),
+	                textVerticalAlign: labelModel.get('textVerticalAlign'),
+	                textFont: textStyle.getFont()
+	            };
+
+	            var outsideText = new echarts.graphic.Text({
+	                style: outsideStyle
+	            });
+
+	            var insideStyle = Object.assign({}, outsideStyle);
+	            insideStyle.fill = textStyle.get('insideColor');
+	            var insideText = new echarts.graphic.Text({
+	                style: insideStyle
+	            });
+
+	            var hoverStyle = Object.assign({}, outsideStyle);
+	            hoverStyle.fill = textHoverStyle.get('color');
+	            hoverStyle.textFont = textHoverStyle.getFont();
+	            outsideText.hoverStyle = hoverStyle;
+
+	            var hoverInsideStyle = Object.assign({}, outsideStyle);
+	            hoverInsideStyle.fill = textHoverStyle.get('insideColor');
+	            hoverInsideStyle.textFont = textHoverStyle.getFont();
+	            insideText.hoverStyle = hoverInsideStyle;
+
+	            // clip out waves for insideText
+	            var boundingCircle = new echarts.graphic.Circle({
+	                shape: {
+	                    cx: 0,
+	                    cy: 0,
+	                    r: radius
+	                }
+	            });
+
+	            wavePath = new echarts.graphic.CompoundPath({
+	                shape: {
+	                    paths: waves
+	                },
+	                position: [cx, cy]
+	            });
+
+	            wavePath.setClipPath(boundingCircle);
+	            insideText.setClipPath(wavePath);
+
+	            insideText.z2 = 10;
+	            outsideText.z2 = 10;
+
+	            var group = new echarts.graphic.Group();
+	            group.add(outsideText);
+	            group.add(insideText);
+
+	            echarts.graphic.setHoverStyle(group);
+
+	            return group;
+	        }
+	    }
+	});
+
+
+/***/ },
+/* 7 */
 /***/ function(module, exports) {
 
 	/**
@@ -840,394 +1304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */,
-/* 10 */,
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var completeDimensions = __webpack_require__(12);
-	var echarts = __webpack_require__(2);
-
-	echarts.extendSeriesModel({
-
-	    type: 'series.liquidFill',
-
-	    visualColorAccessPath: 'textStyle.normal.color',
-
-	    optionUpdated: function () {
-	        var option = this.option;
-	        option.gridSize = Math.max(Math.floor(option.gridSize), 4);
-	    },
-
-	    getInitialData: function (option, ecModel) {
-	        var dimensions = completeDimensions(['value'], option.data);
-	        var list = new echarts.List(dimensions, this);
-	        list.initData(option.data);
-	        return list;
-	    },
-
-	    defaultOption: {
-	        color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
-	        center: ['50%', '50%'],
-	        radius: '80%',
-	        amplitude: 10,
-	        waveLength: '50%',
-	        phase: 0,
-	        speed: 2000,
-	        direction: 'right',
-
-	        itemStyle: {
-	            normal: {
-	                skyColor: '#C8FFFB',
-	                borderColor: '#294D99',
-	                borderWidth: 10,
-	                borderDistance: 10,
-	                opacity: 1
-	            },
-	            emphasis: {
-	                skyColor: '#293c55',
-	                borderColor: '#294D99',
-	                borderWidth: 10,
-	                borderDistance: 10,
-	                opacity: 1
-	            }
-	        },
-
-	        label: {
-	            normal: {
-	                show: true,
-	                position: 'outer',
-	                textStyle: {
-	                    color: '#294D99',
-	                    insideColor: '#fff',
-	                    fontSize: 50,
-	                    fontWeight: 'bold'
-	                },
-	                textAlign: 'center',
-	                textVerticalAlign: 'middle'
-	            }
-	        }
-	    }
-	});
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Complete dimensions by data (guess dimension).
-	 */
-
-
-	    var zrUtil = __webpack_require__(4);
-
-	    /**
-	     * Complete the dimensions array guessed from the data structure.
-	     * @param  {Array.<string>} dimensions      Necessary dimensions, like ['x', 'y']
-	     * @param  {Array} data                     Data list. [[1, 2, 3], [2, 3, 4]]
-	     * @param  {Array.<string>} defaultNames    Default names to fill not necessary dimensions, like ['value']
-	     * @param  {string} extraPrefix             Prefix of name when filling the left dimensions.
-	     * @return {Array.<string>}
-	     */
-	    function completeDimensions(dimensions, data, defaultNames, extraPrefix) {
-	        if (!data) {
-	            return dimensions;
-	        }
-
-	        var value0 = retrieveValue(data[0]);
-	        var dimSize = zrUtil.isArray(value0) && value0.length || 1;
-
-	        defaultNames = defaultNames || [];
-	        extraPrefix = extraPrefix || 'extra';
-	        for (var i = 0; i < dimSize; i++) {
-	            if (!dimensions[i]) {
-	                var name = defaultNames[i] || (extraPrefix + (i - defaultNames.length));
-	                dimensions[i] = guessOrdinal(data, i)
-	                    ? {type: 'ordinal', name: name}
-	                    : name;
-	            }
-	        }
-
-	        return dimensions;
-	    }
-
-	    // The rule should not be complex, otherwise user might not
-	    // be able to known where the data is wrong.
-	    var guessOrdinal = completeDimensions.guessOrdinal = function (data, dimIndex) {
-	        for (var i = 0, len = data.length; i < len; i++) {
-	            var value = retrieveValue(data[i]);
-
-	            if (!zrUtil.isArray(value)) {
-	                return false;
-	            }
-
-	            var value = value[dimIndex];
-	            if (value != null && isFinite(value)) {
-	                return false;
-	            }
-	            else if (zrUtil.isString(value) && value !== '-') {
-	                return true;
-	            }
-	        }
-	        return false;
-	    };
-
-	    function retrieveValue(o) {
-	        return zrUtil.isArray(o) ? o : zrUtil.isObject(o) ? o.value: o;
-	    }
-
-	    module.exports = completeDimensions;
-
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var echarts = __webpack_require__(2);
-	var numberUtil = __webpack_require__(8);
-	var parsePercent = numberUtil.parsePercent;
-
-	var LiquidLayout = __webpack_require__(14);
-
-	function getShallow(model, path) {
-	    return model && model.getShallow(path);
-	}
-
-	echarts.extendChartView({
-
-	    type: 'liquidFill',
-
-	    render: function (seriesModel, ecModel, api) {
-	        var group = this.group;
-	        group.removeAll();
-
-	        var data = seriesModel.getData();
-
-	        var itemModel = data.getItemModel(0);
-
-	        var center = itemModel.get('center');
-	        var radius = itemModel.get('radius');
-	        var phase = itemModel.get('phase');
-	        var maxSpeed = itemModel.get('speed');
-	        var direction = itemModel.get('direction');
-
-	        // itemStyle
-	        var normal = itemModel.get('itemStyle.normal');
-	        var waterColor = normal.waterColor;
-	        var skyColor = normal.skyColor;
-	        var borderColor = normal.borderColor;
-	        var borderWidth = normal.borderWidth;
-	        var borderDistance = normal.borderDistance;
-	        var opacity = normal.opacity;
-
-	        var width = api.getWidth();
-	        var height = api.getHeight();
-	        var size = Math.min(width, height);
-	        var cx = parsePercent(center[0], width);
-	        var cy = parsePercent(center[1], height);
-	        var borderWidth = parsePercent(borderWidth, size);
-	        var outterRadius = parsePercent(radius, size) / 2;
-	        var innerRadius = outterRadius - borderWidth;
-	        var paddingRadius = parsePercent(borderDistance, size);
-
-	        var wavePath = null;
-
-	        var borderRing = new echarts.graphic.Ring({
-	            shape: {
-	                cx: cx,
-	                cy: cy,
-	                r: innerRadius,
-	                r0: outterRadius
-	            },
-	            style: {
-	                fill: borderColor
-	            }
-	        });
-	        group.add(borderRing);
-
-	        var radius = innerRadius - paddingRadius;
-	        var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
-	        var amplitude = itemModel.get('amplitude');
-	        amplitude = typeof amplitude === 'number' ? [amplitude, amplitude]
-	            : amplitude;
-	        var left = cx - radius;
-	        var top = cy - radius;
-
-	        group.add(getBackground());
-
-	        // each data item for a wave
-	        var waves = [];
-	        data.each(function (idx) {
-	            var wave = getWave(idx, false);
-	            group.add(wave);
-	            waves.push(wave);
-	        });
-
-	        group.add(getText(waves));
-
-	        // data.setItemGraphicEl(0, borderRing);
-
-	        /**
-	         * sky circle for wave
-	         */
-	        function getBackground() {
-	            return new echarts.graphic.Circle({
-	                shape: {
-	                    cx: cx,
-	                    cy: cy,
-	                    r: radius
-	                },
-	                style: {
-	                    fill: skyColor
-	                }
-	            });
-	        }
-
-	        /**
-	         * wave shape
-	         */
-	        function getWave(idx, isInverse) {
-	            var value = data.get('value', idx);
-	            var value0 = data.get('value', 0);
-
-	            var waterLevel = radius - value * radius * 2;
-	            var phase = idx * Math.PI / 3;
-	            var waterColor = data.getItemVisual(idx, 'color');
-	            var cnt = data.count();
-	            var speed = value0 === 0 ? maxSpeed : maxSpeed * value / value0;
-
-	            var x = direction === 'left' ? radius * 2 : 0;
-
-	            var wave = new LiquidLayout({
-	                shape: {
-	                    waveLength: waveLength,
-	                    radius: radius,
-	                    cx: x,
-	                    cy: 0,
-	                    waterLevel: waterLevel,
-	                    amplitude: amplitude[1],
-	                    borderWidth: borderWidth,
-	                    borderDistance: paddingRadius,
-	                    phase: phase,
-	                    inverse: isInverse
-	                },
-	                style: {
-	                    fill: waterColor
-	                },
-	                position: [cx, cy]
-	            });
-
-	            // clip out the part outside the circle
-	            wave.setClipPath(new echarts.graphic.Circle({
-	                shape: {
-	                    cx: 0,
-	                    cy: 0,
-	                    r: radius
-	                }
-	            }));
-
-	            // phase for moving left/right
-	            var phaseOffset = 0;
-	            if (direction === 'right' || direction == undefined) {
-	                phaseOffset = Math.PI;
-	            }
-	            else if (direction === 'left') {
-	                phaseOffset = -Math.PI;
-	            }
-	            else if (direction === 'none') {
-	                phaseOffset = 0;
-	            }
-	            else {
-	                console.error('Illegal direction value for liquid fill.');
-	            }
-
-	            // wave animation of moving left/right and changing amplitude
-	            wave.animate('shape', true)
-	                .when(0, {
-	                    phase: phase,
-	                    amplitude: amplitude[1]
-	                })
-	                .when(speed / 2, {
-	                    phase: phaseOffset + phase,
-	                    amplitude: amplitude[0]
-	                })
-	                .when(speed, {
-	                    phase: phaseOffset * 2 + phase,
-	                    amplitude: amplitude[1]
-	                })
-	                .during(function () {
-	                    if (wavePath) {
-	                        wavePath.dirty(true);
-	                    }
-	                })
-	                .start();
-
-	            return wave;
-	        }
-
-	        /**
-	         * text on wave
-	         */
-	        function getText(waves) {
-	            var labelModel = itemModel.getModel('label.normal');
-	            var textStyle = labelModel.getModel('textStyle');
-
-	            var insideStyle = {
-	                text: Math.ceil(data.get('value', 0) * 100) + '%',
-	                x: cx,
-	                y: cy - 50,
-	                fill: labelModel.get('textStyle').color,
-	                textAlign: labelModel.get('textAlign'),
-	                textVerticalAlign: labelModel.get('textVerticalAlign'),
-	                textFont: textStyle.getFont()
-	            };
-
-	            var outsideText = new echarts.graphic.Text({
-	                style: insideStyle,
-	                silent: true
-	            });
-	            console.log(outsideText.getBoundingRect());
-
-	            var insideStyle = Object.assign({}, insideStyle);
-	            insideStyle.fill = labelModel.get('textStyle').insideColor;
-	            var insideText = new echarts.graphic.Text({
-	                style: insideStyle,
-	                silent: true
-	            });
-
-	            // clip out waves for insideText
-	            var boundingCircle = new echarts.graphic.Circle({
-	                shape: {
-	                    cx: 0,
-	                    cy: 0,
-	                    r: radius
-	                }
-	            });
-
-	            wavePath = new echarts.graphic.CompoundPath({
-	                shape: {
-	                    paths: waves
-	                },
-	                position: [cx, cy]
-	            });
-
-	            wavePath.setClipPath(boundingCircle);
-	            insideText.setClipPath(wavePath);
-
-	            var group = new echarts.graphic.Group();
-	            group.add(outsideText);
-	            group.add(insideText);
-
-	            return group;
-	        }
-	    }
-	});
-
-
-/***/ },
-/* 14 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var echarts = __webpack_require__(2);
@@ -1332,8 +1409,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        ctx.closePath();
-
-	        // ctx.stroke();
 	    }
 	});
 
@@ -1394,7 +1469,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 9 */
 /***/ function(module, exports) {
 
 	// Pick color from palette for each data item

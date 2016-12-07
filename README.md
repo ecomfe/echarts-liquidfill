@@ -36,6 +36,56 @@ var option = {
 
 ![A simple liquid fill chart](http://g.recordit.co/r0DvCuoqSY.gif)
 
+
+### Color and Opacity
+
+To set colors for liquid fill chart series, set `color` to be an array of colors. To set opacity, use `itemStyle.normal.opacity` and `itemStyle.emphasis.opacity` for normal style and hover style.
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.5, 0.4, 0.3],
+        color: ['red', '#0f0', 'rgb(0, 0, 255)'],
+        itemStyle: {
+            normal: {
+                opacity: 0.6
+            },
+            emphasis: {
+                opacity: 0.9
+            }
+        }
+    }]
+};
+```
+
+![Color and opacity](http://g.recordit.co/VSUyGVZqcA.gif)
+
+You may also set the color and opacity of a single data item by:
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.5, 0.4, {
+            value: 0.3,
+            itemStyle: {
+                normal: {
+                    color: 'red',
+                    opacity: 0.6
+                },
+                emphasis: {
+                    opacity: 0.9
+                }
+            }
+        }]
+    }]
+};
+```
+
+![Color and opacity of a single data item](http://g.recordit.co/N5GGJ1AwQ3.gif)
+
+
 ### Multiple Waves
 
 It is easy to create a liquid fill chart will multiple waves, either to represent multiple data, or to improve the visual effect of the chart.

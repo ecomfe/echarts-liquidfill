@@ -4,7 +4,7 @@ Liquid Fill Chart plugin for [ECharts](https://github.com/ecomfe/echarts).
 
 This type of charts are usually used to represent percentage data.
 
-![Rendering Results](http://g.recordit.co/T6x0Y4p0Va.gif)
+![Rendering Results](http://g.recordit.co/CGmWW5wT0q.gif)
 
 ## Setup
 

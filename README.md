@@ -2,7 +2,7 @@
 
 Liquid Fill Chart plugin for [ECharts](https://github.com/ecomfe/echarts).
 
-This type of charts are usually used to represent the percentage of data.
+This type of charts are usually used to represent percentage data.
 
 
 
@@ -12,10 +12,10 @@ To use ECharts plugins, you need to include the plugin JavaScript file after ECh
 
 ```html
 <script src='https://cdn.bootcss.com/echarts/3.2.2/echarts.js'></script>
-<script src='../dist/echarts-liquidfill.js'></script>
+<script src='./dist/echarts-liquidfill.js'></script>
 ```
 
-You may download the lastest ECharts files on [ECharts official site](http://echarts.baidu.com/download.html). Note that if you need tooltip for Liquid Fill Chart, you need the complete version. Otherwise, simple version will do.
+You may download the lastest ECharts files on [ECharts official site](http://echarts.baidu.com/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist). Note that if you need tooltip for Liquid Fill Chart, you need the complete ECharts version. Otherwise, simple version will do.
 
 
 
@@ -23,7 +23,7 @@ You may download the lastest ECharts files on [ECharts official site](http://ech
 
 ### A Simple Example
 
-To create a Liquid Fill Chart, you need to have a series with type of 'liquidFill'. A basic option may be:
+To create a Liquid Fill Chart, you need to have a series with type of `'liquidFill'`. A basic option may be:
 
 ```js
 var option = {
@@ -36,7 +36,7 @@ var option = {
 
 ![A simple liquid fill chart](http://g.recordit.co/r0DvCuoqSY.gif)
 
-### More Waves
+### Multiple Waves
 
 It is easy to create a liquid fill chart will multiple waves, either to represent multiple data, or to improve the visual effect of the chart.
 
@@ -51,58 +51,10 @@ var option = {
 
 This creates a chart wit waves at position of 60%, 50%, 40%, and 30%.
 
-### Change Text
-
-By default, the text label of liquid fill chart displays percentage of the first data. For example, for a chart with data `[0.6, 0.5, 0.4, 0.3]`, default text is `60%`.
-
-To change the text, you may use `label.normal.formatter`, which can be set to a string or function.
-
-If it is a string, `{value}` in the string will be replaced with the first data.
-
-```js
-var option = {
-    series: [{
-        type: 'liquidFill',
-        data: [0.6, 0.5, 0.4, 0.3],
-        label: {
-            normal: {
-                formatter: 'I\'m {value}',
-                textStyle: {
-                    fontSize: 20
-                }
-            }
-        }
-    }]
-};
-```
-
-The text of the above code is `I'm 0.6`.
-
-If it is a function, the `value` parameter contains all the data.
-
-```js
-var option = {
-    series: [{
-        type: 'liquidFill',
-        data: [0.6, 0.5, 0.4, 0.3],
-        label: {
-            normal: {
-                formatter: function(value) {
-                    return 'I\'m ' + value;
-                },
-                textStyle: {
-                    fontSize: 20
-                }
-            }
-        }
-    }]
-};
-```
-
-The text of the above code is `I'm 0.6,0.5,0.4,0.3`.
+![Multiple waves](http://g.recordit.co/1ObSCjLCeG.gif)
 
 
-### Static waves
+### Static Waves
 
 To provent the waves from moving left or right, you may simply set `direction` to be `none`. To disable the animation of waves raising, set `animationDuration` and `animationDurationUpdate` to be 0.
 
@@ -160,40 +112,6 @@ var option = {
 ![Change a single wave](http://g.recordit.co/p1fHmfexW4.gif)
 
 
-### Animation
-
-Generally speaking, there are two types of animations in liquid fill charts.
-
-The first type is initial animation, which has the effect of wave raising. The easing method of this animation is controlled with `animationEasing` and its duration with `animationDuration`.
-
-The second type is the update animation, which is usually used when data changes and wave height changes. They are controlled with `animationEasingUpdate` and `animationDurationUpdate`.
-
-For example, to disable the raising animation and set update animation time to be two seconds with `cubicOut` easing, you can use the following option:
-
-```js
-var option = {
-    series: [{
-        type: 'liquidFill',
-        data: [0.6, 0.5, 0.4, 0.3],
-        animationDuration: 0,
-        animationDurationUpdate: 2000,
-        animationEasingUpdate: 'cubicOut'
-    }]
-};
-chart.setOption(option);
-setTimeout(function () {
-    chart.setOption({
-        series: [{
-            type: 'liquidFill',
-            data: [0.8, 0.6, 0.4, 0.2]
-        }]
-    })
-}, 1000);
-```
-
-![Update animation](http://g.recordit.co/dGcr25E8J8.gif)
-
-
 ### Border Style
 
 You may set `outline.borderDistance` to be 0 to disable the gap between waves and border.
@@ -230,6 +148,91 @@ var option = {
 ```
 
 ![No border](http://g.recordit.co/E8YI6wlvp4.gif)
+
+
+### Animation
+
+Generally speaking, there are two types of animations in liquid fill charts.
+
+The first type is initial animation, which has the effect of wave raising. The easing method of this animation is controlled with `animationEasing` and its duration with `animationDuration`.
+
+The second type is the update animation, which is usually used when data changes and wave height changes. They are controlled with `animationEasingUpdate` and `animationDurationUpdate`.
+
+For example, to disable the raising animation and set update animation time to be two seconds with `cubicOut` easing, you can use the following option:
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3],
+        animationDuration: 0,
+        animationDurationUpdate: 2000,
+        animationEasingUpdate: 'cubicOut'
+    }]
+};
+chart.setOption(option);
+setTimeout(function () {
+    chart.setOption({
+        series: [{
+            type: 'liquidFill',
+            data: [0.8, 0.6, 0.4, 0.2]
+        }]
+    })
+}, 1000);
+```
+
+![Update animation](http://g.recordit.co/dGcr25E8J8.gif)
+
+
+### Change Text
+
+By default, the text label of liquid fill chart displays percentage of the first data. For example, for a chart with data `[0.6, 0.5, 0.4, 0.3]`, default text is `60%`.
+
+To change the text, you may use `label.normal.formatter`, which can be set to a string or function.
+
+If it is a string, `{value}` in the string will be replaced with the first data.
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3],
+        label: {
+            normal: {
+                formatter: 'I\'m {value}',
+                textStyle: {
+                    fontSize: 20
+                }
+            }
+        }
+    }]
+};
+```
+
+The text of the above code is `I'm 0.6`.
+
+If it is a function, the `value` parameter contains all the data.
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3],
+        label: {
+            normal: {
+                formatter: function(value) {
+                    return 'I\'m ' + value;
+                },
+                textStyle: {
+                    fontSize: 20
+                }
+            }
+        }
+    }]
+};
+```
+
+The text of the above code is `I'm 0.6,0.5,0.4,0.3`.
 
 
 ## API
@@ -332,7 +335,7 @@ Wave colors.
 Position of the chart. The first value is x position, the second one is the y position. Each of the values can be a relative value like `'50%'`, which is relative to the smaller value of container width and height, or an absolute value like `100px`.
 
 
-## radius {string}
+### radius {string}
 
 Radius of the chart, which can be a relative value like `'50%'`, which is relative to the smaller value of container width and height, or an absolute value like `100px`.
 

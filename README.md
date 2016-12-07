@@ -297,8 +297,8 @@ Default option for liquid fill charts are:
     radius: '50%',
     amplitude: 20,
     waveLength: '80%',
-    phase: 0,
-    speed: 5000,
+    phase: 'auto',
+    speed: 'auto',
     direction: 'right',
 
     animationEasing: 'linear',
@@ -402,12 +402,12 @@ Wave length of the wave, which can be a relative value like `'50%'`, which is re
 
 ### phase {number}
 
-Phase of wave, in radian system. By default, each wave has a phase of `Math.PI / 4` larger than the previous one.
+Phase of wave, in radian system. By default, it is set to be `'auto'`, when each wave has a phase of `Math.PI / 4` larger than the previous one.
 
 
 ### period {number}
 
-Milliseconds that it takes to move forward a wave-length.
+Milliseconds that it takes to move forward a wave-length. By default, it is set to be `'auto'`, when the wave at the front has a greater speed.
 
 
 ### direction {string}

@@ -26,7 +26,7 @@ echarts.extendSeriesModel({
         amplitude: 20,
         waveLength: '80%',
         phase: 0,
-        speed: 5000,
+        period: 5000,
         direction: 'right',
 
         animationEasing: 'linear',
@@ -55,7 +55,6 @@ echarts.extendSeriesModel({
         label: {
             normal: {
                 show: true,
-                position: 'outer',
                 textStyle: {
                     color: '#294D99',
                     insideColor: '#fff',

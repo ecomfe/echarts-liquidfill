@@ -56,7 +56,7 @@ echarts.extendChartView({
         });
         group.add(borderRing);
 
-        var radius = innerRadius - paddingRadius;
+        radius = innerRadius - paddingRadius;
         var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
         var left = cx - radius;
         var top = cy - radius;
@@ -131,7 +131,6 @@ echarts.extendChartView({
             var itemModel = data.getItemModel(idx);
             var itemStyleModel = itemModel.getModel('itemStyle');
             var phase = itemModel.get('phase');
-            var direction = itemModel.get('direction');
             var amplitude = itemModel.get('amplitude');
             var opacity = itemModel.get('itemStyle.normal.opacity');
 
@@ -182,7 +181,7 @@ echarts.extendChartView({
         function setWaveAnimation(idx, wave) {
             var itemModel = data.getItemModel(idx);
 
-            var maxSpeed = itemModel.get('speed');
+            var maxSpeed = itemModel.get('period');
             var direction = itemModel.get('direction');
 
             var value = data.get('value', idx);
@@ -216,23 +215,26 @@ echarts.extendChartView({
             wave
                 .animate()
                 .stop();
-            wave
-                .animate('shape', true)
-                .when(0, {
-                    phase: phase
-                })
-                .when(speed / 2, {
-                    phase: phaseOffset + phase
-                })
-                .when(speed, {
-                    phase: phaseOffset * 2 + phase
-                })
-                .during(function () {
-                    if (wavePath) {
-                        wavePath.dirty(true);
-                    }
-                })
-                .start();
+
+            if (direction !== 'none') {
+                wave
+                    .animate('shape', true)
+                    .when(0, {
+                        phase: phase
+                    })
+                    .when(speed / 2, {
+                        phase: phaseOffset + phase
+                    })
+                    .when(speed, {
+                        phase: phaseOffset * 2 + phase
+                    })
+                    .during(function () {
+                        if (wavePath) {
+                            wavePath.dirty(true);
+                        }
+                    })
+                    .start();
+            }
         }
 
         /**
@@ -252,7 +254,11 @@ echarts.extendChartView({
                         return labelFormatter.replace('{value}', value || '');
                     }
                     else if (typeof labelFormatter === 'function') {
-                        return labelFormatter(value);
+                        var values = [];
+                        for (var i = 0; i < data._rawData.length; ++i) {
+                            values.push(data.get('value', i));
+                        }
+                        return labelFormatter(values);
                     }
                 }
                 else {

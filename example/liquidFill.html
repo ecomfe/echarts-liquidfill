@@ -16,56 +16,36 @@
         <div id='main'></div>
         <script>
             var chart = echarts.init(document.getElementById('main'));
-            var option = {
-                tooltip: {
-                    show: true
-                },
-                series: [{
-                    name: '水球图',
-                    type: 'liquidFill',
-                    data: [{
-                        value: 0.8,
-                        amplitude: 10,
-                        itemStyle: {
-                            normal: {
-                                opacity: 1
-                            }
-                        }
-                    },
-                    0.6,
-                    {
-                        value: 0.4,
-                        itemStyle: {
-                            normal: {
-                                opacity: 0.6
-                            }
-                        }
-                    },
-                    {
-                        value: 0.2,
-                        itemStyle: {
-                            normal: {
-                                opacity: 0.4
-                            }
-                        }
-                    }]
-                }]
-            };
+        var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, {
+            value: 0.5,
+            direction: 'left',
+            itemStyle: {
+                normal: {
+                    color: 'red'
+                }
+            }
+        }, 0.4, 0.3]
+    }]
+};
             chart.setOption(option);
 
-            setInterval(function () {
-                var data = [];
-                var last = 1;
-                for (var i = 0; i < 4; ++i) {
-                    last = Math.floor(last * Math.random() * 100) / 100;
-                    data.push(last);
-                }
-                chart.setOption({
-                    series: [{
-                        data: data
-                    }]
-                });
-            }, 5000);
+            // setInterval(function () {
+            //     var data = [];
+            //     var last = 1;
+            //     for (var i = 0; i < 4; ++i) {
+            //         last = Math.floor(last * (Math.random() * 0.7 + 0.3)
+            //             * 100) / 100;
+            //         data.push(last);
+            //     }
+            //     chart.setOption({
+            //         series: [{
+            //             data: data
+            //         }]
+            //     });
+            // }, 5000);
         </script>
     </body>
 </html>

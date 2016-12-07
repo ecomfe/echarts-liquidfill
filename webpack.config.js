@@ -1,4 +1,5 @@
 var PROD = process.argv.indexOf('-p') >= 0;
+var webpack = require('webpack');
 
 module.exports = {
     entry: {
@@ -12,5 +13,10 @@ module.exports = {
     },
     externals: {
         'echarts': 'echarts'
-    }
+    },
+    plugins: PROD ? [
+        new webpack.optimize.UglifyJsPlugin({
+            compress: { warnings: false }
+        })
+    ] : []
 };

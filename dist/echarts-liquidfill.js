@@ -112,7 +112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        amplitude: 20,
 	        waveLength: '80%',
 	        phase: 0,
-	        speed: 5000,
+	        period: 5000,
 	        direction: 'right',
 
 	        animationEasing: 'linear',
@@ -131,17 +131,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        itemStyle: {
 	            normal: {
 	                backgroundColor: '#E3F7FF',
-	                opacity: 0.8
+	                opacity: 0.95
 	            },
 	            emphasis: {
-	                opacity: 0.9
+	                opacity: 0.8
 	            }
 	        },
 
 	        label: {
 	            normal: {
 	                show: true,
-	                position: 'outer',
 	                textStyle: {
 	                    color: '#294D99',
 	                    insideColor: '#fff',
@@ -793,7 +792,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	        group.add(borderRing);
 
-	        var radius = innerRadius - paddingRadius;
+	        radius = innerRadius - paddingRadius;
 	        var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
 	        var left = cx - radius;
 	        var top = cy - radius;
@@ -868,7 +867,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var itemModel = data.getItemModel(idx);
 	            var itemStyleModel = itemModel.getModel('itemStyle');
 	            var phase = itemModel.get('phase');
-	            var direction = itemModel.get('direction');
 	            var amplitude = itemModel.get('amplitude');
 	            var opacity = itemModel.get('itemStyle.normal.opacity');
 
@@ -919,7 +917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        function setWaveAnimation(idx, wave) {
 	            var itemModel = data.getItemModel(idx);
 
-	            var maxSpeed = itemModel.get('speed');
+	            var maxSpeed = itemModel.get('period');
 	            var direction = itemModel.get('direction');
 
 	            var value = data.get('value', idx);
@@ -953,23 +951,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            wave
 	                .animate()
 	                .stop();
-	            wave
-	                .animate('shape', true)
-	                .when(0, {
-	                    phase: phase
-	                })
-	                .when(speed / 2, {
-	                    phase: phaseOffset + phase
-	                })
-	                .when(speed, {
-	                    phase: phaseOffset * 2 + phase
-	                })
-	                .during(function () {
-	                    if (wavePath) {
-	                        wavePath.dirty(true);
-	                    }
-	                })
-	                .start();
+
+	            if (direction !== 'none') {
+	                wave
+	                    .animate('shape', true)
+	                    .when(0, {
+	                        phase: phase
+	                    })
+	                    .when(speed / 2, {
+	                        phase: phaseOffset + phase
+	                    })
+	                    .when(speed, {
+	                        phase: phaseOffset * 2 + phase
+	                    })
+	                    .during(function () {
+	                        if (wavePath) {
+	                            wavePath.dirty(true);
+	                        }
+	                    })
+	                    .start();
+	            }
 	        }
 
 	        /**
@@ -981,8 +982,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var textStyle = labelModel.getModel('textStyle');
 	            var textHoverStyle = labelHoverModel.getModel('textStyle');
 
+	            function formatLabel() {
+	                var value = data.get('value', 0);
+	                var labelFormatter = labelModel.get('formatter');
+	                if (labelFormatter) {
+	                    if (typeof labelFormatter === 'string') {
+	                        return labelFormatter.replace('{value}', value || '');
+	                    }
+	                    else if (typeof labelFormatter === 'function') {
+	                        var values = [];
+	                        for (var i = 0; i < data._rawData.length; ++i) {
+	                            values.push(data.get('value', i));
+	                        }
+	                        return labelFormatter(values);
+	                    }
+	                }
+	                else {
+	                    return Math.ceil(value * 100) + '%';
+	                }
+	            }
+
 	            var outsideStyle = {
-	                text: Math.ceil(data.get('value', 0) * 100) + '%',
+	                text: formatLabel(),
 	                x: cx,
 	                y: cy,
 	                fill: textStyle.get('color'),

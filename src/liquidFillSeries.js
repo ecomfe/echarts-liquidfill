@@ -25,8 +25,8 @@ echarts.extendSeriesModel({
         radius: '50%',
         amplitude: 20,
         waveLength: '80%',
-        phase: 0,
-        period: 5000,
+        phase: 'auto',
+        period: 'auto',
         direction: 'right',
 
         animationEasing: 'linear',

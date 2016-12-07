@@ -4,7 +4,7 @@ Liquid Fill Chart plugin for [ECharts](https://github.com/ecomfe/echarts).
 
 This type of charts are usually used to represent percentage data.
 
-
+![ECharts Liquid Fill Chart](http://g.recordit.co/Az7cv7Vd8H.gif)
 
 ## Setup
 
@@ -35,6 +35,24 @@ var option = {
 ```
 
 ![A simple liquid fill chart](http://g.recordit.co/r0DvCuoqSY.gif)
+
+
+### Multiple Waves
+
+It is easy to create a liquid fill chart will multiple waves, either to represent multiple data, or to improve the visual effect of the chart.
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3]
+    }]
+};
+```
+
+This creates a chart wit waves at position of 60%, 50%, 40%, and 30%.
+
+![Multiple waves](http://g.recordit.co/1ObSCjLCeG.gif)
 
 
 ### Color and Opacity
@@ -86,27 +104,9 @@ var option = {
 ![Color and opacity of a single data item](http://g.recordit.co/N5GGJ1AwQ3.gif)
 
 
-### Multiple Waves
-
-It is easy to create a liquid fill chart will multiple waves, either to represent multiple data, or to improve the visual effect of the chart.
-
-```js
-var option = {
-    series: [{
-        type: 'liquidFill',
-        data: [0.6, 0.5, 0.4, 0.3]
-    }]
-};
-```
-
-This creates a chart wit waves at position of 60%, 50%, 40%, and 30%.
-
-![Multiple waves](http://g.recordit.co/1ObSCjLCeG.gif)
-
-
 ### Static Waves
 
-To provent the waves from moving left or right, you may simply set `direction` to be `none`. To disable the animation of waves raising, set `animationDuration` and `animationDurationUpdate` to be 0.
+To provent the waves from moving left or right, you may simply set `direction` to be `'none'`. To disable the animation of waves raising, set `animationDuration` and `animationDurationUpdate` to be 0.
 
 ```js
 var option = {

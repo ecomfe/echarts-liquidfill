@@ -1,0 +1,203 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src='https://cdn.bootcss.com/echarts/3.2.2/echarts.js'></script>
+        <script src='../dist/echarts-liquidfill.js'></script>
+    </head>
+    <body>
+        <style>
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                background: #fcfcfc;
+            }
+
+            #main {
+                padding: 20px;
+            }
+
+            #main:after {
+                display: block;
+                content: ' ';
+                clear: both;
+            }
+
+            h1 {
+                margin: 10px;
+                font-size: 25px;
+                text-align: center;
+                color: #156ACF;
+            }
+
+            .chart {
+                width: 25%;
+                height: 300px;
+                float: left;
+            }
+        </style>
+        <div id='main'>
+            <h1>ECharts Liquid Fill Chart</h1>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+            <div class="chart"></div>
+        </div>
+        <script>
+            var containers = document.getElementsByClassName('chart');
+            var options = [{
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6],
+                    radius: '70%'
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6],
+                    radius: '70%',
+                    amplitude: 0
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6, 0.5, 0.4, 0.3],
+                    direction: 'none',
+                    animationDuration: 0,
+                    radius: '70%'
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6, 0.5, 0.4, 0.3],
+                    radius: '70%',
+                    amplitude: 0
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6, 0.5, 0.4, 0.3],
+                    radius: '70%'
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6, 0.5, 0.4, 0.3],
+                    radius: '70%',
+                    phase: 0,
+                    period: 5000
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6, {
+                        value: 0.5,
+                        direction: 'left'
+                    }, 0.4, {
+                        value: 0.3,
+                        direction: 'left'
+                    }],
+                    radius: '70%'
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6, 0.5, {
+                        value: 0.4,
+                        amplitude: 15
+                    }, {
+                        value: 0.3,
+                        amplitude: 20
+                    }],
+                    radius: '70%',
+                    amplitude: 10
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [1, 0.9, 0.8, 0.7],
+                    radius: '70%',
+                    label: {
+                        normal: {
+                            formatter: 'I\'m full.',
+                            textStyle: {
+                                fontSize: 30
+                            }
+                        }
+                    }
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0, 0, 0, 0],
+                    radius: '70%',
+                    label: {
+                        normal: {
+                            formatter: 'I\'m empty.',
+                            textStyle: {
+                                fontSize: 30
+                            }
+                        }
+                    }
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6, 0.5, 0.4, 0.3],
+                    radius: '70%',
+                    outline: {
+                        borderDistance: 0,
+                        itemStyle: {
+                            borderWidth: 5,
+                            borderColor: '#156ACF'
+                        }
+                    }
+                }]
+            }, {
+                series: [{
+                    type: 'liquidFill',
+                    data: [0.6, 0.5, 0.4, 0.3],
+                    radius: '70%',
+                    outline: {
+                        borderDistance: 0,
+                        itemStyle: {
+                            borderWidth: 0
+                        }
+                    }
+                }]
+            }];
+
+            var charts = [];
+            for (var i = 0; i < options.length; ++i) {
+                var chart = echarts.init(containers[i]);
+                chart.setOption(options[i]);
+                charts.push(chart);
+            }
+
+            setInterval(update, 3000);
+
+            function update() {
+                var data = [];
+                var last = 1;
+                for (var i = 0; i < 4; ++i) {
+                    last = Math.floor(last * (Math.random() * 0.5 + 0.5)
+                        * 100) / 100;
+                    data.push(last);
+                }
+                charts[4].setOption({
+                    series: [{
+                        data: data
+                    }]
+                });
+            }
+        </script>
+    </body>
+</html>

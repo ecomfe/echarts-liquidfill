@@ -77,7 +77,7 @@ echarts.extendChartView({
                         waterLevel: waterLevel
                     }
                 }, seriesModel);
-                setWaveAnimation(idx, wave);
+                setWaveAnimation(idx, wave, null);
 
                 group.add(wave);
                 data.setItemGraphicEl(idx, wave);
@@ -93,7 +93,7 @@ echarts.extendChartView({
                     shape: newWave.shape
                 }, seriesModel);
 
-                setWaveAnimation(newIdx, oldWave);
+                setWaveAnimation(newIdx, oldWave, oldWave);
                 group.add(oldWave);
                 data.setItemGraphicEl(newIdx, oldWave);
                 waves.push(oldWave);
@@ -136,7 +136,8 @@ echarts.extendChartView({
 
             var value = data.get('value', idx);
             var waterLevel = radius - value * radius * 2;
-            var phase = oldWave ? oldWave.shape.phase : idx * Math.PI / 4;
+            phase = oldWave ? oldWave.shape.phase
+                : (phase === 'auto' ? idx * Math.PI / 4 : phase);
             var waterColor = data.getItemVisual(idx, 'color');
 
             var x = radius * 2;
@@ -178,7 +179,7 @@ echarts.extendChartView({
             return wave;
         }
 
-        function setWaveAnimation(idx, wave) {
+        function setWaveAnimation(idx, wave, oldWave) {
             var itemModel = data.getItemModel(idx);
 
             var maxSpeed = itemModel.get('period');
@@ -186,15 +187,24 @@ echarts.extendChartView({
 
             var value = data.get('value', idx);
             var value0 = data.get('value', 0);
-            var phase = wave.shape.phase || idx * Math.PI / 3;
+
+            var phase = itemModel.get('phase');
+            phase = oldWave ? oldWave.shape.phase
+                : (phase === 'auto' ? idx * Math.PI / 4 : phase);
 
             var defaultSpeed = function (maxSpeed) {
                 var cnt = data.count();
                 return cnt === 0 ? maxSpeed : maxSpeed *
                     (0.2 + (cnt - idx) / cnt * 0.8);
             };
-            var speed = typeof maxSpeed === 'function'
-                ? maxSpeed(value, idx) : defaultSpeed(maxSpeed);
+            var speed = 0;
+            if (maxSpeed === 'auto') {
+                speed = defaultSpeed(5000);
+            }
+            else {
+                speed = typeof maxSpeed === 'function'
+                    ? maxSpeed(value, idx) : maxSpeed;
+            }
 
             // phase for moving left/right
             var phaseOffset = 0;

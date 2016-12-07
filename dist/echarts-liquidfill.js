@@ -121,17 +121,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        animationDurationUpdate: 1000,
 
 	        outline: {
-	            borderDistance: 10,
+	            borderDistance: 8,
 	            itemStyle: {
 	                borderColor: '#294D99',
-	                borderWidth: 10
+	                borderWidth: 8,
+	                shadowBlur: 20,
+	                shadowColor: 'rgba(0, 0, 0, 0.25)'
 	            }
 	        },
 
 	        itemStyle: {
 	            normal: {
 	                backgroundColor: '#E3F7FF',
-	                opacity: 0.95
+	                opacity: 0.95,
+	                shadowBlur: 50,
+	                shadowColor: 'rgba(0, 0, 0, 0.4)'
 	            },
 	            emphasis: {
 	                opacity: 0.8
@@ -148,7 +152,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    fontWeight: 'bold'
 	                },
 	                textAlign: 'center',
-	                textVerticalAlign: 'middle'
+	                textVerticalAlign: 'middle',
+	                shadowBlur: 10,
+	                shadowColor: 'rgba(0, 0, 0, 0.25)'
 	            },
 	            emphasis: {
 	                textStyle: {
@@ -760,9 +766,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var radius = itemModel.get('radius');
 
 	        // itemStyle
-	        var backgroundColor = seriesModel.get(
-	            'itemStyle.normal.backgroundColor'
-	        );
 	        var borderColor = seriesModel.get('outline.itemStyle.borderColor');
 	        var borderWidth = seriesModel.get('outline.itemStyle.borderWidth');
 	        var borderDistance = seriesModel.get('outline.borderDistance');
@@ -848,15 +851,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * sky circle for wave
 	         */
 	        function getBackground() {
+	            var backStyle = seriesModel.getModel('outline.itemStyle')
+	                .getItemStyle();
+	            var backgroundColor =
+	                seriesModel.get('itemStyle.normal.backgroundColor');
+	            backStyle.fill = backgroundColor;
+	            backStyle.lineWidth = 0;
 	            return new echarts.graphic.Circle({
 	                shape: {
 	                    cx: cx,
 	                    cy: cy,
 	                    r: radius
 	                },
-	                style: {
-	                    fill: backgroundColor
-	                }
+	                style: backStyle
 	            });
 	        }
 
@@ -868,13 +875,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var itemStyleModel = itemModel.getModel('itemStyle');
 	            var phase = itemModel.get('phase');
 	            var amplitude = itemModel.get('amplitude');
-	            var opacity = itemModel.get('itemStyle.normal.opacity');
 
 	            var value = data.get('value', idx);
 	            var waterLevel = radius - value * radius * 2;
 	            phase = oldWave ? oldWave.shape.phase
 	                : (phase === 'auto' ? idx * Math.PI / 4 : phase);
-	            var waterColor = data.getItemVisual(idx, 'color');
+	            var normalStyle = itemStyleModel.getModel('normal').getItemStyle();
+	            normalStyle.fill = data.getItemVisual(idx, 'color');
 
 	            var x = radius * 2;
 
@@ -891,10 +898,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    phase: phase,
 	                    inverse: isInverse
 	                },
-	                style: {
-	                    fill: waterColor,
-	                    opacity: opacity
-	                },
+	                style: normalStyle,
 	                position: [cx, cy]
 	            });
 	            wave.shape._waterLevel = waterLevel;
@@ -1012,7 +1016,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 
-	            var outsideStyle = {
+	            var outsideStyle = labelModel.getItemStyle();
+	            Object.assign(outsideStyle, {
 	                text: formatLabel(),
 	                x: cx,
 	                y: cy,
@@ -1020,7 +1025,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                textAlign: labelModel.get('textAlign'),
 	                textVerticalAlign: labelModel.get('textVerticalAlign'),
 	                textFont: textStyle.getFont()
-	            };
+	            });
 
 	            var outsideText = new echarts.graphic.Text({
 	                style: outsideStyle

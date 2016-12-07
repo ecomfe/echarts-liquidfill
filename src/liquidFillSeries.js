@@ -35,17 +35,21 @@ echarts.extendSeriesModel({
         animationDurationUpdate: 1000,
 
         outline: {
-            borderDistance: 10,
+            borderDistance: 8,
             itemStyle: {
                 borderColor: '#294D99',
-                borderWidth: 10
+                borderWidth: 8,
+                shadowBlur: 20,
+                shadowColor: 'rgba(0, 0, 0, 0.25)'
             }
         },
 
         itemStyle: {
             normal: {
                 backgroundColor: '#E3F7FF',
-                opacity: 0.95
+                opacity: 0.95,
+                shadowBlur: 50,
+                shadowColor: 'rgba(0, 0, 0, 0.4)'
             },
             emphasis: {
                 opacity: 0.8
@@ -62,7 +66,9 @@ echarts.extendSeriesModel({
                     fontWeight: 'bold'
                 },
                 textAlign: 'center',
-                textVerticalAlign: 'middle'
+                textVerticalAlign: 'middle',
+                shadowBlur: 10,
+                shadowColor: 'rgba(0, 0, 0, 0.25)'
             },
             emphasis: {
                 textStyle: {

@@ -4,7 +4,7 @@ Liquid Fill Chart plugin for [ECharts](https://github.com/ecomfe/echarts).
 
 This type of charts are usually used to represent percentage data.
 
-![ECharts Liquid Fill Chart](http://g.recordit.co/Az7cv7Vd8H.gif)
+![ECharts Liquid Fill Chart](http://g.recordit.co/JupusbmpUJ.gif)
 
 ## Setup
 
@@ -285,6 +285,61 @@ var option = {
 The text of the above code is `I'm 0.6,0.5,0.4,0.3`.
 
 
+### Shadow
+
+By default, waves, outline and label have shadow on them. Here's how to change them.
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3],
+        radius: '70%',
+        itemStyle: {
+            normal: {
+                shadowBlur: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.2)'
+            }
+        },
+        outline: {
+            borderDistance: 0,
+            itemStyle: {
+                borderWidth: 5,
+                borderColor: '#156ACF',
+                shadowBlur: 10,
+                shadowColor: 'rgba(0, 0, 0, 0.2)'
+            }
+        },
+        label: {
+            normal: {
+                shadowBlur: 20,
+                shadowColor: 'rgba(0, 0, 0, 0.2)'
+            }
+        }
+    }]
+}
+```
+
+
+### Tooltip
+
+To add tooltip:
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6],
+        radius: '70%',
+        name: 'Liquid Fill'
+    }],
+    tooltip: {
+        show: true
+    }
+};
+```
+
+
 ## API
 
 Default option for liquid fill charts are:
@@ -292,13 +347,14 @@ Default option for liquid fill charts are:
 ```js
 {
     data: [],
+
     color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
     center: ['50%', '50%'],
     radius: '50%',
     amplitude: 20,
     waveLength: '80%',
     phase: 'auto',
-    speed: 'auto',
+    period: 'auto',
     direction: 'right',
 
     animationEasing: 'linear',
@@ -307,17 +363,21 @@ Default option for liquid fill charts are:
     animationDurationUpdate: 1000,
 
     outline: {
-        borderDistance: 10,
+        borderDistance: 8,
         itemStyle: {
             borderColor: '#294D99',
-            borderWidth: 10
+            borderWidth: 8,
+            shadowBlur: 20,
+            shadowColor: 'rgba(0, 0, 0, 0.25)'
         }
     },
 
     itemStyle: {
         normal: {
             backgroundColor: '#E3F7FF',
-            opacity: 0.95
+            opacity: 0.95,
+            shadowBlur: 50,
+            shadowColor: 'rgba(0, 0, 0, 0.4)'
         },
         emphasis: {
             opacity: 0.8
@@ -327,7 +387,6 @@ Default option for liquid fill charts are:
     label: {
         normal: {
             show: true,
-            position: 'outer',
             textStyle: {
                 color: '#294D99',
                 insideColor: '#fff',
@@ -335,7 +394,9 @@ Default option for liquid fill charts are:
                 fontWeight: 'bold'
             },
             textAlign: 'center',
-            textVerticalAlign: 'middle'
+            textVerticalAlign: 'middle',
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.25)'
         },
         emphasis: {
             textStyle: {
@@ -405,9 +466,27 @@ Wave length of the wave, which can be a relative value like `'50%'`, which is re
 Phase of wave, in radian system. By default, it is set to be `'auto'`, when each wave has a phase of `Math.PI / 4` larger than the previous one.
 
 
-### period {number}
+### period {number|'auto'|function}
 
 Milliseconds that it takes to move forward a wave-length. By default, it is set to be `'auto'`, when the wave at the front has a greater speed.
+
+It can also be a formatter function.
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3],
+        radius: '70%',
+        phase: 0,
+        period: function (value, index) {
+            // This function is called four times, each for a data item in series.
+            // `value` is 0.6, 0.5, 0.4, 0.3, and `index` is 0, 1, 2, 3.
+            return 2000 * index + 1000;
+        }
+    }]
+}
+```
 
 
 ### direction {string}
@@ -449,6 +528,16 @@ Border color.
 Border width.
 
 
+### outline.itemStyle.shadowBlur {number}
+
+Outline shadow width.
+
+
+### outline.itemStyle.shadowColor {string}
+
+Outline shadow color.
+
+
 ### itemStyle.normal.backgroundColor {string}
 
 Background color.
@@ -457,6 +546,16 @@ Background color.
 ### itemStyle.normal.opacity {number}
 
 Wave opacity.
+
+
+### itemStyle.normal.shadowBlur {number}
+
+Wave shadow width.
+
+
+### itemStyle.normal.shadowColor {string}
+
+Wave shadow color.
 
 
 ### itemStyle.emphasis.opacity {number}
@@ -487,6 +586,26 @@ Label font size.
 ### label.normal.textStyle.fontWeight {string}
 
 Label font weight.
+
+
+### label.normal.textAlign {string}
+
+Text align, which should be `'left'`, `'center'`, or `'right'`.
+
+
+### label.normal.textVerticalAlign {string}
+
+Text vertical align, which should be `'top'`, `'middle'`, or `'bottom'`.
+
+
+### label.normal.shadowBlur {number}
+
+Label shadow width.
+
+
+### label.normal.shadowColor {string}
+
+Label shadow color.
 
 
 ### label.emphasis.textStyle.color {string}

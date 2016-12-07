@@ -244,8 +244,24 @@ echarts.extendChartView({
             var textStyle = labelModel.getModel('textStyle');
             var textHoverStyle = labelHoverModel.getModel('textStyle');
 
+            function formatLabel() {
+                var value = data.get('value', 0);
+                var labelFormatter = labelModel.get('formatter');
+                if (labelFormatter) {
+                    if (typeof labelFormatter === 'string') {
+                        return labelFormatter.replace('{value}', value || '');
+                    }
+                    else if (typeof labelFormatter === 'function') {
+                        return labelFormatter(value);
+                    }
+                }
+                else {
+                    return Math.ceil(value * 100) + '%';
+                }
+            }
+
             var outsideStyle = {
-                text: Math.ceil(data.get('value', 0) * 100) + '%',
+                text: formatLabel(),
                 x: cx,
                 y: cy,
                 fill: textStyle.get('color'),

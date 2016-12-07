@@ -45,10 +45,10 @@ echarts.extendSeriesModel({
         itemStyle: {
             normal: {
                 backgroundColor: '#E3F7FF',
-                opacity: 0.8
+                opacity: 0.95
             },
             emphasis: {
-                opacity: 0.9
+                opacity: 0.8
             }
         },
 

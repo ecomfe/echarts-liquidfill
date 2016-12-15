@@ -63,10 +63,13 @@ echarts.extendSeriesModel({
                     color: '#294D99',
                     insideColor: '#fff',
                     fontSize: 50,
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+
+                    position: 'inside',
+                    align: 'center',
+                    baseline: 'center'
                 },
-                textAlign: 'center',
-                textVerticalAlign: 'middle',
+                position: [],
                 shadowBlur: 10,
                 shadowColor: 'rgba(0, 0, 0, 0.25)'
             },

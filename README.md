@@ -624,3 +624,18 @@ Label font size when hover.
 ### label.emphasis.textStyle.fontWeight {string}
 
 Label font weight when hover.
+
+
+
+## Build
+
+For development:
+```
+$ webpack
+```
+
+For release:
+
+```
+$ webpack -p
+```

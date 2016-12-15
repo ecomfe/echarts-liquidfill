@@ -108,21 +108,54 @@ echarts.extendChartView({
         /**
          * sky circle for wave
          */
-        function getBackground() {
+        function getBackground(isForClipping) {
             var backStyle = seriesModel.getModel('outline.itemStyle')
                 .getItemStyle();
             var backgroundColor =
                 seriesModel.get('itemStyle.normal.backgroundColor');
             backStyle.fill = backgroundColor;
             backStyle.lineWidth = 0;
-            return new echarts.graphic.Circle({
-                shape: {
-                    cx: cx,
-                    cy: cy,
-                    r: radius
-                },
-                style: backStyle
-            });
+
+            var symbol = seriesModel.get('symbol');
+            if (symbol) {
+                // customed symbol path
+                if (symbol.indexOf('path://') === 0) {
+                    var path = echarts.graphic.makePath(symbol.slice(7), {});
+                    var bouding = path.getBoundingRect();
+                    var width = bouding.width;
+                    var height = bouding.height;
+                    if (width > height) {
+                        height = radius * 2 / width * height;
+                        width = radius * 2;
+                    }
+                    else {
+                        width = radius * 2 / height * width;
+                        height = radius * 2;
+                    }
+
+                    var left = isForClipping ? 0 : cx - width / 2;
+                    var top = isForClipping ? 0 : cy - height / 2;
+                    path = echarts.graphic.makePath(
+                        symbol.slice(7),
+                        {},
+                        new echarts.graphic.BoundingRect(left, top, width, height)
+                    );
+                    path.setStyle(backStyle);
+                    if (isForClipping) {
+                        path.position = [-width / 2, -height / 2];
+                    }
+                    return path;
+                }
+            } else {
+                return new echarts.graphic.Circle({
+                    shape: {
+                        cx: cx,
+                        cy: cy,
+                        r: radius
+                    },
+                    style: backStyle
+                });
+            }
         }
 
         /**
@@ -166,13 +199,8 @@ echarts.extendChartView({
             echarts.graphic.setHoverStyle(wave, hoverStyle);
 
             // clip out the part outside the circle
-            wave.setClipPath(new echarts.graphic.Circle({
-                shape: {
-                    cx: 0,
-                    cy: 0,
-                    r: radius
-                }
-            }));
+            var clip = getBackground(true);
+            wave.setClipPath(clip);
 
             return wave;
         }
@@ -275,6 +303,7 @@ echarts.extendChartView({
             }
 
             var outsideStyle = labelModel.getItemStyle();
+            console.log(labelModel.get('textAlign'))
             Object.assign(outsideStyle, {
                 text: formatLabel(),
                 x: cx,
@@ -306,13 +335,7 @@ echarts.extendChartView({
             insideText.hoverStyle = hoverInsideStyle;
 
             // clip out waves for insideText
-            var boundingCircle = new echarts.graphic.Circle({
-                shape: {
-                    cx: 0,
-                    cy: 0,
-                    r: radius
-                }
-            });
+            var boundingCircle = getBackground(true);
 
             wavePath = new echarts.graphic.CompoundPath({
                 shape: {

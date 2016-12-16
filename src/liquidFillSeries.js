@@ -31,8 +31,8 @@ echarts.extendSeriesModel({
 
         animationEasing: 'linear',
         animationEasingUpdate: 'linear',
-        animationDuration: 0,//2000,
-        animationDurationUpdate: 0,//1000,
+        animationDuration: 2000,
+        animationDurationUpdate: 1000,
 
         outline: {
             borderDistance: 8,
@@ -71,14 +71,6 @@ echarts.extendSeriesModel({
                 position: 'inside',
                 shadowBlur: 10,
                 shadowColor: 'rgba(0, 0, 0, 0.25)'
-            },
-            emphasis: {
-                textStyle: {
-                    color: '#156ACF',
-                    insideColor: '#E3F7FF',
-                    fontSize: 50,
-                    fontWeight: 'bold'
-                }
             }
         }
     }

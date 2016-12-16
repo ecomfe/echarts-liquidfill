@@ -149,20 +149,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    color: '#294D99',
 	                    insideColor: '#fff',
 	                    fontSize: 50,
-	                    fontWeight: 'bold'
+	                    fontWeight: 'bold',
+
+	                    align: 'center',
+	                    baseline: 'middle'
 	                },
-	                textAlign: 'center',
-	                textVerticalAlign: 'middle',
+	                position: 'inside',
 	                shadowBlur: 10,
 	                shadowColor: 'rgba(0, 0, 0, 0.25)'
-	            },
-	            emphasis: {
-	                textStyle: {
-	                    color: '#156ACF',
-	                    insideColor: '#E3F7FF',
-	                    fontSize: 50,
-	                    fontWeight: 'bold'
-	                }
 	            }
 	        }
 	    }
@@ -184,8 +178,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Complete the dimensions array guessed from the data structure.
 	     * @param  {Array.<string>} dimensions      Necessary dimensions, like ['x', 'y']
 	     * @param  {Array} data                     Data list. [[1, 2, 3], [2, 3, 4]]
-	     * @param  {Array.<string>} defaultNames    Default names to fill not necessary dimensions, like ['value']
-	     * @param  {string} extraPrefix             Prefix of name when filling the left dimensions.
+	     * @param  {Array.<string>} [defaultNames]    Default names to fill not necessary dimensions, like ['value']
+	     * @param  {string} [extraPrefix]             Prefix of name when filling the left dimensions.
 	     * @return {Array.<string>}
 	     */
 	    function completeDimensions(dimensions, data, defaultNames, extraPrefix) {
@@ -256,8 +250,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        '[object Error]': 1,
 	        '[object CanvasGradient]': 1,
 	        '[object CanvasPattern]': 1,
-	        // In node-canvas Image can be Canvas.Image
-	        '[object Image]': 1
+	        // For node-canvas
+	        '[object Image]': 1,
+	        '[object Canvas]': 1
+	    };
+
+	    var TYPED_ARRAY = {
+	        '[object Int8Array]': 1,
+	        '[object Uint8Array]': 1,
+	        '[object Uint8ClampedArray]': 1,
+	        '[object Int16Array]': 1,
+	        '[object Uint16Array]': 1,
+	        '[object Int32Array]': 1,
+	        '[object Uint32Array]': 1,
+	        '[object Float32Array]': 1,
+	        '[object Float64Array]': 1
 	    };
 
 	    var objToString = Object.prototype.toString;
@@ -270,35 +277,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var nativeReduce = arrayProto.reduce;
 
 	    /**
+	     * Those data types can be cloned:
+	     *     Plain object, Array, TypedArray, number, string, null, undefined.
+	     * Those data types will be assgined using the orginal data:
+	     *     BUILTIN_OBJECT
+	     * Instance of user defined class will be cloned to a plain object, without
+	     * properties in prototype.
+	     * Other data types is not supported (not sure what will happen).
+	     *
+	     * Caution: do not support clone Date, for performance consideration.
+	     * (There might be a large number of date in `series.data`).
+	     * So date should not be modified in and out of echarts.
+	     *
 	     * @param {*} source
-	     * @return {*} 拷贝后的新对象
+	     * @return {*} new
 	     */
 	    function clone(source) {
-	        if (typeof source == 'object' && source !== null) {
-	            var result = source;
-	            if (source instanceof Array) {
-	                result = [];
-	                for (var i = 0, len = source.length; i < len; i++) {
-	                    result[i] = clone(source[i]);
-	                }
-	            }
-	            else if (
-	                !isBuildInObject(source)
-	                // 是否为 dom 对象
-	                && !isDom(source)
-	            ) {
-	                result = {};
-	                for (var key in source) {
-	                    if (source.hasOwnProperty(key)) {
-	                        result[key] = clone(source[key]);
-	                    }
-	                }
-	            }
-
-	            return result;
+	        if (source == null || typeof source != 'object') {
+	            return source;
 	        }
 
-	        return source;
+	        var result = source;
+	        var typeStr = objToString.call(source);
+
+	        if (typeStr === '[object Array]') {
+	            result = [];
+	            for (var i = 0, len = source.length; i < len; i++) {
+	                result[i] = clone(source[i]);
+	            }
+	        }
+	        else if (TYPED_ARRAY[typeStr]) {
+	            result = source.constructor.from(source);
+	        }
+	        else if (!BUILTIN_OBJECT[typeStr] && !isDom(source)) {
+	            result = {};
+	            for (var key in source) {
+	                if (source.hasOwnProperty(key)) {
+	                    result[key] = clone(source[key]);
+	                }
+	            }
+	        }
+
+	        return result;
 	    }
 
 	    /**
@@ -663,8 +683,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @return {boolean}
 	     */
 	    function isDom(value) {
-	        return value && value.nodeType === 1
-	               && typeof(value.nodeName) == 'string';
+	        return typeof value === 'object'
+	            && typeof value.nodeType === 'number'
+	            && typeof value.ownerDocument === 'object';
+	    }
+
+	    /**
+	     * Whether is exactly NaN. Notice isNaN('a') returns true.
+	     * @param {*} value
+	     * @return {boolean}
+	     */
+	    function eqNaN(value) {
+	        return value !== value;
 	    }
 
 	    /**
@@ -728,6 +758,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        isFunction: isFunction,
 	        isBuildInObject: isBuildInObject,
 	        isDom: isDom,
+	        eqNaN: eqNaN,
 	        retrieve: retrieve,
 	        assert: assert,
 	        noop: function () {}
@@ -823,19 +854,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                waves.push(wave);
 	            })
 	            .update(function (newIdx, oldIdx) {
-	                var oldWave = oldData.getItemGraphicEl(oldIdx);
+	                var waveElement = oldData.getItemGraphicEl(oldIdx);
 
 	                // new wave is used to calculate position, but not added
-	                var newWave = getWave(newIdx, false, oldWave);
+	                var newWave = getWave(newIdx, false, waveElement);
 	                // update old wave with parameters of new wave
-	                echarts.graphic.updateProps(oldWave, {
+	                echarts.graphic.updateProps(waveElement, {
 	                    shape: newWave.shape
 	                }, seriesModel);
 
-	                setWaveAnimation(newIdx, oldWave, oldWave);
-	                group.add(oldWave);
-	                data.setItemGraphicEl(newIdx, oldWave);
-	                waves.push(oldWave);
+	                setWaveAnimation(newIdx, waveElement, waveElement);
+	                group.add(waveElement);
+	                data.setItemGraphicEl(newIdx, waveElement);
+	                waves.push(waveElement);
 	            })
 	            .remove(function (idx) {
 	                var wave = oldData.getItemGraphicEl(idx);
@@ -850,21 +881,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * sky circle for wave
 	         */
-	        function getBackground() {
+	        function getBackground(isForClipping) {
 	            var backStyle = seriesModel.getModel('outline.itemStyle')
 	                .getItemStyle();
 	            var backgroundColor =
 	                seriesModel.get('itemStyle.normal.backgroundColor');
 	            backStyle.fill = backgroundColor;
 	            backStyle.lineWidth = 0;
-	            return new echarts.graphic.Circle({
-	                shape: {
-	                    cx: cx,
-	                    cy: cy,
-	                    r: radius
-	                },
-	                style: backStyle
-	            });
+
+	            var symbol = seriesModel.get('shape');
+	            if (symbol) {
+	                // customed symbol path
+	                if (symbol.indexOf('path://') === 0) {
+	                    var path = echarts.graphic.makePath(symbol.slice(7), {});
+	                    var bouding = path.getBoundingRect();
+	                    var width = bouding.width;
+	                    var height = bouding.height;
+	                    if (width > height) {
+	                        height = radius * 2 / width * height;
+	                        width = radius * 2;
+	                    }
+	                    else {
+	                        width = radius * 2 / height * width;
+	                        height = radius * 2;
+	                    }
+
+	                    var left = isForClipping ? 0 : cx - width / 2;
+	                    var top = isForClipping ? 0 : cy - height / 2;
+	                    path = echarts.graphic.makePath(
+	                        symbol.slice(7),
+	                        {},
+	                        new echarts.graphic.BoundingRect(left, top, width, height)
+	                    );
+	                    path.setStyle(backStyle);
+	                    if (isForClipping) {
+	                        path.position = [-width / 2, -height / 2];
+	                    }
+	                    return path;
+	                }
+	            } else {
+	                return new echarts.graphic.Circle({
+	                    shape: {
+	                        cx: isForClipping ? 0 : cx,
+	                        cy: isForClipping ? 0 : cy,
+	                        r: radius
+	                    },
+	                    style: backStyle
+	                });
+	            }
 	        }
 
 	        /**
@@ -908,13 +972,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            echarts.graphic.setHoverStyle(wave, hoverStyle);
 
 	            // clip out the part outside the circle
-	            wave.setClipPath(new echarts.graphic.Circle({
-	                shape: {
-	                    cx: 0,
-	                    cy: 0,
-	                    r: radius
-	                }
-	            }));
+	            var clip = getBackground(true);
+	            wave.setClipPath(clip);
 
 	            return wave;
 	        }
@@ -992,9 +1051,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        function getText(waves) {
 	            var labelModel = itemModel.getModel('label.normal');
-	            var labelHoverModel = itemModel.getModel('label.emphasis');
 	            var textStyle = labelModel.getModel('textStyle');
-	            var textHoverStyle = labelHoverModel.getModel('textStyle');
 
 	            function formatLabel() {
 	                var value = data.get('value', 0);
@@ -1016,45 +1073,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 
-	            var outsideStyle = labelModel.getItemStyle();
-	            Object.assign(outsideStyle, {
-	                text: formatLabel(),
-	                x: cx,
-	                y: cy,
-	                fill: textStyle.get('color'),
-	                textAlign: labelModel.get('textAlign'),
-	                textVerticalAlign: labelModel.get('textVerticalAlign'),
-	                textFont: textStyle.getFont()
-	            });
+	            var textOption = {
+	                z2: 10,
+	                shape: {
+	                    x: left,
+	                    y: top,
+	                    width: radius * 2,
+	                    height: radius * 2
+	                },
+	                style: {
+	                    fill: 'transparent',
+	                    text: formatLabel(),
+	                    textAlign: textStyle.get('align'),
+	                    textVerticalAlign: textStyle.get('baseline')
+	                },
+	                silent: true
+	            };
 
-	            var outsideText = new echarts.graphic.Text({
-	                style: outsideStyle
-	            });
+	            var outsideTextRect = new echarts.graphic.Rect(textOption);
+	            var color = textStyle.get('color');
+	            echarts.graphic.setText(outsideTextRect.style, labelModel, color);
 
-	            var insideStyle = Object.assign({}, outsideStyle);
-	            insideStyle.fill = textStyle.get('insideColor');
-	            var insideText = new echarts.graphic.Text({
-	                style: insideStyle
-	            });
+	            var insideTextRect = new echarts.graphic.Rect(textOption);
+	            var insColor = textStyle.get('insideColor');
+	            echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
+	            insideTextRect.style.textFill = insColor;
 
-	            var hoverStyle = Object.assign({}, outsideStyle);
-	            hoverStyle.fill = textHoverStyle.get('color');
-	            hoverStyle.textFont = textHoverStyle.getFont();
-	            outsideText.hoverStyle = hoverStyle;
-
-	            var hoverInsideStyle = Object.assign({}, outsideStyle);
-	            hoverInsideStyle.fill = textHoverStyle.get('insideColor');
-	            hoverInsideStyle.textFont = textHoverStyle.getFont();
-	            insideText.hoverStyle = hoverInsideStyle;
+	            var group = new echarts.graphic.Group();
+	            group.add(outsideTextRect);
+	            group.add(insideTextRect);
 
 	            // clip out waves for insideText
-	            var boundingCircle = new echarts.graphic.Circle({
-	                shape: {
-	                    cx: 0,
-	                    cy: 0,
-	                    r: radius
-	                }
-	            });
+	            var boundingCircle = getBackground(true);
 
 	            wavePath = new echarts.graphic.CompoundPath({
 	                shape: {
@@ -1064,16 +1114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 
 	            wavePath.setClipPath(boundingCircle);
-	            insideText.setClipPath(wavePath);
-
-	            insideText.z2 = 10;
-	            outsideText.z2 = 10;
-
-	            var group = new echarts.graphic.Group();
-	            group.add(outsideText);
-	            group.add(insideText);
-
-	            echarts.graphic.setHoverStyle(group);
+	            insideTextRect.setClipPath(wavePath);
 
 	            return group;
 	        }
@@ -1241,19 +1282,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    /**
+	     * Minimal dicernible data precisioin according to a single pixel.
 	     * @param {Array.<number>} dataExtent
 	     * @param {Array.<number>} pixelExtent
-	     * @return {number}  precision
+	     * @return {number} precision
 	     */
 	    number.getPixelPrecision = function (dataExtent, pixelExtent) {
 	        var log = Math.log;
 	        var LN10 = Math.LN10;
 	        var dataQuantity = Math.floor(log(dataExtent[1] - dataExtent[0]) / LN10);
 	        var sizeQuantity = Math.round(log(Math.abs(pixelExtent[1] - pixelExtent[0])) / LN10);
-	        return Math.max(
-	            -dataQuantity + sizeQuantity,
-	            0
-	        );
+	        // toFixed() digits argument must be between 0 and 20.
+	        var precision = Math.min(Math.max(-dataQuantity + sizeQuantity, 0), 20);
+	        return !isFinite(precision) ? 20 : precision;
 	    };
 
 	    // Number.MAX_SAFE_INTEGER, ie do not support.
@@ -1334,6 +1375,70 @@ return /******/ (function(modules) { // webpackBootstrap
 	            else { nf = 10; }
 	        }
 	        return nf * exp10;
+	    };
+
+	    /**
+	     * Order intervals asc, and split them when overlap.
+	     * expect(numberUtil.reformIntervals([
+	     *     {interval: [18, 62], close: [1, 1]},
+	     *     {interval: [-Infinity, -70], close: [0, 0]},
+	     *     {interval: [-70, -26], close: [1, 1]},
+	     *     {interval: [-26, 18], close: [1, 1]},
+	     *     {interval: [62, 150], close: [1, 1]},
+	     *     {interval: [106, 150], close: [1, 1]},
+	     *     {interval: [150, Infinity], close: [0, 0]}
+	     * ])).toEqual([
+	     *     {interval: [-Infinity, -70], close: [0, 0]},
+	     *     {interval: [-70, -26], close: [1, 1]},
+	     *     {interval: [-26, 18], close: [0, 1]},
+	     *     {interval: [18, 62], close: [0, 1]},
+	     *     {interval: [62, 150], close: [0, 1]},
+	     *     {interval: [150, Infinity], close: [0, 0]}
+	     * ]);
+	     * @param {Array.<Object>} list, where `close` mean open or close
+	     *        of the interval, and Infinity can be used.
+	     * @return {Array.<Object>} The origin list, which has been reformed.
+	     */
+	    number.reformIntervals = function (list) {
+	        list.sort(function (a, b) {
+	            return littleThan(a, b, 0) ? -1 : 1;
+	        });
+
+	        var curr = -Infinity;
+	        var currClose = 1;
+	        for (var i = 0; i < list.length;) {
+	            var interval = list[i].interval;
+	            var close = list[i].close;
+
+	            for (var lg = 0; lg < 2; lg++) {
+	                if (interval[lg] <= curr) {
+	                    interval[lg] = curr;
+	                    close[lg] = !lg ? 1 - currClose : 1;
+	                }
+	                curr = interval[lg];
+	                currClose = close[lg];
+	            }
+
+	            if (interval[0] === interval[1] && close[0] * close[1] !== 1) {
+	                list.splice(i, 1);
+	            }
+	            else {
+	                i++;
+	            }
+	        }
+
+	        return list;
+
+	        function littleThan(a, b, lg) {
+	            return a.interval[lg] < b.interval[lg]
+	                || (
+	                    a.interval[lg] === b.interval[lg]
+	                    && (
+	                        (a.close[lg] - b.close[lg] === (!lg ? 1 : -1))
+	                        || (!lg && littleThan(a, b, 1))
+	                    )
+	                );
+	        }
 	    };
 
 	    module.exports = number;

@@ -596,16 +596,6 @@ Text align, which should be `'left'`, `'center'`, or `'right'`.
 Text vertical align, which should be `'top'`, `'middle'`, or `'bottom'`.
 
 
-### label.normal.shadowBlur {number}
-
-Label shadow width.
-
-
-### label.normal.shadowColor {string}
-
-Label shadow color.
-
-
 ### label.emphasis.textStyle.color {string}
 
 Color of text when display on background when hover.

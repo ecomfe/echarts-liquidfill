@@ -116,7 +116,7 @@ echarts.extendChartView({
             backStyle.fill = backgroundColor;
             backStyle.lineWidth = 0;
 
-            var symbol = seriesModel.get('symbol');
+            var symbol = seriesModel.get('shape');
             if (symbol) {
                 // customed symbol path
                 if (symbol.indexOf('path://') === 0) {
@@ -149,8 +149,8 @@ echarts.extendChartView({
             } else {
                 return new echarts.graphic.Circle({
                     shape: {
-                        cx: cx,
-                        cy: cy,
+                        cx: isForClipping ? 0 : cx,
+                        cy: isForClipping ? 0 : cy,
                         r: radius
                     },
                     style: backStyle
@@ -302,37 +302,33 @@ echarts.extendChartView({
                 }
             }
 
-            var outsideStyle = labelModel.getItemStyle();
-            console.log(labelModel.get('textAlign'))
-            Object.assign(outsideStyle, {
-                text: formatLabel(),
-                x: cx,
-                y: cy,
-                fill: textStyle.get('color'),
-                textAlign: labelModel.get('textAlign'),
-                textVerticalAlign: labelModel.get('textVerticalAlign'),
-                textFont: textStyle.getFont()
-            });
+            var textOption = {
+                z2: 10,
+                shape: {
+                    x: left,
+                    y: top,
+                    width: radius * 2,
+                    height: radius * 2
+                },
+                style: {
+                    fill: 'transparent',
+                    text: formatLabel()
+                },
+                silent: true
+            };
 
-            var outsideText = new echarts.graphic.Text({
-                style: outsideStyle
-            });
+            var outsideTextRect = new echarts.graphic.Rect(textOption);
+            var color = textStyle.get('color');
+            echarts.graphic.setText(outsideTextRect.style, labelModel, color);
 
-            var insideStyle = Object.assign({}, outsideStyle);
-            insideStyle.fill = textStyle.get('insideColor');
-            var insideText = new echarts.graphic.Text({
-                style: insideStyle
-            });
+            var insideTextRect = new echarts.graphic.Rect(textOption);
+            var insColor = textStyle.get('insideColor');
+            textStyle.parentModel.option.color = insColor;
+            echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
 
-            var hoverStyle = Object.assign({}, outsideStyle);
-            hoverStyle.fill = textHoverStyle.get('color');
-            hoverStyle.textFont = textHoverStyle.getFont();
-            outsideText.hoverStyle = hoverStyle;
-
-            var hoverInsideStyle = Object.assign({}, outsideStyle);
-            hoverInsideStyle.fill = textHoverStyle.get('insideColor');
-            hoverInsideStyle.textFont = textHoverStyle.getFont();
-            insideText.hoverStyle = hoverInsideStyle;
+            var group = new echarts.graphic.Group();
+            group.add(outsideTextRect);
+            group.add(insideTextRect);
 
             // clip out waves for insideText
             var boundingCircle = getBackground(true);
@@ -345,16 +341,7 @@ echarts.extendChartView({
             });
 
             wavePath.setClipPath(boundingCircle);
-            insideText.setClipPath(wavePath);
-
-            insideText.z2 = 10;
-            outsideText.z2 = 10;
-
-            var group = new echarts.graphic.Group();
-            group.add(outsideText);
-            group.add(insideText);
-
-            echarts.graphic.setHoverStyle(group);
+            insideTextRect.setClipPath(wavePath);
 
             return group;
         }

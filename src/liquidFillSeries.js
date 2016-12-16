@@ -65,11 +65,10 @@ echarts.extendSeriesModel({
                     fontSize: 50,
                     fontWeight: 'bold',
 
-                    position: 'inside',
                     align: 'center',
-                    baseline: 'center'
+                    baseline: 'middle'
                 },
-                position: [],
+                position: 'inside',
                 shadowBlur: 10,
                 shadowColor: 'rgba(0, 0, 0, 0.25)'
             },

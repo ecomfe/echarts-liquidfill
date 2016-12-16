@@ -2,7 +2,7 @@
 
 Liquid Fill Chart plugin for [ECharts](https://github.com/ecomfe/echarts), which is usually used to represent data in percentage.
 
-![Rendering Results](http://g.recordit.co/CGmWW5wT0q.gif)
+![Rendering Results](http://g.recordit.co/KbIEQT73sF.gif)
 
 ## Setup
 
@@ -197,6 +197,8 @@ var option = {
 
 ![No border](http://g.recordit.co/E8YI6wlvp4.gif)
 
+Note that you may probably want to set the border width to be 0 when using customerized path for chart shape.
+
 
 ### Animation
 
@@ -282,10 +284,12 @@ var option = {
 
 The text of the above code is `I'm 0.6,0.5,0.4,0.3`.
 
+Text position is at the center by default. `label.normal.position` can be set to be `'inside'`, `'left'`, `'right'`, `'top'`, `'bottom'`, or horizontal and vertical positions like `['10%', '20%']`, which means `'10%'` to the left (controlled by `label.normal.textStyle.align`, which can be `'left'`, `'center'`, or `'right'`) and `'20%'` to the top (controlled by `label.normal.textStyle.baseline`, which can be `'top'`, `'middle'`, or `'bottom'`).
+
 
 ### Shadow
 
-By default, waves, outline and label have shadow on them. Here's how to change them.
+By default, waves and outline have shadow on them. Here's how to change them.
 
 ```js
 var option = {
@@ -389,20 +393,14 @@ Default option for liquid fill charts are:
                 color: '#294D99',
                 insideColor: '#fff',
                 fontSize: 50,
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+
+                align: 'center',
+                baseline: 'middle'
             },
-            textAlign: 'center',
-            textVerticalAlign: 'middle',
+            position: 'inside',
             shadowBlur: 10,
             shadowColor: 'rgba(0, 0, 0, 0.25)'
-        },
-        emphasis: {
-            textStyle: {
-                color: '#156ACF',
-                insideColor: '#E3F7FF',
-                fontSize: 50,
-                fontWeight: 'bold'
-            }
         }
     }
 }
@@ -586,35 +584,19 @@ Label font size.
 Label font weight.
 
 
-### label.normal.textAlign {string}
+### label.normal.textStyle.align {string}
 
 Text align, which should be `'left'`, `'center'`, or `'right'`.
 
 
-### label.normal.textVerticalAlign {string}
+### label.normal.textStyle.baseline {string}
 
 Text vertical align, which should be `'top'`, `'middle'`, or `'bottom'`.
 
 
-### label.emphasis.textStyle.color {string}
+### label.normal.position {string|string[]}
 
-Color of text when display on background when hover.
-
-
-### label.emphasis.textStyle.insideColor {string}
-
-Color of text when display on wave when hover.
-
-
-### label.emphasis.textStyle.fontSize {number}
-
-Label font size when hover.
-
-
-### label.emphasis.textStyle.fontWeight {string}
-
-Label font weight when hover.
-
+Text position is at the center by default. `label.normal.position` can be set to be `'inside'`, `'left'`, `'right'`, `'top'`, `'bottom'`, or horizontal and vertical positions like `['10%', '20%']`, which means `'10%'` to the left and `'20%'` to the top.
 
 
 ## Build

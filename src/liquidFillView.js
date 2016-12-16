@@ -74,26 +74,26 @@ echarts.extendChartView({
                         waterLevel: waterLevel
                     }
                 }, seriesModel);
-                setWaveAnimation(idx, wave, null);
+                // setWaveAnimation(idx, wave, null);
 
                 group.add(wave);
                 data.setItemGraphicEl(idx, wave);
                 waves.push(wave);
             })
             .update(function (newIdx, oldIdx) {
-                var oldWave = oldData.getItemGraphicEl(oldIdx);
+                var waveElement = oldData.getItemGraphicEl(oldIdx);
 
                 // new wave is used to calculate position, but not added
-                var newWave = getWave(newIdx, false, oldWave);
+                var newWave = getWave(newIdx, false, waveElement);
                 // update old wave with parameters of new wave
-                echarts.graphic.updateProps(oldWave, {
+                echarts.graphic.updateProps(waveElement, {
                     shape: newWave.shape
                 }, seriesModel);
 
-                setWaveAnimation(newIdx, oldWave, oldWave);
-                group.add(oldWave);
-                data.setItemGraphicEl(newIdx, oldWave);
-                waves.push(oldWave);
+                // setWaveAnimation(newIdx, waveElement, waveElement);
+                group.add(waveElement);
+                data.setItemGraphicEl(newIdx, waveElement);
+                waves.push(waveElement);
             })
             .remove(function (idx) {
                 var wave = oldData.getItemGraphicEl(idx);
@@ -278,9 +278,7 @@ echarts.extendChartView({
          */
         function getText(waves) {
             var labelModel = itemModel.getModel('label.normal');
-            var labelHoverModel = itemModel.getModel('label.emphasis');
             var textStyle = labelModel.getModel('textStyle');
-            var textHoverStyle = labelHoverModel.getModel('textStyle');
 
             function formatLabel() {
                 var value = data.get('value', 0);
@@ -312,9 +310,11 @@ echarts.extendChartView({
                 },
                 style: {
                     fill: 'transparent',
-                    text: formatLabel()
+                    text: formatLabel(),
+                    textAlign: textStyle.get('align'),
+                    textVerticalAlign: textStyle.get('baseline')
                 },
-                silent: true
+                // silent: true
             };
 
             var outsideTextRect = new echarts.graphic.Rect(textOption);

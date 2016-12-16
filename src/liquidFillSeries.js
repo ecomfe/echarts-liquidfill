@@ -31,8 +31,8 @@ echarts.extendSeriesModel({
 
         animationEasing: 'linear',
         animationEasingUpdate: 'linear',
-        animationDuration: 2000,
-        animationDurationUpdate: 1000,
+        animationDuration: 0,//2000,
+        animationDurationUpdate: 0,//1000,
 
         outline: {
             borderDistance: 8,

@@ -117,8 +117,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        animationEasing: 'linear',
 	        animationEasingUpdate: 'linear',
-	        animationDuration: 2000,
-	        animationDurationUpdate: 1000,
+	        animationDuration: 0,//2000,
+	        animationDurationUpdate: 0,//1000,
 
 	        outline: {
 	            borderDistance: 8,
@@ -157,6 +157,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                position: 'inside',
 	                shadowBlur: 10,
 	                shadowColor: 'rgba(0, 0, 0, 0.25)'
+	            },
+	            emphasis: {
+	                textStyle: {
+	                    color: '#156ACF',
+	                    insideColor: '#E3F7FF',
+	                    fontSize: 50,
+	                    fontWeight: 'bold'
+	                }
 	            }
 	        }
 	    }
@@ -847,7 +855,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        waterLevel: waterLevel
 	                    }
 	                }, seriesModel);
-	                setWaveAnimation(idx, wave, null);
+	                // setWaveAnimation(idx, wave, null);
 
 	                group.add(wave);
 	                data.setItemGraphicEl(idx, wave);
@@ -863,7 +871,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    shape: newWave.shape
 	                }, seriesModel);
 
-	                setWaveAnimation(newIdx, waveElement, waveElement);
+	                // setWaveAnimation(newIdx, waveElement, waveElement);
 	                group.add(waveElement);
 	                data.setItemGraphicEl(newIdx, waveElement);
 	                waves.push(waveElement);
@@ -1087,7 +1095,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    textAlign: textStyle.get('align'),
 	                    textVerticalAlign: textStyle.get('baseline')
 	                },
-	                silent: true
+	                // silent: true
 	            };
 
 	            var outsideTextRect = new echarts.graphic.Rect(textOption);
@@ -1096,8 +1104,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var insideTextRect = new echarts.graphic.Rect(textOption);
 	            var insColor = textStyle.get('insideColor');
+	            textStyle.parentModel.option.color = insColor;
 	            echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
-	            insideTextRect.style.textFill = insColor;
 
 	            var group = new echarts.graphic.Group();
 	            group.add(outsideTextRect);

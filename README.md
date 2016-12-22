@@ -160,17 +160,18 @@ var option = {
 ![Change a single wave](http://g.recordit.co/p1fHmfexW4.gif)
 
 
-### Border Style
+### Background Style
 
-You may set `outline.borderDistance` to be 0 to disable the gap between waves and border.
+You can use backgroundStyle option to set the stroke, fill style of background shape.
 
 ```js
 var option = {
     series: [{
         type: 'liquidFill',
         data: [0.6, 0.5, 0.4, 0.3],
-        outline: {
-            borderDistance: 0
+        backgroundStyle: {
+            borderWidth: 5,
+            borderColor: '#294D99'
         }
     }]
 };
@@ -178,7 +179,7 @@ var option = {
 
 ![No border distance](http://g.recordit.co/G8tAPTIdFa.gif)
 
-To hide the border, set `outline.itemStyle.borderWidth` to be 0. You may also change `outline.itemStyle.borderColor` to change border color.
+To hide the outline, just set `outline.show` to be `false`
 
 ```js
 var option = {
@@ -186,10 +187,7 @@ var option = {
         type: 'liquidFill',
         data: [0.6, 0.5, 0.4, 0.3],
         outline: {
-            borderDistance: 0,
-            itemStyle: {
-                borderWidth: 0
-            }
+            show: false
         }
     }]
 };

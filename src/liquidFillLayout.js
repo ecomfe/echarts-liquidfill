@@ -10,8 +10,6 @@ module.exports = echarts.graphic.extendShape({
         cy: 0,
         waterLevel: 0,
         amplitude: 0,
-        borderWidth: 0,
-        borderDistance: 0,
         phase: 0,
         inverse: false
     },

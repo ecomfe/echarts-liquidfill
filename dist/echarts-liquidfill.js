@@ -124,7 +124,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            show: true,
 	            borderDistance: 8,
 	            itemStyle: {
-	                fill: 'none',
+	                color: 'none',
 	                borderColor: '#294D99',
 	                borderWidth: 8,
 	                shadowBlur: 20,
@@ -133,7 +133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 
 	        backgroundStyle: {
-	            color: '#E3F7FF',
+	            color: '#E3F7FF'
 	        },
 
 	        itemStyle: {

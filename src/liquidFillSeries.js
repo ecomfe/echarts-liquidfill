@@ -38,7 +38,7 @@ echarts.extendSeriesModel({
             show: true,
             borderDistance: 8,
             itemStyle: {
-                fill: 'none',
+                color: 'none',
                 borderColor: '#294D99',
                 borderWidth: 8,
                 shadowBlur: 20,
@@ -47,7 +47,7 @@ echarts.extendSeriesModel({
         },
 
         backgroundStyle: {
-            color: '#E3F7FF',
+            color: '#E3F7FF'
         },
 
         itemStyle: {

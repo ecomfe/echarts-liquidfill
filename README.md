@@ -367,6 +367,7 @@ Default option for liquid fill charts are:
     outline: {
         borderDistance: 8,
         itemStyle: {
+            color: 'none',
             borderColor: '#294D99',
             borderWidth: 8,
             shadowBlur: 20,
@@ -374,9 +375,12 @@ Default option for liquid fill charts are:
         }
     },
 
+    backgroundStyle: {
+        color: '#E3F7FF'
+    },
+
     itemStyle: {
         normal: {
-            backgroundColor: '#E3F7FF',
             opacity: 0.95,
             shadowBlur: 50,
             shadowColor: 'rgba(0, 0, 0, 0.4)'
@@ -526,17 +530,36 @@ Border width.
 
 ### outline.itemStyle.shadowBlur {number}
 
-Outline shadow width.
+Outline shadow blur size.
 
 
 ### outline.itemStyle.shadowColor {string}
 
 Outline shadow color.
 
+### backgroundStyle.color {string}
 
-### itemStyle.normal.backgroundColor {string}
+Background fill color.
 
-Background color.
+### backgroundStyle.borderWidth {string}
+
+Background stroke line width.
+
+### backgroundStyle.borderColor {string}
+
+Background stroke line width.
+
+### backgroundStyle.itemStyle.shadowBlur {number}
+
+Background shadow blur size.
+
+### backgroundStyle.itemStyle.shadowColor {string}
+
+Background shadow color.
+
+### backgroundStyle.itemStyle.opacity {number}
+
+Background opacity.
 
 
 ### itemStyle.normal.opacity {number}

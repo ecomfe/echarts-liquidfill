@@ -29,6 +29,7 @@ echarts.extendSeriesModel({
         period: 'auto',
         direction: 'right',
 
+        waveAnimation: true,
         animationEasing: 'linear',
         animationEasingUpdate: 'linear',
         animationDuration: 2000,

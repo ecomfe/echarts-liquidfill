@@ -252,7 +252,7 @@ echarts.extendChartView({
                 .animate()
                 .stop();
 
-            if (direction !== 'none') {
+            if (direction !== 'none' && itemModel.get('waveAnimation')) {
                 wave
                     .animate('shape', true)
                     .when(0, {

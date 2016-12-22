@@ -115,6 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        period: 'auto',
 	        direction: 'right',
 
+	        waveAnimation: true,
 	        animationEasing: 'linear',
 	        animationEasingUpdate: 'linear',
 	        animationDuration: 2000,
@@ -1025,7 +1026,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                .animate()
 	                .stop();
 
-	            if (direction !== 'none') {
+	            if (direction !== 'none' && itemModel.get('waveAnimation')) {
 	                wave
 	                    .animate('shape', true)
 	                    .when(0, {

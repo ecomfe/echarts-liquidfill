@@ -307,23 +307,13 @@ echarts.extendChartView({
             var textStyle = labelModel.getModel('textStyle');
 
             function formatLabel() {
-                var value = data.get('value', 0);
-                var labelFormatter = labelModel.get('formatter');
-                if (labelFormatter) {
-                    if (typeof labelFormatter === 'string') {
-                        return labelFormatter.replace('{value}', value || '');
-                    }
-                    else if (typeof labelFormatter === 'function') {
-                        var values = [];
-                        for (var i = 0; i < data._rawData.length; ++i) {
-                            values.push(data.get('value', i));
-                        }
-                        return labelFormatter(values);
-                    }
+                var formatted = seriesModel.getFormattedLabel(0, 'normal');
+                var defaultVal = (data.get('value', 0) * 100);
+                var defaultLabel = data.getName(0) || seriesModel.name;
+                if (!isNaN(defaultVal)) {
+                    defaultLabel = defaultVal.toFixed(0) + '%';
                 }
-                else {
-                    return Math.ceil(value * 100) + '%';
-                }
+                return formatted == null ? defaultLabel : formatted;
             }
 
             var textOption = {

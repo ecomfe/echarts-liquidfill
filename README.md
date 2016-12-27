@@ -27,13 +27,14 @@ To create a Liquid Fill Chart, you need to have a series with type of `'liquidFi
 var option = {
     series: [{
         type: 'liquidFill',
-        data: [0.5]
+        data: [0.6]
     }]
 };
 ```
 
-![A simple liquid fill chart](http://g.recordit.co/r0DvCuoqSY.gif)
+![A simple liquid fill chart](http://g.recordit.co/RsjUlo69JN.gif)
 
+[Run](http://gallery.echartsjs.com/editor.html?c=xr1XplzB4e)
 
 ### Multiple Waves
 
@@ -50,7 +51,9 @@ var option = {
 
 This creates a chart wit waves at position of 60%, 50%, 40%, and 30%.
 
-![Multiple waves](http://g.recordit.co/1ObSCjLCeG.gif)
+![Multiple waves](http://g.recordit.co/HJ3z3ITqzL.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xSyIEWMBNl)
 
 
 ### Color and Opacity
@@ -75,7 +78,9 @@ var option = {
 };
 ```
 
-![Color and opacity](http://g.recordit.co/VSUyGVZqcA.gif)
+![Color and opacity](http://g.recordit.co/ZVRBdxO6oY.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xrJpDC704l)
 
 You may also set the color and opacity of a single data item by:
 
@@ -99,24 +104,30 @@ var option = {
 };
 ```
 
-![Color and opacity of a single data item](http://g.recordit.co/N5GGJ1AwQ3.gif)
+![Color and opacity of a single data item](http://g.recordit.co/Smz5G8ypvO.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xBJPCRXR4l)
 
 
 ### Static Waves
 
-To provent the waves from moving left or right, you may simply set `direction` to be `'none'`. To disable the animation of waves raising, set `animationDuration` and `animationDurationUpdate` to be 0.
+To provent the waves from moving left or right, you may simply set `waveAnimation` to be `false`. To disable the animation of waves raising, set `animationDuration` and `animationDurationUpdate` to be 0.
 
 ```js
 var option = {
     series: [{
         type: 'liquidFill',
-        direction: 'none',
+        waveAnimation: false,
         animationDuration: 0,
         animationDurationUpdate: 0,
         data: [0.6, 0.5, 0.4, 0.3]
     }]
 };
 ```
+
+![Static waves](http://g.recordit.co/Wze7eblLPM.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xH1VfVVREx)
 
 
 ### Still Water
@@ -128,13 +139,17 @@ var option = {
     series: [{
         type: 'liquidFill',
         data: [0.6, 0.5, 0.4, 0.3],
-        amplitude: 0
+        amplitude: 0,
+        waveAnimation: 0
     }]
 };
 ```
 
+It is recommended to set `waveAnimation` to be false in this case to disable animation for performance consideration.
+
 ![Still water](http://g.recordit.co/EQ5pnYDAtN.gif)
 
+[Run](http://gallery.echartsjs.com/editor.html?c=xHy1NHVCNx)
 
 ### Change A Single Wave
 
@@ -157,12 +172,35 @@ var option = {
 };
 ```
 
-![Change a single wave](http://g.recordit.co/p1fHmfexW4.gif)
+![Change a single wave](http://g.recordit.co/31VHgsRV2y.gif)
 
+[Run](http://gallery.echartsjs.com/editor.html?c=xry6CHNCVl)
 
-### Border Style
+### Background Style
 
-You may set `outline.borderDistance` to be 0 to disable the gap between waves and border.
+You can use backgroundStyle option to set the stroke, fill style of background shape.
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3],
+        backgroundStyle: {
+            borderWidth: 5,
+            borderColor: 'red',
+            color: 'yellow'
+        }
+    }]
+};
+```
+
+![Change border width and color](http://g.recordit.co/nXCxOcV4IQ.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xSkJoa_kBx)
+
+### Outline Style
+
+To hide the outline, just set `outline.show` to be `false`.
 
 ```js
 var option = {
@@ -170,34 +208,15 @@ var option = {
         type: 'liquidFill',
         data: [0.6, 0.5, 0.4, 0.3],
         outline: {
-            borderDistance: 0
+            show: false
         }
     }]
 };
 ```
 
-![No border distance](http://g.recordit.co/G8tAPTIdFa.gif)
+![No outline](http://g.recordit.co/nIxiw5KAGC.gif)
 
-To hide the border, set `outline.itemStyle.borderWidth` to be 0. You may also change `outline.itemStyle.borderColor` to change border color.
-
-```js
-var option = {
-    series: [{
-        type: 'liquidFill',
-        data: [0.6, 0.5, 0.4, 0.3],
-        outline: {
-            borderDistance: 0,
-            itemStyle: {
-                borderWidth: 0
-            }
-        }
-    }]
-};
-```
-
-![No border](http://g.recordit.co/E8YI6wlvp4.gif)
-
-Note that you may probably want to set the border width to be 0 when using customerized path for chart shape.
+[Run](http://gallery.echartsjs.com/editor.html?c=xSySxR_JBg)
 
 
 ### Animation
@@ -367,6 +386,7 @@ Default option for liquid fill charts are:
     outline: {
         borderDistance: 8,
         itemStyle: {
+            color: 'none',
             borderColor: '#294D99',
             borderWidth: 8,
             shadowBlur: 20,
@@ -374,9 +394,12 @@ Default option for liquid fill charts are:
         }
     },
 
+    backgroundStyle: {
+        color: '#E3F7FF'
+    },
+
     itemStyle: {
         normal: {
-            backgroundColor: '#E3F7FF',
             opacity: 0.95,
             shadowBlur: 50,
             shadowColor: 'rgba(0, 0, 0, 0.4)'
@@ -526,17 +549,36 @@ Border width.
 
 ### outline.itemStyle.shadowBlur {number}
 
-Outline shadow width.
+Outline shadow blur size.
 
 
 ### outline.itemStyle.shadowColor {string}
 
 Outline shadow color.
 
+### backgroundStyle.color {string}
 
-### itemStyle.normal.backgroundColor {string}
+Background fill color.
 
-Background color.
+### backgroundStyle.borderWidth {string}
+
+Background stroke line width.
+
+### backgroundStyle.borderColor {string}
+
+Background stroke line width.
+
+### backgroundStyle.itemStyle.shadowBlur {number}
+
+Background shadow blur size.
+
+### backgroundStyle.itemStyle.shadowColor {string}
+
+Background shadow color.
+
+### backgroundStyle.itemStyle.opacity {number}
+
+Background opacity.
 
 
 ### itemStyle.normal.opacity {number}

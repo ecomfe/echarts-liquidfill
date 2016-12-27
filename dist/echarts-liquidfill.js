@@ -115,14 +115,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        period: 'auto',
 	        direction: 'right',
 
+	        waveAnimation: true,
 	        animationEasing: 'linear',
 	        animationEasingUpdate: 'linear',
 	        animationDuration: 2000,
 	        animationDurationUpdate: 1000,
 
 	        outline: {
+	            show: true,
 	            borderDistance: 8,
 	            itemStyle: {
+	                color: 'none',
 	                borderColor: '#294D99',
 	                borderWidth: 8,
 	                shadowBlur: 20,
@@ -130,9 +133,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        },
 
+	        backgroundStyle: {
+	            color: '#E3F7FF'
+	        },
+
 	        itemStyle: {
 	            normal: {
-	                backgroundColor: '#E3F7FF',
 	                opacity: 0.95,
 	                shadowBlur: 50,
 	                shadowColor: 'rgba(0, 0, 0, 0.4)'
@@ -796,38 +802,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var center = itemModel.get('center');
 	        var radius = itemModel.get('radius');
 
-	        // itemStyle
-	        var borderColor = seriesModel.get('outline.itemStyle.borderColor');
-	        var borderWidth = seriesModel.get('outline.itemStyle.borderWidth');
-	        var borderDistance = seriesModel.get('outline.borderDistance');
-
 	        var width = api.getWidth();
 	        var height = api.getHeight();
 	        var size = Math.min(width, height);
+	        // itemStyle
+	        var outlineDistance = 0;
+	        var outlineBorderWidth = 0;
+	        var showOutline = seriesModel.get('outline.show');
+
+	        if (showOutline) {
+	            outlineDistance = seriesModel.get('outline.borderDistance');
+	            outlineBorderWidth = parsePercent(seriesModel.get('outline.itemStyle.borderWidth'), size);
+	        }
+
 	        var cx = parsePercent(center[0], width);
 	        var cy = parsePercent(center[1], height);
-	        var borderWidth = parsePercent(borderWidth, size);
 	        var outterRadius = parsePercent(radius, size) / 2;
-	        var innerRadius = outterRadius - borderWidth;
-	        var paddingRadius = parsePercent(borderDistance, size);
+	        var innerRadius = outterRadius - outlineBorderWidth / 2;
+	        var paddingRadius = parsePercent(outlineDistance, size);
 
 	        var wavePath = null;
 
-	        var borderRing = new echarts.graphic.Ring({
-	            shape: {
-	                cx: cx,
-	                cy: cy,
-	                r: innerRadius,
-	                r0: outterRadius
-	            },
-	            style: {
-	                fill: borderColor
-	            }
-	        });
-	        group.add(borderRing);
+	        if (showOutline) {
+	            var outline = getOutline();
+	            outline.style.lineWidth = outlineBorderWidth;
+	            group.add(getOutline());
+	        }
 
 	        radius = innerRadius - paddingRadius;
-	        var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
 	        var left = cx - radius;
 	        var top = cy - radius;
 
@@ -847,6 +849,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        waterLevel: waterLevel
 	                    }
 	                }, seriesModel);
+
+	                wave.z2 = 2;
 	                setWaveAnimation(idx, wave, null);
 
 	                group.add(wave);
@@ -879,16 +883,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._data = data;
 
 	        /**
-	         * sky circle for wave
+	         * Get path for outline, background and clipping
 	         */
-	        function getBackground(isForClipping) {
-	            var backStyle = seriesModel.getModel('outline.itemStyle')
-	                .getItemStyle();
-	            var backgroundColor =
-	                seriesModel.get('itemStyle.normal.backgroundColor');
-	            backStyle.fill = backgroundColor;
-	            backStyle.lineWidth = 0;
-
+	        function getPath(r, isForClipping) {
 	            var symbol = seriesModel.get('shape');
 	            if (symbol) {
 	                // customed symbol path
@@ -898,12 +895,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    var width = bouding.width;
 	                    var height = bouding.height;
 	                    if (width > height) {
-	                        height = radius * 2 / width * height;
-	                        width = radius * 2;
+	                        height = r * 2 / width * height;
+	                        width = r * 2;
 	                    }
 	                    else {
-	                        width = radius * 2 / height * width;
-	                        height = radius * 2;
+	                        width = r * 2 / height * width;
+	                        height = r * 2;
 	                    }
 
 	                    var left = isForClipping ? 0 : cx - width / 2;
@@ -913,22 +910,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        {},
 	                        new echarts.graphic.BoundingRect(left, top, width, height)
 	                    );
-	                    path.setStyle(backStyle);
 	                    if (isForClipping) {
 	                        path.position = [-width / 2, -height / 2];
 	                    }
 	                    return path;
 	                }
-	            } else {
+	            }
+	            else {
 	                return new echarts.graphic.Circle({
 	                    shape: {
 	                        cx: isForClipping ? 0 : cx,
 	                        cy: isForClipping ? 0 : cy,
-	                        r: radius
-	                    },
-	                    style: backStyle
+	                        r: r
+	                    }
 	                });
 	            }
+	        }
+	        /**
+	         * Create outline
+	         */
+	        function getOutline() {
+	            var outlinePath = getPath(outterRadius);
+	            outlinePath.style.fill = null;
+
+	            outlinePath.setStyle(seriesModel.getModel('outline.itemStyle')
+	                .getItemStyle());
+
+	            return outlinePath;
+	        }
+
+	        /**
+	         * Create background
+	         */
+	        function getBackground() {
+	            // Seperate stroke and fill, so we can use stroke to cover the alias of clipping.
+	            var strokePath = getPath(radius);
+	            strokePath.setStyle(seriesModel.getModel('backgroundStyle')
+	                .getItemStyle());
+	            strokePath.style.fill = null;
+
+	            // Stroke is front of wave
+	            strokePath.z2 = 5;
+
+	            var fillPath = getPath(radius);
+	            fillPath.setStyle(seriesModel.getModel('backgroundStyle')
+	                .getItemStyle());
+	            fillPath.style.stroke = null;
+
+	            var group = new echarts.graphic.Group();
+	            group.add(strokePath);
+	            group.add(fillPath);
+
+	            return group;
 	        }
 
 	        /**
@@ -939,6 +972,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var itemStyleModel = itemModel.getModel('itemStyle');
 	            var phase = itemModel.get('phase');
 	            var amplitude = itemModel.get('amplitude');
+	            var waveLength = parsePercent(itemModel.get('waveLength'),
+	                radius * 2);
 
 	            var value = data.get('value', idx);
 	            var waterLevel = radius - value * radius * 2;
@@ -957,8 +992,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    cy: 0,
 	                    waterLevel: waterLevel,
 	                    amplitude: amplitude,
-	                    borderWidth: borderWidth,
-	                    borderDistance: paddingRadius,
 	                    phase: phase,
 	                    inverse: isInverse
 	                },
@@ -972,7 +1005,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            echarts.graphic.setHoverStyle(wave, hoverStyle);
 
 	            // clip out the part outside the circle
-	            var clip = getBackground(true);
+	            var clip = getPath(radius, true);
 	            wave.setClipPath(clip);
 
 	            return wave;
@@ -1007,7 +1040,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // phase for moving left/right
 	            var phaseOffset = 0;
-	            if (direction === 'right' || direction == undefined) {
+	            if (direction === 'right' || direction == null) {
 	                phaseOffset = Math.PI;
 	            }
 	            else if (direction === 'left') {
@@ -1025,7 +1058,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                .animate()
 	                .stop();
 
-	            if (direction !== 'none') {
+	            if (direction !== 'none' && itemModel.get('waveAnimation')) {
 	                wave
 	                    .animate('shape', true)
 	                    .when(0, {
@@ -1054,23 +1087,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var textStyle = labelModel.getModel('textStyle');
 
 	            function formatLabel() {
-	                var value = data.get('value', 0);
-	                var labelFormatter = labelModel.get('formatter');
-	                if (labelFormatter) {
-	                    if (typeof labelFormatter === 'string') {
-	                        return labelFormatter.replace('{value}', value || '');
-	                    }
-	                    else if (typeof labelFormatter === 'function') {
-	                        var values = [];
-	                        for (var i = 0; i < data._rawData.length; ++i) {
-	                            values.push(data.get('value', i));
-	                        }
-	                        return labelFormatter(values);
-	                    }
+	                var formatted = seriesModel.getFormattedLabel(0, 'normal');
+	                var defaultVal = (data.get('value', 0) * 100);
+	                var defaultLabel = data.getName(0) || seriesModel.name;
+	                if (!isNaN(defaultVal)) {
+	                    defaultLabel = defaultVal.toFixed(0) + '%';
 	                }
-	                else {
-	                    return Math.ceil(value * 100) + '%';
-	                }
+	                return formatted == null ? defaultLabel : formatted;
 	            }
 
 	            var textOption = {
@@ -1104,7 +1127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            group.add(insideTextRect);
 
 	            // clip out waves for insideText
-	            var boundingCircle = getBackground(true);
+	            var boundingCircle = getPath(radius, true);
 
 	            wavePath = new echarts.graphic.CompoundPath({
 	                shape: {
@@ -1460,8 +1483,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        cy: 0,
 	        waterLevel: 0,
 	        amplitude: 0,
-	        borderWidth: 0,
-	        borderDistance: 0,
 	        phase: 0,
 	        inverse: false
 	    },

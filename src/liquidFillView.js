@@ -51,7 +51,6 @@ echarts.extendChartView({
         }
 
         radius = innerRadius - paddingRadius;
-        var waveLength = parsePercent(itemModel.get('waveLength'), radius * 2);
         var left = cx - radius;
         var top = cy - radius;
 
@@ -194,6 +193,8 @@ echarts.extendChartView({
             var itemStyleModel = itemModel.getModel('itemStyle');
             var phase = itemModel.get('phase');
             var amplitude = itemModel.get('amplitude');
+            var waveLength = parsePercent(itemModel.get('waveLength'),
+                radius * 2);
 
             var value = data.get('value', idx);
             var waterLevel = radius - value * radius * 2;

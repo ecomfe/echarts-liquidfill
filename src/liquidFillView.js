@@ -85,8 +85,10 @@ echarts.extendChartView({
                 var newWave = getWave(newIdx, false, waveElement);
                 // update old wave with parameters of new wave
                 echarts.graphic.updateProps(waveElement, {
-                    shape: newWave.shape
+                    shape: newWave.shape,
+                    style: newWave.style
                 }, seriesModel);
+                waveElement.position = newWave.position;
 
                 setWaveAnimation(newIdx, waveElement, waveElement);
                 group.add(waveElement);
@@ -204,7 +206,7 @@ echarts.extendChartView({
             normalStyle.fill = data.getItemVisual(idx, 'color');
 
             var x = radius * 2;
-
+            console.log(cx, cy);
             var wave = new LiquidLayout({
                 shape: {
                     waveLength: waveLength,

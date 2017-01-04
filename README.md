@@ -2,7 +2,7 @@
 
 Liquid Fill Chart plugin for [ECharts](https://github.com/ecomfe/echarts), which is usually used to represent data in percentage.
 
-![Rendering Results](http://g.recordit.co/KbIEQT73sF.gif)
+![Rendering Results](http://g.recordit.co/zHeMqqlh4j.gif)
 
 ## Setup
 
@@ -35,6 +35,11 @@ var option = {
 ![A simple liquid fill chart](http://g.recordit.co/RsjUlo69JN.gif)
 
 [Run](http://gallery.echartsjs.com/editor.html?c=xr1XplzB4e)
+
+
+### Examples on Gallery
+
+[View more examples](http://gallery.echartsjs.com/explore.html#tags=liquidFill~sort=rank~timeframe=all~author=all).
 
 ### Multiple Waves
 
@@ -247,11 +252,12 @@ setTimeout(function () {
             data: [0.8, 0.6, 0.4, 0.2]
         }]
     })
-}, 1000);
+}, 3000);
 ```
 
-![Update animation](http://g.recordit.co/dGcr25E8J8.gif)
+![Update animation](http://g.recordit.co/qt87aYQ9SO.gif)
 
+[Run](http://gallery.echartsjs.com/editor.html?c=xSk8I5JcHe)
 
 ### Change Text
 
@@ -259,18 +265,22 @@ By default, the text label of liquid fill chart displays percentage of the first
 
 To change the text, you may use `label.normal.formatter`, which can be set to a string or function.
 
-If it is a string, `{value}` in the string will be replaced with the first data.
+If it is a string, `{a}` refers to series name, `{b}` to data name, and `{c}` to data value.
 
 ```js
 var option = {
     series: [{
         type: 'liquidFill',
-        data: [0.6, 0.5, 0.4, 0.3],
+        name: 'Liquid Fill',
+        data: [{
+            name: 'First Data',
+            value: 0.6
+        }, 0.5, 0.4, 0.3],
         label: {
             normal: {
-                formatter: 'I\'m {value}',
+                formatter: '{a}\n{b}\nValue: {c}',
                 textStyle: {
-                    fontSize: 20
+                    fontSize: 28
                 }
             }
         }
@@ -278,22 +288,32 @@ var option = {
 };
 ```
 
-The text of the above code is `I'm 0.6`.
+Label text of this example is `'Liquid Fill\nFirst Data\nValue: 0.6'`.
 
-If it is a function, the `value` parameter contains all the data.
+![Label formatter as string](http://g.recordit.co/3Zcftu8tpL.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xrkwSn1qHx)
+
+This has the same result as using `formatter` as a function:
 
 ```js
 var option = {
     series: [{
         type: 'liquidFill',
-        data: [0.6, 0.5, 0.4, 0.3],
+        name: 'Liquid Fill',
+        data: [{
+            name: 'First Data',
+            value: 0.6
+        }, 0.5, 0.4, 0.3],
         label: {
             normal: {
-                formatter: function(value) {
-                    return 'I\'m ' + value;
+                formatter: function(param) {
+                    return param.seriesName + '\n'
+                        + param.name + '\n'
+                        + 'Value:' + param.value;
                 },
                 textStyle: {
-                    fontSize: 20
+                    fontSize: 28
                 }
             }
         }
@@ -301,7 +321,7 @@ var option = {
 };
 ```
 
-The text of the above code is `I'm 0.6,0.5,0.4,0.3`.
+[Run](http://gallery.echartsjs.com/editor.html?c=xHk5831cHg)
 
 Text position is at the center by default. `label.normal.position` can be set to be `'inside'`, `'left'`, `'right'`, `'top'`, `'bottom'`, or horizontal and vertical positions like `['10%', '20%']`, which means `'10%'` to the left (controlled by `label.normal.textStyle.align`, which can be `'left'`, `'center'`, or `'right'`) and `'20%'` to the top (controlled by `label.normal.textStyle.baseline`, which can be `'top'`, `'middle'`, or `'bottom'`).
 
@@ -315,11 +335,9 @@ var option = {
     series: [{
         type: 'liquidFill',
         data: [0.6, 0.5, 0.4, 0.3],
-        radius: '70%',
         itemStyle: {
             normal: {
-                shadowBlur: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.2)'
+                shadowBlur: 0
             }
         },
         outline: {
@@ -327,20 +345,17 @@ var option = {
             itemStyle: {
                 borderWidth: 5,
                 borderColor: '#156ACF',
-                shadowBlur: 10,
-                shadowColor: 'rgba(0, 0, 0, 0.2)'
-            }
-        },
-        label: {
-            normal: {
                 shadowBlur: 20,
-                shadowColor: 'rgba(0, 0, 0, 0.2)'
+                shadowColor: 'rgba(255, 0, 0, 1)'
             }
         }
     }]
-}
+};
 ```
 
+![Change shadow](http://g.recordit.co/nIy6lZaS8C.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xrJO4CyqSl)
 
 ### Tooltip
 
@@ -351,7 +366,6 @@ var option = {
     series: [{
         type: 'liquidFill',
         data: [0.6],
-        radius: '70%',
         name: 'Liquid Fill'
     }],
     tooltip: {
@@ -359,6 +373,10 @@ var option = {
     }
 };
 ```
+
+~[Tooltip](http://g.recordit.co/S1zQTS6B0G.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xSJqXeg5He)
 
 
 ## API
@@ -378,12 +396,14 @@ Default option for liquid fill charts are:
     period: 'auto',
     direction: 'right',
 
+    waveAnimation: true,
     animationEasing: 'linear',
     animationEasingUpdate: 'linear',
     animationDuration: 2000,
     animationDurationUpdate: 1000,
 
     outline: {
+        show: true,
         borderDistance: 8,
         itemStyle: {
             color: 'none',
@@ -421,9 +441,7 @@ Default option for liquid fill charts are:
                 align: 'center',
                 baseline: 'middle'
             },
-            position: 'inside',
-            shadowBlur: 10,
-            shadowColor: 'rgba(0, 0, 0, 0.25)'
+            position: 'inside'
         }
     }
 }
@@ -510,7 +528,12 @@ var option = {
 
 ### direction {string}
 
-Direction that the waves moving in, which should either be `'right'`, `'left'`, or `'none'` for not moving.
+Direction that the waves moving in, which should either be `'right'`, or `'left'`.
+
+
+### waveAnimation {boolean}
+
+Whether to enable wave from moving left or right.
 
 
 ### animationEasing {string}
@@ -530,6 +553,11 @@ Initial animation duration, in milliseconds.
 ### animationDurationUpdate {number}
 
 Other animation duration, in milliseconds.
+
+
+### outline.show {boolean}
+
+Whether to display outline.
 
 
 ### outline.borderDistance {number}
@@ -636,9 +664,9 @@ Text align, which should be `'left'`, `'center'`, or `'right'`.
 Text vertical align, which should be `'top'`, `'middle'`, or `'bottom'`.
 
 
-### label.normal.position {string|string[]}
+### label.position {string|string[]}
 
-Text position is at the center by default. `label.normal.position` can be set to be `'inside'`, `'left'`, `'right'`, `'top'`, `'bottom'`, or horizontal and vertical positions like `['10%', '20%']`, which means `'10%'` to the left and `'20%'` to the top.
+Text position is at the center by default. `label.position` can be set to be `'inside'`, `'left'`, `'right'`, `'top'`, `'bottom'`, or horizontal and vertical positions like `['10%', '20%']`, which means `'10%'` to the left and `'20%'` to the top.
 
 
 ## Build

@@ -1,5 +1,6 @@
 var echarts = require('echarts');
 var numberUtil = require('echarts/lib/util/number');
+var symbolUtil = require('echarts/lib/util/symbol');
 var parsePercent = numberUtil.parsePercent;
 
 var LiquidLayout = require('./liquidFillLayout');
@@ -138,16 +139,26 @@ echarts.extendChartView({
                     }
                     return path;
                 }
-            }
-            else {
-                return new echarts.graphic.Circle({
-                    shape: {
-                        cx: isForClipping ? 0 : cx,
-                        cy: isForClipping ? 0 : cy,
-                        r: r
+                else {
+                    var x = isForClipping ? -r : cx - r;
+                    var y = isForClipping ? -r : cy - r;
+                    if (symbol === 'pin') {
+                        y += r;
                     }
-                });
+                    else if (symbol === 'arrow') {
+                        y -= r;
+                    }
+                    return symbolUtil.createSymbol(symbol, x, y, r * 2, r * 2);
+                }
             }
+
+            return new echarts.graphic.Circle({
+                shape: {
+                    cx: isForClipping ? 0 : cx,
+                    cy: isForClipping ? 0 : cy,
+                    r: r
+                }
+            });
         }
         /**
          * Create outline
@@ -206,7 +217,6 @@ echarts.extendChartView({
             normalStyle.fill = data.getItemVisual(idx, 'color');
 
             var x = radius * 2;
-            console.log(cx, cy);
             var wave = new LiquidLayout({
                 shape: {
                     waveLength: waveLength,

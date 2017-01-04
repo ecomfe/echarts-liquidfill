@@ -28,6 +28,7 @@ echarts.extendSeriesModel({
         phase: 'auto',
         period: 'auto',
         direction: 'right',
+        shape: 'circle',
 
         waveAnimation: true,
         animationEasing: 'linear',
@@ -74,9 +75,7 @@ echarts.extendSeriesModel({
                     align: 'center',
                     baseline: 'middle'
                 },
-                position: 'inside',
-                shadowBlur: 10,
-                shadowColor: 'rgba(0, 0, 0, 0.25)'
+                position: 'inside'
             }
         }
     }

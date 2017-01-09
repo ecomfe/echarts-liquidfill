@@ -69,7 +69,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	echarts.registerVisual(
 	    echarts.util.curry(
-	        __webpack_require__(9), 'liquidFill'
+	        __webpack_require__(64), 'liquidFill'
 	    )
 	);
 
@@ -777,11 +777,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var echarts = __webpack_require__(2);
-	var numberUtil = __webpack_require__(7);
-	var symbolUtil = __webpack_require__(10);
+	var numberUtil = echarts.number;
+	var symbolUtil = __webpack_require__(7);
 	var parsePercent = numberUtil.parsePercent;
 
-	var LiquidLayout = __webpack_require__(8);
+	var LiquidLayout = __webpack_require__(63);
 
 	function getShallow(model, path) {
 	    return model && model.getShallow(path);
@@ -1158,548 +1158,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 7 */
-/***/ function(module, exports) {
-
-	/**
-	 * 数值处理模块
-	 * @module echarts/util/number
-	 */
-
-
-
-	    var number = {};
-
-	    var RADIAN_EPSILON = 1e-4;
-
-	    function _trim(str) {
-	        return str.replace(/^\s+/, '').replace(/\s+$/, '');
-	    }
-
-	    /**
-	     * Linear mapping a value from domain to range
-	     * @memberOf module:echarts/util/number
-	     * @param  {(number|Array.<number>)} val
-	     * @param  {Array.<number>} domain Domain extent domain[0] can be bigger than domain[1]
-	     * @param  {Array.<number>} range  Range extent range[0] can be bigger than range[1]
-	     * @param  {boolean} clamp
-	     * @return {(number|Array.<number>}
-	     */
-	    number.linearMap = function (val, domain, range, clamp) {
-	        var subDomain = domain[1] - domain[0];
-	        var subRange = range[1] - range[0];
-
-	        if (subDomain === 0) {
-	            return subRange === 0
-	                ? range[0]
-	                : (range[0] + range[1]) / 2;
-	        }
-
-	        // Avoid accuracy problem in edge, such as
-	        // 146.39 - 62.83 === 83.55999999999999.
-	        // See echarts/test/ut/spec/util/number.js#linearMap#accuracyError
-	        // It is a little verbose for efficiency considering this method
-	        // is a hotspot.
-	        if (clamp) {
-	            if (subDomain > 0) {
-	                if (val <= domain[0]) {
-	                    return range[0];
-	                }
-	                else if (val >= domain[1]) {
-	                    return range[1];
-	                }
-	            }
-	            else {
-	                if (val >= domain[0]) {
-	                    return range[0];
-	                }
-	                else if (val <= domain[1]) {
-	                    return range[1];
-	                }
-	            }
-	        }
-	        else {
-	            if (val === domain[0]) {
-	                return range[0];
-	            }
-	            if (val === domain[1]) {
-	                return range[1];
-	            }
-	        }
-
-	        return (val - domain[0]) / subDomain * subRange + range[0];
-	    };
-
-	    /**
-	     * Convert a percent string to absolute number.
-	     * Returns NaN if percent is not a valid string or number
-	     * @memberOf module:echarts/util/number
-	     * @param {string|number} percent
-	     * @param {number} all
-	     * @return {number}
-	     */
-	    number.parsePercent = function(percent, all) {
-	        switch (percent) {
-	            case 'center':
-	            case 'middle':
-	                percent = '50%';
-	                break;
-	            case 'left':
-	            case 'top':
-	                percent = '0%';
-	                break;
-	            case 'right':
-	            case 'bottom':
-	                percent = '100%';
-	                break;
-	        }
-	        if (typeof percent === 'string') {
-	            if (_trim(percent).match(/%$/)) {
-	                return parseFloat(percent) / 100 * all;
-	            }
-
-	            return parseFloat(percent);
-	        }
-
-	        return percent == null ? NaN : +percent;
-	    };
-
-	    /**
-	     * Fix rounding error of float numbers
-	     * @param {number} x
-	     * @return {number}
-	     */
-	    number.round = function (x, precision) {
-	        if (precision == null) {
-	            precision = 10;
-	        }
-	        // Avoid range error
-	        precision = Math.min(Math.max(0, precision), 20);
-	        return +(+x).toFixed(precision);
-	    };
-
-	    number.asc = function (arr) {
-	        arr.sort(function (a, b) {
-	            return a - b;
-	        });
-	        return arr;
-	    };
-
-	    /**
-	     * Get precision
-	     * @param {number} val
-	     */
-	    number.getPrecision = function (val) {
-	        val = +val;
-	        if (isNaN(val)) {
-	            return 0;
-	        }
-	        // It is much faster than methods converting number to string as follows
-	        //      var tmp = val.toString();
-	        //      return tmp.length - 1 - tmp.indexOf('.');
-	        // especially when precision is low
-	        var e = 1;
-	        var count = 0;
-	        while (Math.round(val * e) / e !== val) {
-	            e *= 10;
-	            count++;
-	        }
-	        return count;
-	    };
-
-	    number.getPrecisionSafe = function (val) {
-	        var str = val.toString();
-	        var dotIndex = str.indexOf('.');
-	        if (dotIndex < 0) {
-	            return 0;
-	        }
-	        return str.length - 1 - dotIndex;
-	    };
-
-	    /**
-	     * Minimal dicernible data precisioin according to a single pixel.
-	     * @param {Array.<number>} dataExtent
-	     * @param {Array.<number>} pixelExtent
-	     * @return {number} precision
-	     */
-	    number.getPixelPrecision = function (dataExtent, pixelExtent) {
-	        var log = Math.log;
-	        var LN10 = Math.LN10;
-	        var dataQuantity = Math.floor(log(dataExtent[1] - dataExtent[0]) / LN10);
-	        var sizeQuantity = Math.round(log(Math.abs(pixelExtent[1] - pixelExtent[0])) / LN10);
-	        // toFixed() digits argument must be between 0 and 20.
-	        var precision = Math.min(Math.max(-dataQuantity + sizeQuantity, 0), 20);
-	        return !isFinite(precision) ? 20 : precision;
-	    };
-
-	    // Number.MAX_SAFE_INTEGER, ie do not support.
-	    number.MAX_SAFE_INTEGER = 9007199254740991;
-
-	    /**
-	     * To 0 - 2 * PI, considering negative radian.
-	     * @param {number} radian
-	     * @return {number}
-	     */
-	    number.remRadian = function (radian) {
-	        var pi2 = Math.PI * 2;
-	        return (radian % pi2 + pi2) % pi2;
-	    };
-
-	    /**
-	     * @param {type} radian
-	     * @return {boolean}
-	     */
-	    number.isRadianAroundZero = function (val) {
-	        return val > -RADIAN_EPSILON && val < RADIAN_EPSILON;
-	    };
-
-	    /**
-	     * @param {string|Date|number} value
-	     * @return {Date} date
-	     */
-	    number.parseDate = function (value) {
-	        if (value instanceof Date) {
-	            return value;
-	        }
-	        else if (typeof value === 'string') {
-	            // Treat as ISO format. See issue #3623
-	            var ret = new Date(value);
-	            if (isNaN(+ret)) {
-	                // FIXME new Date('1970-01-01') is UTC, new Date('1970/01/01') is local
-	                ret = new Date(new Date(value.replace(/-/g, '/')) - new Date('1970/01/01'));
-	            }
-	            return ret;
-	        }
-
-	        return new Date(Math.round(value));
-	    };
-
-	    /**
-	     * Quantity of a number. e.g. 0.1, 1, 10, 100
-	     * @param  {number} val
-	     * @return {number}
-	     */
-	    number.quantity = function (val) {
-	        return Math.pow(10, Math.floor(Math.log(val) / Math.LN10));
-	    };
-
-	    // "Nice Numbers for Graph Labels" of Graphic Gems
-	    /**
-	     * find a “nice” number approximately equal to x. Round the number if round = true, take ceiling if round = false
-	     * The primary observation is that the “nicest” numbers in decimal are 1, 2, and 5, and all power-of-ten multiples of these numbers.
-	     * @param  {number} val
-	     * @param  {boolean} round
-	     * @return {number}
-	     */
-	    number.nice = function (val, round) {
-	        var exp10 = number.quantity(val);
-	        var f = val / exp10; // between 1 and 10
-	        var nf;
-	        if (round) {
-	            if (f < 1.5) { nf = 1; }
-	            else if (f < 2.5) { nf = 2; }
-	            else if (f < 4) { nf = 3; }
-	            else if (f < 7) { nf = 5; }
-	            else { nf = 10; }
-	        }
-	        else {
-	            if (f < 1) { nf = 1; }
-	            else if (f < 2) { nf = 2; }
-	            else if (f < 3) { nf = 3; }
-	            else if (f < 5) { nf = 5; }
-	            else { nf = 10; }
-	        }
-	        return nf * exp10;
-	    };
-
-	    /**
-	     * Order intervals asc, and split them when overlap.
-	     * expect(numberUtil.reformIntervals([
-	     *     {interval: [18, 62], close: [1, 1]},
-	     *     {interval: [-Infinity, -70], close: [0, 0]},
-	     *     {interval: [-70, -26], close: [1, 1]},
-	     *     {interval: [-26, 18], close: [1, 1]},
-	     *     {interval: [62, 150], close: [1, 1]},
-	     *     {interval: [106, 150], close: [1, 1]},
-	     *     {interval: [150, Infinity], close: [0, 0]}
-	     * ])).toEqual([
-	     *     {interval: [-Infinity, -70], close: [0, 0]},
-	     *     {interval: [-70, -26], close: [1, 1]},
-	     *     {interval: [-26, 18], close: [0, 1]},
-	     *     {interval: [18, 62], close: [0, 1]},
-	     *     {interval: [62, 150], close: [0, 1]},
-	     *     {interval: [150, Infinity], close: [0, 0]}
-	     * ]);
-	     * @param {Array.<Object>} list, where `close` mean open or close
-	     *        of the interval, and Infinity can be used.
-	     * @return {Array.<Object>} The origin list, which has been reformed.
-	     */
-	    number.reformIntervals = function (list) {
-	        list.sort(function (a, b) {
-	            return littleThan(a, b, 0) ? -1 : 1;
-	        });
-
-	        var curr = -Infinity;
-	        var currClose = 1;
-	        for (var i = 0; i < list.length;) {
-	            var interval = list[i].interval;
-	            var close = list[i].close;
-
-	            for (var lg = 0; lg < 2; lg++) {
-	                if (interval[lg] <= curr) {
-	                    interval[lg] = curr;
-	                    close[lg] = !lg ? 1 - currClose : 1;
-	                }
-	                curr = interval[lg];
-	                currClose = close[lg];
-	            }
-
-	            if (interval[0] === interval[1] && close[0] * close[1] !== 1) {
-	                list.splice(i, 1);
-	            }
-	            else {
-	                i++;
-	            }
-	        }
-
-	        return list;
-
-	        function littleThan(a, b, lg) {
-	            return a.interval[lg] < b.interval[lg]
-	                || (
-	                    a.interval[lg] === b.interval[lg]
-	                    && (
-	                        (a.close[lg] - b.close[lg] === (!lg ? 1 : -1))
-	                        || (!lg && littleThan(a, b, 1))
-	                    )
-	                );
-	        }
-	    };
-
-	    module.exports = number;
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var echarts = __webpack_require__(2);
-
-	module.exports = echarts.graphic.extendShape({
-	    type: 'ec-liquid-fill',
-
-	    shape: {
-	        waveLength: 0,
-	        radius: 0,
-	        cx: 0,
-	        cy: 0,
-	        waterLevel: 0,
-	        amplitude: 0,
-	        phase: 0,
-	        inverse: false
-	    },
-
-	    style: {
-	        fill: '#0f0'
-	    },
-
-	    buildPath: function (ctx, shape) {
-	        var curves = Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2;
-	        var controls = [[0, 0]];
-	        var positions = [];
-
-	        // map phase to [-Math.PI * 2, 0]
-	        while (shape.phase < -Math.PI * 2) {
-	            shape.phase += Math.PI * 2;
-	        }
-	        while (shape.phase > 0) {
-	            shape.phase -= Math.PI * 2;
-	        }
-	        var phase = shape.phase / Math.PI / 2 * shape.waveLength;
-
-	        var left = shape.cx - shape.radius + phase - shape.radius * 2;
-
-	        /**
-	         * top-left corner as start point
-	         *
-	         * draws this point
-	         *  |
-	         * \|/
-	         *  ~~~~~~~~
-	         *  |      |
-	         *  +------+
-	         */
-	        ctx.moveTo(left, shape.waterLevel);
-
-	        /**
-	         * top wave
-	         *
-	         * ~~~~~~~~ <- draws this sine wave
-	         * |      |
-	         * +------+
-	         */
-	        var waveLeft = 0;
-	        var waveRight = 0;
-	        for (var c = 0; c < curves; ++c) {
-	            var stage = c % 4;
-	            var pos = getWaterPositions(c * shape.waveLength / 4, stage,
-	                shape.waveLength, shape.amplitude);
-	            ctx.bezierCurveTo(pos[0][0] + left, -pos[0][1] + shape.waterLevel,
-	                pos[1][0] + left, -pos[1][1] + shape.waterLevel,
-	                pos[2][0] + left, -pos[2][1] + shape.waterLevel);
-
-	            if (c === curves - 1) {
-	                waveRight = pos[2][0];
-	            }
-	        }
-
-	        if (shape.inverse) {
-	            /**
-	             * top-right corner
-	             *                  2. draws this line
-	             *                          |
-	             *                       +------+
-	             * 3. draws this line -> |      | <- 1. draws this line
-	             *                       ~~~~~~~~
-	             */
-	            ctx.lineTo(waveRight + left, shape.cy - shape.radius);
-	            ctx.lineTo(left, shape.cy - shape.radius);
-	            ctx.lineTo(left, shape.waterLevel);
-	        }
-	        else {
-	            /**
-	             * top-right corner
-	             *
-	             *                       ~~~~~~~~
-	             * 3. draws this line -> |      | <- 1. draws this line
-	             *                       +------+
-	             *                          ^
-	             *                          |
-	             *                  2. draws this line
-	             */
-	            ctx.lineTo(waveRight + left, shape.cy + shape.radius);
-	            ctx.lineTo(left, shape.cy + shape.radius);
-	            ctx.lineTo(left, shape.waterLevel);
-	        }
-
-	        ctx.closePath();
-	    }
-	});
-
-
-
-	/**
-	 * Using Bezier curves to fit sine wave.
-	 * There is 4 control points for each curve of wave,
-	 * which is at 1/4 wave length of the sine wave.
-	 *
-	 * The control points for a wave from (a) to (d) are a-b-c-d:
-	 *          c *----* d
-	 *     b *
-	 *       |
-	 * ... a * ..................
-	 *
-	 * whose positions are a: (0, 0), b: (0.5, 0.5), c: (1, 1), d: (PI / 2, 1)
-	 *
-	 * @param {number} x          x position of the left-most point (a)
-	 * @param {number} stage      0-3, stating which part of the wave it is
-	 * @param {number} waveLength wave length of the sine wave
-	 * @param {number} amplitude  wave amplitude
-	 */
-	function getWaterPositions(x, stage, waveLength, amplitude) {
-	    if (stage === 0) {
-	        return [
-	            [x + 1 / 2 * waveLength / Math.PI / 2, amplitude / 2],
-	            [x + 1 / 2 * waveLength / Math.PI,     amplitude],
-	            [x + waveLength / 4,                   amplitude]
-	        ];
-	    }
-	    else if (stage === 1) {
-	        return [
-	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 2),
-	            amplitude],
-	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 1),
-	            amplitude / 2],
-	            [x + waveLength / 4,                   0]
-	        ]
-	    }
-	    else if (stage === 2) {
-	        return [
-	            [x + 1 / 2 * waveLength / Math.PI / 2, -amplitude / 2],
-	            [x + 1 / 2 * waveLength / Math.PI,     -amplitude],
-	            [x + waveLength / 4,                   -amplitude]
-	        ]
-	    }
-	    else {
-	        return [
-	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 2),
-	            -amplitude],
-	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 1),
-	            -amplitude / 2],
-	            [x + waveLength / 4,                   0]
-	        ]
-	    }
-	}
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports) {
-
-	// Pick color from palette for each data item
-
-
-	    module.exports = function (seriesType, ecModel) {
-	        // Pie and funnel may use diferrent scope
-	        var paletteScope = {};
-	        ecModel.eachRawSeriesByType(seriesType, function (seriesModel) {
-	            var dataAll = seriesModel.getRawData();
-	            var idxMap = {};
-	            if (!ecModel.isSeriesFiltered(seriesModel)) {
-	                var data = seriesModel.getData();
-	                data.each(function (idx) {
-	                    var rawIdx = data.getRawIndex(idx);
-	                    idxMap[rawIdx] = idx;
-	                });
-	                dataAll.each(function (rawIdx) {
-	                    // FIXME Performance
-	                    var itemModel = dataAll.getItemModel(rawIdx);
-	                    var filteredIdx = idxMap[rawIdx];
-
-	                    // If series.itemStyle.normal.color is a function. itemVisual may be encoded
-	                    var singleDataColor = filteredIdx != null
-	                        && data.getItemVisual(filteredIdx, 'color', true);
-
-	                    if (!singleDataColor) {
-	                        var color = itemModel.get('itemStyle.normal.color')
-	                            || seriesModel.getColorFromPalette(dataAll.getName(rawIdx), paletteScope);
-	                        // Legend may use the visual info in data before processed
-	                        dataAll.setItemVisual(rawIdx, 'color', color);
-
-	                        // Data is not filtered
-	                        if (filteredIdx != null) {
-	                            data.setItemVisual(filteredIdx, 'color', color);
-	                        }
-	                    }
-	                    else {
-	                        // Set data all color for legend
-	                        dataAll.setItemVisual(rawIdx, 'color', singleDataColor);
-	                    }
-	                });
-	            }
-	        });
-	    };
-
-
-/***/ },
-/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	// Symbol factory
 
 
-	    var graphic = __webpack_require__(11);
-	    var BoundingRect = __webpack_require__(31);
+	    var graphic = __webpack_require__(8);
+	    var BoundingRect = __webpack_require__(28);
 
 	    /**
 	     * Triangle shape
@@ -2051,7 +1517,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2059,46 +1525,46 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var zrUtil = __webpack_require__(5);
 
-	    var pathTool = __webpack_require__(12);
+	    var pathTool = __webpack_require__(9);
 	    var round = Math.round;
-	    var Path = __webpack_require__(13);
-	    var colorTool = __webpack_require__(26);
-	    var matrix = __webpack_require__(20);
-	    var vector = __webpack_require__(21);
+	    var Path = __webpack_require__(10);
+	    var colorTool = __webpack_require__(23);
+	    var matrix = __webpack_require__(17);
+	    var vector = __webpack_require__(18);
 
 	    var graphic = {};
 
-	    graphic.Group = __webpack_require__(44);
+	    graphic.Group = __webpack_require__(41);
 
-	    graphic.Image = __webpack_require__(45);
+	    graphic.Image = __webpack_require__(42);
 
-	    graphic.Text = __webpack_require__(47);
+	    graphic.Text = __webpack_require__(44);
 
-	    graphic.Circle = __webpack_require__(48);
+	    graphic.Circle = __webpack_require__(45);
 
-	    graphic.Sector = __webpack_require__(49);
+	    graphic.Sector = __webpack_require__(46);
 
-	    graphic.Ring = __webpack_require__(51);
+	    graphic.Ring = __webpack_require__(48);
 
-	    graphic.Polygon = __webpack_require__(52);
+	    graphic.Polygon = __webpack_require__(49);
 
-	    graphic.Polyline = __webpack_require__(56);
+	    graphic.Polyline = __webpack_require__(53);
 
-	    graphic.Rect = __webpack_require__(57);
+	    graphic.Rect = __webpack_require__(54);
 
-	    graphic.Line = __webpack_require__(59);
+	    graphic.Line = __webpack_require__(56);
 
-	    graphic.BezierCurve = __webpack_require__(60);
+	    graphic.BezierCurve = __webpack_require__(57);
 
-	    graphic.Arc = __webpack_require__(61);
+	    graphic.Arc = __webpack_require__(58);
 
-	    graphic.CompoundPath = __webpack_require__(62);
+	    graphic.CompoundPath = __webpack_require__(59);
 
-	    graphic.LinearGradient = __webpack_require__(63);
+	    graphic.LinearGradient = __webpack_require__(60);
 
-	    graphic.RadialGradient = __webpack_require__(65);
+	    graphic.RadialGradient = __webpack_require__(62);
 
-	    graphic.BoundingRect = __webpack_require__(31);
+	    graphic.BoundingRect = __webpack_require__(28);
 
 	    /**
 	     * Extend shape with parameters
@@ -2635,15 +2101,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 
-	    var Path = __webpack_require__(13);
-	    var PathProxy = __webpack_require__(32);
-	    var transformPath = __webpack_require__(43);
-	    var matrix = __webpack_require__(20);
+	    var Path = __webpack_require__(10);
+	    var PathProxy = __webpack_require__(29);
+	    var transformPath = __webpack_require__(40);
+	    var matrix = __webpack_require__(17);
 
 	    // command chars
 	    var cc = [
@@ -3043,7 +2509,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3053,12 +2519,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-	    var Displayable = __webpack_require__(14);
+	    var Displayable = __webpack_require__(11);
 	    var zrUtil = __webpack_require__(5);
-	    var PathProxy = __webpack_require__(32);
-	    var pathContain = __webpack_require__(35);
+	    var PathProxy = __webpack_require__(29);
+	    var pathContain = __webpack_require__(32);
 
-	    var Pattern = __webpack_require__(42);
+	    var Pattern = __webpack_require__(39);
 	    var getCanvasPattern = Pattern.prototype.getCanvasPattern;
 
 	    var abs = Math.abs;
@@ -3408,7 +2874,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3421,10 +2887,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var zrUtil = __webpack_require__(5);
 
-	    var Style = __webpack_require__(15);
+	    var Style = __webpack_require__(12);
 
-	    var Element = __webpack_require__(16);
-	    var RectText = __webpack_require__(29);
+	    var Element = __webpack_require__(13);
+	    var RectText = __webpack_require__(26);
 	    // var Stateful = require('./mixin/Stateful');
 
 	    /**
@@ -3682,7 +3148,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 12 */
 /***/ function(module, exports) {
 
 	/**
@@ -3998,7 +3464,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4007,10 +3473,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var guid = __webpack_require__(17);
-	    var Eventful = __webpack_require__(18);
-	    var Transformable = __webpack_require__(19);
-	    var Animatable = __webpack_require__(22);
+	    var guid = __webpack_require__(14);
+	    var Eventful = __webpack_require__(15);
+	    var Transformable = __webpack_require__(16);
+	    var Animatable = __webpack_require__(19);
 	    var zrUtil = __webpack_require__(5);
 
 	    /**
@@ -4266,7 +3732,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 14 */
 /***/ function(module, exports) {
 
 	/**
@@ -4285,7 +3751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 15 */
 /***/ function(module, exports) {
 
 	/**
@@ -4593,7 +4059,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4604,8 +4070,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var matrix = __webpack_require__(20);
-	    var vector = __webpack_require__(21);
+	    var matrix = __webpack_require__(17);
+	    var vector = __webpack_require__(18);
 	    var mIdentity = matrix.identity;
 
 	    var EPSILON = 5e-5;
@@ -4849,7 +4315,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 17 */
 /***/ function(module, exports) {
 
 	
@@ -5013,7 +4479,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 18 */
 /***/ function(module, exports) {
 
 	
@@ -5299,7 +4765,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -5308,12 +4774,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var Animator = __webpack_require__(23);
+	    var Animator = __webpack_require__(20);
 	    var util = __webpack_require__(5);
 	    var isString = util.isString;
 	    var isFunction = util.isFunction;
 	    var isObject = util.isObject;
-	    var log = __webpack_require__(27);
+	    var log = __webpack_require__(24);
 
 	    /**
 	     * @alias modue:zrender/mixin/Animatable
@@ -5573,7 +5039,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -5581,8 +5047,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var Clip = __webpack_require__(24);
-	    var color = __webpack_require__(26);
+	    var Clip = __webpack_require__(21);
+	    var color = __webpack_require__(23);
 	    var util = __webpack_require__(5);
 	    var isArrayLike = util.isArrayLike;
 
@@ -6209,7 +5675,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6228,7 +5694,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var easingFuncs = __webpack_require__(25);
+	    var easingFuncs = __webpack_require__(22);
 
 	    function Clip(options) {
 
@@ -6321,7 +5787,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 22 */
 /***/ function(module, exports) {
 
 	/**
@@ -6672,7 +6138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 23 */
 /***/ function(module, exports) {
 
 	/**
@@ -7155,11 +6621,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	        var config = __webpack_require__(28);
+	        var config = __webpack_require__(25);
 
 	        /**
 	         * @exports zrender/tool/log
@@ -7193,7 +6659,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 25 */
 /***/ function(module, exports) {
 
 	
@@ -7225,7 +6691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7235,8 +6701,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-	    var textContain = __webpack_require__(30);
-	    var BoundingRect = __webpack_require__(31);
+	    var textContain = __webpack_require__(27);
+	    var BoundingRect = __webpack_require__(28);
 
 	    var tmpRect = new BoundingRect();
 
@@ -7374,7 +6840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -7384,7 +6850,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var TEXT_CACHE_MAX = 5000;
 
 	    var util = __webpack_require__(5);
-	    var BoundingRect = __webpack_require__(31);
+	    var BoundingRect = __webpack_require__(28);
 	    var retrieve = util.retrieve;
 
 	    function getTextWidth(text, textFont) {
@@ -7655,7 +7121,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7664,8 +7130,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var vec2 = __webpack_require__(21);
-	    var matrix = __webpack_require__(20);
+	    var vec2 = __webpack_require__(18);
+	    var matrix = __webpack_require__(17);
 
 	    var v2ApplyTransform = vec2.applyTransform;
 	    var mathMin = Math.min;
@@ -7859,7 +7325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7874,11 +7340,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 // TODO getTotalLength, getPointAtLength
 
 
-	    var curve = __webpack_require__(33);
-	    var vec2 = __webpack_require__(21);
-	    var bbox = __webpack_require__(34);
-	    var BoundingRect = __webpack_require__(31);
-	    var dpr = __webpack_require__(28).devicePixelRatio;
+	    var curve = __webpack_require__(30);
+	    var vec2 = __webpack_require__(18);
+	    var bbox = __webpack_require__(31);
+	    var BoundingRect = __webpack_require__(28);
+	    var dpr = __webpack_require__(25).devicePixelRatio;
 
 	    var CMD = {
 	        M: 1,
@@ -8634,7 +8100,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 33 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8645,7 +8111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var vec2 = __webpack_require__(21);
+	    var vec2 = __webpack_require__(18);
 	    var v2Create = vec2.create;
 	    var v2DistSquare = vec2.distSquare;
 	    var mathPow = Math.pow;
@@ -9180,7 +8646,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -9188,8 +8654,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var vec2 = __webpack_require__(21);
-	    var curve = __webpack_require__(33);
+	    var vec2 = __webpack_require__(18);
+	    var curve = __webpack_require__(30);
 
 	    var bbox = {};
 	    var mathMin = Math.min;
@@ -9416,21 +8882,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 
-	    var CMD = __webpack_require__(32).CMD;
-	    var line = __webpack_require__(36);
-	    var cubic = __webpack_require__(37);
-	    var quadratic = __webpack_require__(38);
-	    var arc = __webpack_require__(39);
-	    var normalizeRadian = __webpack_require__(40).normalizeRadian;
-	    var curve = __webpack_require__(33);
+	    var CMD = __webpack_require__(29).CMD;
+	    var line = __webpack_require__(33);
+	    var cubic = __webpack_require__(34);
+	    var quadratic = __webpack_require__(35);
+	    var arc = __webpack_require__(36);
+	    var normalizeRadian = __webpack_require__(37).normalizeRadian;
+	    var curve = __webpack_require__(30);
 
-	    var windingLine = __webpack_require__(41);
+	    var windingLine = __webpack_require__(38);
 
 	    var containStroke = line.containStroke;
 
@@ -9822,7 +9288,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 33 */
 /***/ function(module, exports) {
 
 	
@@ -9870,12 +9336,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 37 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 
-	    var curve = __webpack_require__(33);
+	    var curve = __webpack_require__(30);
 
 	    module.exports = {
 	        /**
@@ -9917,12 +9383,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 
-	    var curve = __webpack_require__(33);
+	    var curve = __webpack_require__(30);
 
 	    module.exports = {
 	        /**
@@ -9962,12 +9428,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 39 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 
-	    var normalizeRadian = __webpack_require__(40).normalizeRadian;
+	    var normalizeRadian = __webpack_require__(37).normalizeRadian;
 	    var PI2 = Math.PI * 2;
 
 	    module.exports = {
@@ -10028,7 +9494,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 40 */
+/* 37 */
 /***/ function(module, exports) {
 
 	
@@ -10046,7 +9512,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 41 */
+/* 38 */
 /***/ function(module, exports) {
 
 	
@@ -10073,7 +9539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 42 */
+/* 39 */
 /***/ function(module, exports) {
 
 	
@@ -10096,13 +9562,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 43 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 
-	    var CMD = __webpack_require__(32).CMD;
-	    var vec2 = __webpack_require__(21);
+	    var CMD = __webpack_require__(29).CMD;
+	    var vec2 = __webpack_require__(18);
 	    var v2ApplyTransform = vec2.applyTransform;
 
 	    var points = [[], [], []];
@@ -10197,7 +9663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 44 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -10221,8 +9687,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	    var zrUtil = __webpack_require__(5);
-	    var Element = __webpack_require__(16);
-	    var BoundingRect = __webpack_require__(31);
+	    var Element = __webpack_require__(13);
+	    var BoundingRect = __webpack_require__(28);
 
 	    /**
 	     * @alias module:zrender/graphic/Group
@@ -10519,7 +9985,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 45 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -10529,11 +9995,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-	    var Displayable = __webpack_require__(14);
-	    var BoundingRect = __webpack_require__(31);
+	    var Displayable = __webpack_require__(11);
+	    var BoundingRect = __webpack_require__(28);
 	    var zrUtil = __webpack_require__(5);
 
-	    var LRU = __webpack_require__(46);
+	    var LRU = __webpack_require__(43);
 	    var globalImageCache = new LRU(50);
 	    /**
 	     * @alias zrender/graphic/Image
@@ -10680,7 +10146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 46 */
+/* 43 */
 /***/ function(module, exports) {
 
 	// Simple LRU cache use doubly linked list
@@ -10855,7 +10321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 47 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -10869,9 +10335,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-	    var Displayable = __webpack_require__(14);
+	    var Displayable = __webpack_require__(11);
 	    var zrUtil = __webpack_require__(5);
-	    var textContain = __webpack_require__(30);
+	    var textContain = __webpack_require__(27);
 
 	    /**
 	     * @alias zrender/graphic/Text
@@ -10986,7 +10452,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 48 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10997,7 +10463,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-	    module.exports = __webpack_require__(13).extend({
+	    module.exports = __webpack_require__(10).extend({
 
 	        type: 'circle',
 
@@ -11023,7 +10489,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 49 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11033,8 +10499,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-	    var env = __webpack_require__(50);
-	    var Path = __webpack_require__(13);
+	    var env = __webpack_require__(47);
+	    var Path = __webpack_require__(10);
 
 	    var shadowTemp = [
 	        ['shadowBlur', 0],
@@ -11142,7 +10608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 50 */
+/* 47 */
 /***/ function(module, exports) {
 
 	/**
@@ -11276,7 +10742,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 51 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11285,7 +10751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    module.exports = __webpack_require__(13).extend({
+	    module.exports = __webpack_require__(10).extend({
 
 	        type: 'ring',
 
@@ -11310,7 +10776,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 52 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11319,9 +10785,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var polyHelper = __webpack_require__(53);
+	    var polyHelper = __webpack_require__(50);
 
-	    module.exports = __webpack_require__(13).extend({
+	    module.exports = __webpack_require__(10).extend({
 	        
 	        type: 'polygon',
 
@@ -11340,13 +10806,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 53 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
 
-	    var smoothSpline = __webpack_require__(54);
-	    var smoothBezier = __webpack_require__(55);
+	    var smoothSpline = __webpack_require__(51);
+	    var smoothBezier = __webpack_require__(52);
 
 	    module.exports = {
 	        buildPath: function (ctx, shape, closePath) {
@@ -11387,7 +10853,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 54 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11398,7 +10864,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *         errorrik (errorrik@gmail.com)
 	 */
 
-	    var vec2 = __webpack_require__(21);
+	    var vec2 = __webpack_require__(18);
 
 	    /**
 	     * @inner
@@ -11463,7 +10929,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 55 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11475,7 +10941,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var vec2 = __webpack_require__(21);
+	    var vec2 = __webpack_require__(18);
 	    var v2Min = vec2.min;
 	    var v2Max = vec2.max;
 	    var v2Scale = vec2.scale;
@@ -11570,7 +11036,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 56 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11578,9 +11044,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var polyHelper = __webpack_require__(53);
+	    var polyHelper = __webpack_require__(50);
 
-	    module.exports = __webpack_require__(13).extend({
+	    module.exports = __webpack_require__(10).extend({
 	        
 	        type: 'polyline',
 
@@ -11605,7 +11071,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 57 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11614,9 +11080,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var roundRectHelper = __webpack_require__(58);
+	    var roundRectHelper = __webpack_require__(55);
 
-	    module.exports = __webpack_require__(13).extend({
+	    module.exports = __webpack_require__(10).extend({
 
 	        type: 'rect',
 
@@ -11653,7 +11119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 58 */
+/* 55 */
 /***/ function(module, exports) {
 
 	
@@ -11748,7 +11214,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 59 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11756,7 +11222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @module zrender/graphic/shape/Line
 	 */
 
-	    module.exports = __webpack_require__(13).extend({
+	    module.exports = __webpack_require__(10).extend({
 
 	        type: 'line',
 
@@ -11813,7 +11279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 60 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11823,8 +11289,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	    var curveTool = __webpack_require__(33);
-	    var vec2 = __webpack_require__(21);
+	    var curveTool = __webpack_require__(30);
+	    var vec2 = __webpack_require__(18);
 	    var quadraticSubdivide = curveTool.quadraticSubdivide;
 	    var cubicSubdivide = curveTool.cubicSubdivide;
 	    var quadraticAt = curveTool.quadraticAt;
@@ -11850,7 +11316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            ];
 	        }
 	    }
-	    module.exports = __webpack_require__(13).extend({
+	    module.exports = __webpack_require__(10).extend({
 
 	        type: 'bezier-curve',
 
@@ -11954,7 +11420,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 61 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11963,7 +11429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	 
 
-	    module.exports = __webpack_require__(13).extend({
+	    module.exports = __webpack_require__(10).extend({
 
 	        type: 'arc',
 
@@ -12008,13 +11474,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 62 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CompoundPath to improve performance
 
 
-	    var Path = __webpack_require__(13);
+	    var Path = __webpack_require__(10);
 	    module.exports = Path.extend({
 
 	        type: 'compound',
@@ -12067,7 +11533,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 63 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12075,7 +11541,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var zrUtil = __webpack_require__(5);
 
-	    var Gradient = __webpack_require__(64);
+	    var Gradient = __webpack_require__(61);
 
 	    /**
 	     * x, y, x2, y2 are all percent from 0 to 1
@@ -12115,7 +11581,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 64 */
+/* 61 */
 /***/ function(module, exports) {
 
 	
@@ -12146,7 +11612,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 65 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12154,7 +11620,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var zrUtil = __webpack_require__(5);
 
-	    var Gradient = __webpack_require__(64);
+	    var Gradient = __webpack_require__(61);
 
 	    /**
 	     * x, y, r are all percent from 0 to 1
@@ -12188,6 +11654,218 @@ return /******/ (function(modules) { // webpackBootstrap
 	    zrUtil.inherits(RadialGradient, Gradient);
 
 	    module.exports = RadialGradient;
+
+
+/***/ },
+/* 63 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var echarts = __webpack_require__(2);
+
+	module.exports = echarts.graphic.extendShape({
+	    type: 'ec-liquid-fill',
+
+	    shape: {
+	        waveLength: 0,
+	        radius: 0,
+	        cx: 0,
+	        cy: 0,
+	        waterLevel: 0,
+	        amplitude: 0,
+	        phase: 0,
+	        inverse: false
+	    },
+
+	    style: {
+	        fill: '#0f0'
+	    },
+
+	    buildPath: function (ctx, shape) {
+	        var curves = Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2;
+	        var controls = [[0, 0]];
+	        var positions = [];
+
+	        // map phase to [-Math.PI * 2, 0]
+	        while (shape.phase < -Math.PI * 2) {
+	            shape.phase += Math.PI * 2;
+	        }
+	        while (shape.phase > 0) {
+	            shape.phase -= Math.PI * 2;
+	        }
+	        var phase = shape.phase / Math.PI / 2 * shape.waveLength;
+
+	        var left = shape.cx - shape.radius + phase - shape.radius * 2;
+
+	        /**
+	         * top-left corner as start point
+	         *
+	         * draws this point
+	         *  |
+	         * \|/
+	         *  ~~~~~~~~
+	         *  |      |
+	         *  +------+
+	         */
+	        ctx.moveTo(left, shape.waterLevel);
+
+	        /**
+	         * top wave
+	         *
+	         * ~~~~~~~~ <- draws this sine wave
+	         * |      |
+	         * +------+
+	         */
+	        var waveLeft = 0;
+	        var waveRight = 0;
+	        for (var c = 0; c < curves; ++c) {
+	            var stage = c % 4;
+	            var pos = getWaterPositions(c * shape.waveLength / 4, stage,
+	                shape.waveLength, shape.amplitude);
+	            ctx.bezierCurveTo(pos[0][0] + left, -pos[0][1] + shape.waterLevel,
+	                pos[1][0] + left, -pos[1][1] + shape.waterLevel,
+	                pos[2][0] + left, -pos[2][1] + shape.waterLevel);
+
+	            if (c === curves - 1) {
+	                waveRight = pos[2][0];
+	            }
+	        }
+
+	        if (shape.inverse) {
+	            /**
+	             * top-right corner
+	             *                  2. draws this line
+	             *                          |
+	             *                       +------+
+	             * 3. draws this line -> |      | <- 1. draws this line
+	             *                       ~~~~~~~~
+	             */
+	            ctx.lineTo(waveRight + left, shape.cy - shape.radius);
+	            ctx.lineTo(left, shape.cy - shape.radius);
+	            ctx.lineTo(left, shape.waterLevel);
+	        }
+	        else {
+	            /**
+	             * top-right corner
+	             *
+	             *                       ~~~~~~~~
+	             * 3. draws this line -> |      | <- 1. draws this line
+	             *                       +------+
+	             *                          ^
+	             *                          |
+	             *                  2. draws this line
+	             */
+	            ctx.lineTo(waveRight + left, shape.cy + shape.radius);
+	            ctx.lineTo(left, shape.cy + shape.radius);
+	            ctx.lineTo(left, shape.waterLevel);
+	        }
+
+	        ctx.closePath();
+	    }
+	});
+
+
+
+	/**
+	 * Using Bezier curves to fit sine wave.
+	 * There is 4 control points for each curve of wave,
+	 * which is at 1/4 wave length of the sine wave.
+	 *
+	 * The control points for a wave from (a) to (d) are a-b-c-d:
+	 *          c *----* d
+	 *     b *
+	 *       |
+	 * ... a * ..................
+	 *
+	 * whose positions are a: (0, 0), b: (0.5, 0.5), c: (1, 1), d: (PI / 2, 1)
+	 *
+	 * @param {number} x          x position of the left-most point (a)
+	 * @param {number} stage      0-3, stating which part of the wave it is
+	 * @param {number} waveLength wave length of the sine wave
+	 * @param {number} amplitude  wave amplitude
+	 */
+	function getWaterPositions(x, stage, waveLength, amplitude) {
+	    if (stage === 0) {
+	        return [
+	            [x + 1 / 2 * waveLength / Math.PI / 2, amplitude / 2],
+	            [x + 1 / 2 * waveLength / Math.PI,     amplitude],
+	            [x + waveLength / 4,                   amplitude]
+	        ];
+	    }
+	    else if (stage === 1) {
+	        return [
+	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 2),
+	            amplitude],
+	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 1),
+	            amplitude / 2],
+	            [x + waveLength / 4,                   0]
+	        ]
+	    }
+	    else if (stage === 2) {
+	        return [
+	            [x + 1 / 2 * waveLength / Math.PI / 2, -amplitude / 2],
+	            [x + 1 / 2 * waveLength / Math.PI,     -amplitude],
+	            [x + waveLength / 4,                   -amplitude]
+	        ]
+	    }
+	    else {
+	        return [
+	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 2),
+	            -amplitude],
+	            [x + 1 / 2 * waveLength / Math.PI / 2 * (Math.PI - 1),
+	            -amplitude / 2],
+	            [x + waveLength / 4,                   0]
+	        ]
+	    }
+	}
+
+
+/***/ },
+/* 64 */
+/***/ function(module, exports) {
+
+	// Pick color from palette for each data item
+
+
+	    module.exports = function (seriesType, ecModel) {
+	        // Pie and funnel may use diferrent scope
+	        var paletteScope = {};
+	        ecModel.eachRawSeriesByType(seriesType, function (seriesModel) {
+	            var dataAll = seriesModel.getRawData();
+	            var idxMap = {};
+	            if (!ecModel.isSeriesFiltered(seriesModel)) {
+	                var data = seriesModel.getData();
+	                data.each(function (idx) {
+	                    var rawIdx = data.getRawIndex(idx);
+	                    idxMap[rawIdx] = idx;
+	                });
+	                dataAll.each(function (rawIdx) {
+	                    // FIXME Performance
+	                    var itemModel = dataAll.getItemModel(rawIdx);
+	                    var filteredIdx = idxMap[rawIdx];
+
+	                    // If series.itemStyle.normal.color is a function. itemVisual may be encoded
+	                    var singleDataColor = filteredIdx != null
+	                        && data.getItemVisual(filteredIdx, 'color', true);
+
+	                    if (!singleDataColor) {
+	                        var color = itemModel.get('itemStyle.normal.color')
+	                            || seriesModel.getColorFromPalette(dataAll.getName(rawIdx), paletteScope);
+	                        // Legend may use the visual info in data before processed
+	                        dataAll.setItemVisual(rawIdx, 'color', color);
+
+	                        // Data is not filtered
+	                        if (filteredIdx != null) {
+	                            data.setItemVisual(filteredIdx, 'color', color);
+	                        }
+	                    }
+	                    else {
+	                        // Set data all color for legend
+	                        dataAll.setItemVisual(rawIdx, 'color', singleDataColor);
+	                    }
+	                });
+	            }
+	        });
+	    };
 
 
 /***/ }

@@ -1,5 +1,5 @@
 var echarts = require('echarts');
-var numberUtil = require('echarts/lib/util/number');
+var numberUtil = echarts.number;
 var symbolUtil = require('echarts/lib/util/symbol');
 var parsePercent = numberUtil.parsePercent;
 

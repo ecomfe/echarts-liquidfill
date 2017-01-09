@@ -14,6 +14,11 @@ module.exports = {
     externals: {
         'echarts': 'echarts'
     },
+    resolve: {
+        alias: {
+            echarts$: 'echarts/lib/echarts'
+        }
+    },
     plugins: PROD ? [
         new webpack.optimize.UglifyJsPlugin({
             compress: { warnings: false }

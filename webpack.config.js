@@ -12,11 +12,11 @@ module.exports = {
         filename: PROD ? '[name].min.js' : '[name].js'
     },
     externals: {
-        'echarts': 'echarts'
+        'echarts/lib/echarts': 'echarts'
     },
     resolve: {
         alias: {
-            echarts$: 'echarts/lib/echarts'
+            'echarts/lib/echarts': 'echarts'
         }
     },
     plugins: PROD ? [

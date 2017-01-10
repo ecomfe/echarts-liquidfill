@@ -1,4 +1,4 @@
-var echarts = require('echarts');
+var echarts = require('echarts/lib/echarts');
 
 module.exports = echarts.graphic.extendShape({
     type: 'ec-liquid-fill',

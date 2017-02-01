@@ -3,7 +3,11 @@
   "version": "1.0.1",
   "description": "ECharts liquid fill extension",
   "main": "index.js",
-  "author": "",
+  "author": {
+    "name": "Ovilia",
+    "email": "me@zhangwenli.com",
+    "url": "http://zhangwenli.com"
+  },
   "license": "BSD",
   "dependencies": {
     "echarts": "^3.2.2",

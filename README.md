@@ -13,6 +13,14 @@ To use ECharts plugins, you need to include the plugin JavaScript file after ECh
 <script src='./dist/echarts-liquidfill.js'></script>
 ```
 
+## Install with npm
+
+```sh
+npm install echarts-liquidfill
+```
+
+## Download from GitHub
+
 You may download the lastest ECharts files on [ECharts official site](http://echarts.baidu.com/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist). Note that if you need tooltip for Liquid Fill Chart, you need the complete ECharts version. Otherwise, simple version will do.
 
 

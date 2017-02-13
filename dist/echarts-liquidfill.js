@@ -109,7 +109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
 	        center: ['50%', '50%'],
 	        radius: '50%',
-	        amplitude: 20,
+	        amplitude: '8%',
 	        waveLength: '80%',
 	        phase: 'auto',
 	        period: 'auto',
@@ -983,7 +983,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var itemModel = data.getItemModel(idx);
 	            var itemStyleModel = itemModel.getModel('itemStyle');
 	            var phase = itemModel.get('phase');
-	            var amplitude = itemModel.get('amplitude');
+	            var amplitude = parsePercent(itemModel.get('amplitude'),
+	                radius * 2);
 	            var waveLength = parsePercent(itemModel.get('waveLength'),
 	                radius * 2);
 
@@ -3286,6 +3287,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @default 'inside'
 	         */
 	        textPosition: 'inside',
+
+	        /**
+	         * [x, y]
+	         * @type {Array.<number>}
+	         */
+	        textOffset: null,
 
 	        /**
 	         * @type {string}
@@ -6743,6 +6750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var x;
 	            var y;
 	            var textPosition = style.textPosition;
+	            var textOffset = style.textOffset;
 	            var distance = style.textDistance;
 	            var align = style.textAlign;
 	            var font = style.textFont || style.font;
@@ -6796,6 +6804,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // Default align and baseline when has textPosition
 	                align = align || res.textAlign;
 	                baseline = baseline || res.textBaseline;
+	            }
+
+	            if (textOffset) {
+	                x += textOffset[0];
+	                y += textOffset[1];
 	            }
 
 	            // Use canvas default left textAlign. Giving invalid value will cause state not change

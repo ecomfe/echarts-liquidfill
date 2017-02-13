@@ -453,7 +453,7 @@ Default option for liquid fill charts are:
     color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
     center: ['50%', '50%'],
     radius: '50%',
-    amplitude: 20,
+    amplitude: '8%',
     waveLength: '80%',
     phase: 'auto',
     period: 'auto',
@@ -559,7 +559,7 @@ Radius of the chart, which can be a relative value like `'50%'`, which is relati
 
 ### amplitude {number}
 
-Amplitude of the wave, in pixels.
+Amplitude of the wave, in pixels or percentage. If it is in percentage, it's relative to the diameter.
 
 
 ### waveLength {string|number}

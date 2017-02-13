@@ -23,7 +23,7 @@ echarts.extendSeriesModel({
         color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
         center: ['50%', '50%'],
         radius: '50%',
-        amplitude: 20,
+        amplitude: '8%',
         waveLength: '80%',
         phase: 'auto',
         period: 'auto',

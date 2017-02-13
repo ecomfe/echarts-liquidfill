@@ -205,7 +205,8 @@ echarts.extendChartView({
             var itemModel = data.getItemModel(idx);
             var itemStyleModel = itemModel.getModel('itemStyle');
             var phase = itemModel.get('phase');
-            var amplitude = itemModel.get('amplitude');
+            var amplitude = parsePercent(itemModel.get('amplitude'),
+                radius * 2);
             var waveLength = parsePercent(itemModel.get('waveLength'),
                 radius * 2);
 

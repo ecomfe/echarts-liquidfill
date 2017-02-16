@@ -90,6 +90,7 @@ echarts.extendChartView({
                     style: newWave.style
                 }, seriesModel);
                 waveElement.position = newWave.position;
+                waveElement.setClipPath(newWave.clipPath);
 
                 setWaveAnimation(newIdx, waveElement, waveElement);
                 group.add(waveElement);
@@ -288,10 +289,6 @@ echarts.extendChartView({
             }
 
             // wave animation of moving left/right
-            wave
-                .animate()
-                .stop();
-
             if (direction !== 'none' && itemModel.get('waveAnimation')) {
                 wave
                     .animate('shape', true)

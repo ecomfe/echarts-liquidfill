@@ -810,6 +810,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var outlineBorderWidth = 0;
 	        var showOutline = seriesModel.get('outline.show');
 
+	        var waveClips = [];
+
 	        if (showOutline) {
 	            outlineDistance = seriesModel.get('outline.borderDistance');
 	            outlineBorderWidth = parsePercent(seriesModel.get('outline.itemStyle.borderWidth'), size);
@@ -868,6 +870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    style: newWave.style
 	                }, seriesModel);
 	                waveElement.position = newWave.position;
+	                waveElement.setClipPath(newWave.clipPath);
 
 	                setWaveAnimation(newIdx, waveElement, waveElement);
 	                group.add(waveElement);
@@ -1019,6 +1022,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // clip out the part outside the circle
 	            var clip = getPath(radius, true);
 	            wave.setClipPath(clip);
+	            waveClips.push(clip);
 
 	            return wave;
 	        }
@@ -1066,10 +1070,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            // wave animation of moving left/right
-	            wave
-	                .animate()
-	                .stop();
-
 	            if (direction !== 'none' && itemModel.get('waveAnimation')) {
 	                wave
 	                    .animate('shape', true)
@@ -1086,6 +1086,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        if (wavePath) {
 	                            wavePath.dirty(true);
 	                        }
+	                        // for (var i = 0; i < waveClips.length; ++i) {
+	                        //     if (waveClips[i]) {
+	                        //         waveClips[i].dirty(true);
+	                        //     }
+	                        // }
 	                    })
 	                    .start();
 	            }

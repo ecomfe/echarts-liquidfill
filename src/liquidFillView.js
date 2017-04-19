@@ -372,5 +372,9 @@ echarts.extendChartView({
 
             return group;
         }
+    },
+
+    dispose: function () {
+        // nothing to dispose here
     }
 });

@@ -1,6 +1,6 @@
 {
   "name": "echarts-liquidfill",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "ECharts liquid fill extension",
   "main": "index.js",
   "author": {

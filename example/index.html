@@ -3,7 +3,7 @@
         <meta charset="utf-8">
         <link href="https://fonts.googleapis.com/css?family=Lobster+Two:700i" rel="stylesheet">
 
-        <script src='https://rawgit.com/ecomfe/echarts/32f5c8ea9a4e77e70bc2f6626ab82b5d3790269b/dist/echarts.js'></script>
+        <script src='https://rawgit.com/ecomfe/echarts/99350dd4033ea7d3f39a4205a53ccd701f6e7433/dist/echarts.js'></script>
         <script src='../dist/echarts-liquidfill.js'></script>
     </head>
     <body>
@@ -38,6 +38,23 @@
                 height: 300px;
                 float: left;
             }
+            @media (max-width: 980px) {
+                .chart {
+                    height: 200px;
+                }
+            }
+            @media (max-width: 750px) {
+                .chart {
+                    width: 33.333333%;
+                }
+            }
+            @media (max-width: 500px) {
+                .chart {
+                    width: 50%;
+                    height: 180px;
+                }
+            }
+
 
             .main-chart {
                 width: 100%;
@@ -56,8 +73,8 @@
                 background-color: #294D99;
                 transition: 0.5s;
                 color: white;
-                padding: 8px 5px;
-                border-radius: 5px;
+                padding: 6px 18px;
+                border-radius: 20px;
                 margin: 0 4px;
             }
 
@@ -72,9 +89,10 @@
         </style>
         <div id='main'>
             <div class="chart main-chart"></div>
-            <h1>Liquid Fill Chart (ECharts Plugin)</h1>
+            <h1>Liquid Fill Chart (ECharts Extension)</h1>
             <div class="nav">
-                <a href="https://github.com/ecomfe/echarts-liquidfill">GitHub</a>
+                <a href="https://github.com/ecomfe/echarts-liquidfill">GitHub (Doc & API)</a>
+                <a href="http://gallery.echartsjs.com/explore.html?u=bd-4013131402&type=work#tags=liquidFill">More Examples</a>
                 <a href="http://echarts.baidu.com">ECharts</a>
             </div>
             <div class="chart"></div>
@@ -90,11 +108,15 @@
             <div class="chart"></div>
             <div class="chart"></div>
         </div>
-        <div id="view-more">
-            <a href="http://gallery.echartsjs.com/explore.html?u=bd-4013131402&type=work#tags=liquidFill">More Examples</a>
-            <a href="https://github.com/ecomfe/echarts-liquidfill/blob/master/README.md">Documentation</a>
-        </div>
         <script>
+            var _hmt = _hmt || [];
+            (function() {
+            var hm = document.createElement('script');
+            hm.src = '//hm.baidu.com/hm.js?4bad1df23f079e0d12bdbef5e65b072f';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(hm, s);
+            })();
+
             var bgColor = '#E3F7FF';
             var containers = document.getElementsByClassName('chart');
             var options = [{
@@ -309,9 +331,39 @@
             var charts = [];
             for (var i = 0; i < options.length; ++i) {
                 var chart = echarts.init(containers[i]);
+
+                if (i > 0) {
+                    options[i].series[0].silent = true;
+                }
                 chart.setOption(options[i]);
+                chart.setOption({
+                    baseOption: options[i],
+                    media: [{
+                        query: {
+                            maxWidth: 300
+                        },
+                        option: {
+                            series: [{
+                                label: {
+                                    normal: {
+                                        textStyle: {
+                                            fontSize: 26
+                                        }
+                                    }
+                                }
+                            }]
+                        }
+                    }]
+                });
+
                 charts.push(chart);
             }
+
+            window.onresize = function () {
+                for (var i = 0; i < charts.length; ++i) {
+                    charts[i].resize();
+                }
+            };
 
             setInterval(update, 3000);
 

@@ -25,7 +25,32 @@ You may download the lastest ECharts files on [ECharts official site](http://ech
 
 
 
-## Setting Options
+## Quick Start
+
+- [API](https://github.com/ecomfe/echarts-liquidfill#api)
+- [Examples at ECharts Gallery](http://gallery.echartsjs.com/explore.html#tags=liquidFill~sort=rank~timeframe=all~author=all)
+
+Here are some common uses:
+
+- [Use multiple waves in a chart](https://github.com/ecomfe/echarts-liquidfill#multiple-waves)
+- [Change waves color and opacity](https://github.com/ecomfe/echarts-liquidfill#color-and-opacity)
+- [Make waves static](https://github.com/ecomfe/echarts-liquidfill#static-waves)
+- [Water with no waves](https://github.com/ecomfe/echarts-liquidfill#still-water)
+- [Set attributes for a single wave](https://github.com/ecomfe/echarts-liquidfill#change-a-single-wave)
+- [Change background and border style](https://github.com/ecomfe/echarts-liquidfill#background-style)
+- [Hide outline in chart](https://github.com/ecomfe/echarts-liquidfill#outline-style)
+- [Change shape with SVG](https://github.com/ecomfe/echarts-liquidfill#shape)
+- [Setup animation](https://github.com/ecomfe/echarts-liquidfill#animation)
+- [Change text content and style](https://github.com/ecomfe/echarts-liquidfill#change-text)
+- [Change shadow style](https://github.com/ecomfe/echarts-liquidfill#shadow)
+- [Setup tooltip](https://github.com/ecomfe/echarts-liquidfill#tooltip)
+- [Click event](https://github.com/ecomfe/echarts-liquidfill#click-event)
+- [Make an element non-interactable]((https://github.com/ecomfe/echarts-liquidfill#non-interactable))
+
+To ask a question, you may fork [Liquid Fill Chart Example on Gallery](http://gallery.echartsjs.com/editor.html?c=xr1XplzB4e) and copy your code there. Then you may [open an issue](https://github.com/ecomfe/echarts-liquidfill/issues/new) in this project.
+
+
+## Examples
 
 ### A Simple Example
 
@@ -44,10 +69,6 @@ var option = {
 
 [Run](http://gallery.echartsjs.com/editor.html?c=xr1XplzB4e)
 
-
-### Examples on Gallery
-
-[View more examples](http://gallery.echartsjs.com/explore.html#tags=liquidFill~sort=rank~timeframe=all~author=all).
 
 ### Multiple Waves
 
@@ -440,6 +461,42 @@ var option = {
 ![Tooltip](http://g.recordit.co/S1zQTS6B0G.gif)
 
 [Run](http://gallery.echartsjs.com/editor.html?c=xSJqXeg5He)
+
+### Click Event
+
+To add click event on waves:
+
+```js
+chart.setOption(option);
+chart.on('click', function() {
+    console.log(arguments);
+    // do something useful here
+});
+```
+
+Like any other chart types, the above code will only trigger events on waves. If you want to track events on the whole canvas or specific elements, you may add listener to zrender like:
+
+```js
+chart.getZr().on('click', function() {
+       console.log(arguments);
+});
+```
+
+### Non-interactable
+
+To make an element (e.g., a wave) non-interactable, simply set `silent` to be `true`.
+
+```js
+var option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.6, 0.5, 0.4, 0.3],
+        silent: true
+    }]
+};
+```
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xSJqev71Jb)
 
 
 ## API

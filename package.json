@@ -1,6 +1,6 @@
 {
   "name": "echarts-liquidfill",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "ECharts liquid fill extension",
   "main": "index.js",
   "author": {
@@ -10,8 +10,8 @@
   },
   "license": "BSD",
   "dependencies": {
-    "echarts": "^3.2.2",
-    "zrender": "^3.1.2"
+    "echarts": ">=3.5.4",
+    "zrender": ">=3.4.4"
   },
   "repository": {
     "type": "git",

@@ -241,6 +241,10 @@ echarts.extendChartView({
 
             // clip out the part outside the circle
             var clip = getPath(radius, true);
+            // set fill for clipPath, otherwise it will not trigger hover event
+            clip.setStyle({
+                fill: 'white'
+            });
             wave.setClipPath(clip);
 
             return wave;

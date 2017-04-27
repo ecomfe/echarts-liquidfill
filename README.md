@@ -45,7 +45,7 @@ Here are some common uses:
 - [Change shadow style](https://github.com/ecomfe/echarts-liquidfill#shadow)
 - [Setup tooltip](https://github.com/ecomfe/echarts-liquidfill#tooltip)
 - [Click event](https://github.com/ecomfe/echarts-liquidfill#click-event)
-- [Make an element non-interactable]((https://github.com/ecomfe/echarts-liquidfill#non-interactable))
+- [Make an element non-interactable](https://github.com/ecomfe/echarts-liquidfill#non-interactable)
 
 To ask a question, you may fork [Liquid Fill Chart Example on Gallery](http://gallery.echartsjs.com/editor.html?c=xr1XplzB4e) and copy your code there. Then you may [open an issue](https://github.com/ecomfe/echarts-liquidfill/issues/new) in this project.
 

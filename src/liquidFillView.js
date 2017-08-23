@@ -257,7 +257,6 @@ echarts.extendChartView({
             var direction = itemModel.get('direction');
 
             var value = data.get('value', idx);
-            var value0 = data.get('value', 0);
 
             var phase = itemModel.get('phase');
             phase = oldWave ? oldWave.shape.phase

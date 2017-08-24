@@ -66,15 +66,13 @@ echarts.extendSeriesModel({
         label: {
             normal: {
                 show: true,
-                textStyle: {
-                    color: '#294D99',
-                    insideColor: '#fff',
-                    fontSize: 50,
-                    fontWeight: 'bold',
+                color: '#294D99',
+                insideColor: '#fff',
+                fontSize: 50,
+                fontWeight: 'bold',
 
-                    align: 'center',
-                    baseline: 'middle'
-                },
+                align: 'center',
+                baseline: 'middle',
                 position: 'inside'
             }
         }

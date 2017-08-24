@@ -84,10 +84,17 @@ echarts.extendChartView({
 
                 // new wave is used to calculate position, but not added
                 var newWave = getWave(newIdx, false, waveElement);
+
+                // Shallow copy shape and style to avoid comparing style.host
+                // when animating
+                var shape = Object.assign({}, newWave.shape);
+                var style = Object.assign({}, newWave.style);
+                style.host = null;
+
                 // update old wave with parameters of new wave
                 echarts.graphic.updateProps(waveElement, {
-                    shape: newWave.shape,
-                    style: newWave.style
+                    shape: shape,
+                    style: style
                 }, seriesModel);
                 waveElement.position = newWave.position;
                 waveElement.setClipPath(newWave.clipPath);

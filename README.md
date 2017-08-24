@@ -4,24 +4,37 @@ Liquid Fill Chart plugin for [ECharts](https://github.com/ecomfe/echarts), which
 
 ![Rendering Results](http://g.recordit.co/zHeMqqlh4j.gif)
 
-## Setup
+## Install ECharts
 
 To use ECharts plugins, you need to include the plugin JavaScript file after ECharts file.
 
 ```html
-<script src='https://cdn.bootcss.com/echarts/3.2.2/echarts.js'></script>
-<script src='./dist/echarts-liquidfill.js'></script>
+<script src='echarts.js'></script>
+<script src='echarts-liquidfill.js'></script>
 ```
 
-## Install with npm
+ECharts can be downloaded at [GitHub dist directory](https://github.com/ecomfe/echarts/tree/master/dist) or [Download page of Official Website](http://echarts.baidu.com/download.html) (in Chinese).
+
+>#### NOTE
+>
+> The minimum package of ECharts required by LiquidFill Chart is [simple version](https://github.com/ecomfe/echarts/blob/master/dist/echarts.simple.js) on GitHub, or selecting nothing in [online builder](http://echarts.baidu.com/builder.html) (in Chinese). If you need other chart types or components in your other chart, you should include them accordingly.
+
+## Install echarts-liquidfill with npm
 
 ```sh
 npm install echarts-liquidfill
 ```
 
-## Download from GitHub
+## Download echarts-liquidfill from GitHub
 
 You may download the lastest ECharts files on [ECharts official site](http://echarts.baidu.com/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist). Note that if you need tooltip for Liquid Fill Chart, you need the complete ECharts version. Otherwise, simple version will do.
+
+
+## Notes
+
+### Flatten `textStyle`
+
+From [ECharts v3.7.0](https://github.com/ecomfe/echarts/releases/tag/3.7.0), `textStyle` option is flatten, so that `series.label[normal|emphasis].textStyle.xxx` is now can be written in `series.label[normal|emphasis].textStyle`. This is supported from [echarts-liquidfill](https://github.com/ecomfe/echarts-liquidfill/releases/tag/v1.0.6) v1.0.6. So if you found examples with `textStyle` in old demo, don't be too surprised.
 
 
 
@@ -293,10 +306,8 @@ var option = {
                 formatter: function() {
                     return 'ECharts\nLiquid Fill';
                 },
-                textStyle: {
-                    fontSize: 40,
-                    color: '#D94854'
-                }
+                fontSize: 40,
+                color: '#D94854'
             }
         }
     }]
@@ -363,9 +374,7 @@ var option = {
         label: {
             normal: {
                 formatter: '{a}\n{b}\nValue: {c}',
-                textStyle: {
-                    fontSize: 28
-                }
+                fontSize: 28
             }
         }
     }]
@@ -396,9 +405,7 @@ var option = {
                         + param.name + '\n'
                         + 'Value:' + param.value;
                 },
-                textStyle: {
-                    fontSize: 28
-                }
+                fontSize: 28
             }
         }
     }]
@@ -407,7 +414,7 @@ var option = {
 
 [Run](http://gallery.echartsjs.com/editor.html?c=xHk5831cHg)
 
-Text position is at the center by default. `label.normal.position` can be set to be `'inside'`, `'left'`, `'right'`, `'top'`, `'bottom'`, or horizontal and vertical positions like `['10%', '20%']`, which means `'10%'` to the left (controlled by `label.normal.textStyle.align`, which can be `'left'`, `'center'`, or `'right'`) and `'20%'` to the top (controlled by `label.normal.textStyle.baseline`, which can be `'top'`, `'middle'`, or `'bottom'`).
+Text position is at the center by default. `label.normal.position` can be set to be `'inside'`, `'left'`, `'right'`, `'top'`, `'bottom'`, or horizontal and vertical positions like `['10%', '20%']`, which means `'10%'` to the left (controlled by `label.normal.align`, which can be `'left'`, `'center'`, or `'right'`) and `'20%'` to the top (controlled by `label.normal.baseline`, which can be `'top'`, `'middle'`, or `'bottom'`).
 
 
 ### Shadow
@@ -553,15 +560,13 @@ Default option for liquid fill charts are:
     label: {
         normal: {
             show: true,
-            textStyle: {
-                color: '#294D99',
-                insideColor: '#fff',
-                fontSize: 50,
-                fontWeight: 'bold',
+            color: '#294D99',
+            insideColor: '#fff',
+            fontSize: 50,
+            fontWeight: 'bold',
 
-                align: 'center',
-                baseline: 'middle'
-            },
+            align: 'center',
+            baseline: 'middle'
             position: 'inside'
         }
     }
@@ -760,32 +765,32 @@ Wave opacity when hover.
 Whether to display label text.
 
 
-### label.normal.textStyle.color {string}
+### label.normal.color {string}
 
 Color of text when display on background.
 
 
-### label.normal.textStyle.insideColor {string}
+### label.normal.insideColor {string}
 
 Color of text when display on wave.
 
 
-### label.normal.textStyle.fontSize {number}
+### label.normal.fontSize {number}
 
 Label font size.
 
 
-### label.normal.textStyle.fontWeight {string}
+### label.normal.fontWeight {string}
 
 Label font weight.
 
 
-### label.normal.textStyle.align {string}
+### label.normal.align {string}
 
 Text align, which should be `'left'`, `'center'`, or `'right'`.
 
 
-### label.normal.textStyle.baseline {string}
+### label.normal.baseline {string}
 
 Text vertical align, which should be `'top'`, `'middle'`, or `'bottom'`.
 

@@ -355,11 +355,12 @@ echarts.extendChartView({
             };
 
             var outsideTextRect = new echarts.graphic.Rect(textOption);
-            var color = labelModel.get('color');
+            var color = labelModel.get('color') || textStyle.get('color');
             echarts.graphic.setText(outsideTextRect.style, labelModel, color);
 
             var insideTextRect = new echarts.graphic.Rect(textOption);
-            var insColor = labelModel.get('insideColor');
+            var insColor = labelModel.get('insideColor')
+                || textStyle.get('insideColor');
             echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
             insideTextRect.style.textFill = insColor;
 

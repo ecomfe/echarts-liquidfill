@@ -288,6 +288,23 @@ var options = [{
 
 [Run](http://gallery.echartsjs.com/editor.html?c=xry0tUfcBe)
 
+```
+option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.5, 0.4, 0.3, 0.2],
+        shape: 'container',
+        outline: {
+            show: false
+        }
+    }]
+};
+```
+
+![Fill the container](http://g.recordit.co/iuMJckv5lB.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xrko4E9zKb&v=1)
+
 ```js
 var option = {
     series: [{

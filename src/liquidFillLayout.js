@@ -19,9 +19,10 @@ module.exports = echarts.graphic.extendShape({
     },
 
     buildPath: function (ctx, shape) {
-        var curves = Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2;
-        var controls = [[0, 0]];
-        var positions = [];
+        var curves = Math.max(
+            Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2,
+            8
+        );
 
         // map phase to [-Math.PI * 2, 0]
         while (shape.phase < -Math.PI * 2) {
@@ -53,7 +54,6 @@ module.exports = echarts.graphic.extendShape({
          * |      |
          * +------+
          */
-        var waveLeft = 0;
         var waveRight = 0;
         for (var c = 0; c < curves; ++c) {
             var stage = c % 4;

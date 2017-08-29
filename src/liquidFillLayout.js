@@ -19,6 +19,11 @@ module.exports = echarts.graphic.extendShape({
     },
 
     buildPath: function (ctx, shape) {
+        /**
+         * We define a sine wave having 4 waves, and make sure at least 8 curves
+         * is drawn. Otherwise, it may cause blank area for some waves when
+         * wave length is large enough.
+         */
         var curves = Math.max(
             Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2,
             8

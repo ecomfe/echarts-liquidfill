@@ -268,7 +268,11 @@ var option = {
 
 ### Shape
 
-Shape of water fill chart. It can be one of the default symbols: `'circle'`, `'rect'`, `'roundRect'`, `'triangle'`, `'diamond'`, `'pin'`, `'arrow'`. Or, an SVG path starting with `'path://'`.
+Shape of water fill chart. It can be:
+
+- one of the default symbols: `'circle'`, `'rect'`, `'roundRect'`, `'triangle'`, `'diamond'`, `'pin'`, `'arrow'`;
+- `'container'`: a shape that fully fills the container.
+- an SVG path starting with `'path://'`.
 
 ```js
 var options = [{

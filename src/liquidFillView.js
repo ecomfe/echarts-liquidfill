@@ -34,16 +34,50 @@ echarts.extendChartView({
 
         if (showOutline) {
             outlineDistance = seriesModel.get('outline.borderDistance');
-            outlineBorderWidth = parsePercent(seriesModel.get('outline.itemStyle.borderWidth'), size);
+            outlineBorderWidth = parsePercent(
+                seriesModel.get('outline.itemStyle.borderWidth'), size
+            );
         }
 
         var cx = parsePercent(center[0], width);
         var cy = parsePercent(center[1], height);
-        var outterRadius = parsePercent(radius, size) / 2;
-        var innerRadius = outterRadius - outlineBorderWidth / 2;
-        var paddingRadius = parsePercent(outlineDistance, size);
 
-        var wavePath = null;
+        var outterRadius;
+        var innerRadius;
+        var paddingRadius;
+
+        var isFillContainer = false;
+
+        var symbol = seriesModel.get('shape');
+        if (symbol === 'container') {
+            // a shape that fully fills the container
+            isFillContainer = true;
+
+            outterRadius = [
+                width / 2,
+                height / 2
+            ];
+            innerRadius = [
+                outterRadius[0] - outlineBorderWidth / 2,
+                outterRadius[1] - outlineBorderWidth / 2
+            ];
+            paddingRadius = [
+                parsePercent(outlineDistance, width),
+                parsePercent(outlineDistance, height)
+            ];
+
+            radius = [
+                innerRadius[0] - paddingRadius[0],
+                innerRadius[1] - paddingRadius[1]
+            ];
+        }
+        else {
+            outterRadius = parsePercent(radius, size) / 2;
+            innerRadius = outterRadius - outlineBorderWidth / 2;
+            paddingRadius = parsePercent(outlineDistance, size);
+
+            radius = innerRadius - paddingRadius;
+        }
 
         if (showOutline) {
             var outline = getOutline();
@@ -51,9 +85,10 @@ echarts.extendChartView({
             group.add(getOutline());
         }
 
-        radius = innerRadius - paddingRadius;
-        var left = cx - radius;
-        var top = cy - radius;
+        var left = isFillContainer ? 0 : cx - radius;
+        var top = isFillContainer ? 0 : cy - radius;
+
+        var wavePath = null;
 
         group.add(getBackground());
 
@@ -65,7 +100,7 @@ echarts.extendChartView({
                 var wave = getWave(idx, false);
 
                 var waterLevel = wave.shape.waterLevel;
-                wave.shape.waterLevel = radius;
+                wave.shape.waterLevel = isFillContainer ? radius[1] : radius;
                 echarts.graphic.initProps(wave, {
                     shape: {
                         waterLevel: waterLevel
@@ -116,36 +151,47 @@ echarts.extendChartView({
 
         /**
          * Get path for outline, background and clipping
+         *
+         * @param {number} r outter radius of shape
+         * @param {boolean|undefined} isForClipping if the shape is used
+         *                                          for clipping
          */
         function getPath(r, isForClipping) {
-            var symbol = seriesModel.get('shape');
             if (symbol) {
                 // customed symbol path
                 if (symbol.indexOf('path://') === 0) {
                     var path = echarts.graphic.makePath(symbol.slice(7), {});
                     var bouding = path.getBoundingRect();
-                    var width = bouding.width;
-                    var height = bouding.height;
-                    if (width > height) {
-                        height = r * 2 / width * height;
-                        width = r * 2;
+                    var w = bouding.width;
+                    var h = bouding.height;
+                    if (w > h) {
+                        h = r * 2 / w * h;
+                        w = r * 2;
                     }
                     else {
-                        width = r * 2 / height * width;
-                        height = r * 2;
+                        w = r * 2 / h * w;
+                        h = r * 2;
                     }
 
-                    var left = isForClipping ? 0 : cx - width / 2;
-                    var top = isForClipping ? 0 : cy - height / 2;
+                    var left = isForClipping ? 0 : cx - w / 2;
+                    var top = isForClipping ? 0 : cy - h / 2;
                     path = echarts.graphic.makePath(
                         symbol.slice(7),
                         {},
-                        new echarts.graphic.BoundingRect(left, top, width, height)
+                        new echarts.graphic.BoundingRect(left, top, w, h)
                     );
                     if (isForClipping) {
-                        path.position = [-width / 2, -height / 2];
+                        path.position = [-w / 2, -h / 2];
                     }
                     return path;
+                }
+                else if (isFillContainer) {
+                    // fully fill the container
+                    var x = isForClipping ? -r[0] : cx - r[0];
+                    var y = isForClipping ? -r[1] : cy - r[1];
+                    return symbolUtil.createSymbol(
+                        'rect', x, y, r[0] * 2, r[1] * 2
+                    );
                 }
                 else {
                     var x = isForClipping ? -r : cx - r;
@@ -210,26 +256,29 @@ echarts.extendChartView({
          * wave shape
          */
         function getWave(idx, isInverse, oldWave) {
+            var radiusX = isFillContainer ? radius[0] : radius;
+            var radiusY = isFillContainer ? radius[1] : radius;
+
             var itemModel = data.getItemModel(idx);
             var itemStyleModel = itemModel.getModel('itemStyle');
             var phase = itemModel.get('phase');
             var amplitude = parsePercent(itemModel.get('amplitude'),
-                radius * 2);
+                radiusY * 2);
             var waveLength = parsePercent(itemModel.get('waveLength'),
-                radius * 2);
+                radiusX * 2);
 
             var value = data.get('value', idx);
-            var waterLevel = radius - value * radius * 2;
+            var waterLevel = radiusY - value * radiusY * 2;
             phase = oldWave ? oldWave.shape.phase
                 : (phase === 'auto' ? idx * Math.PI / 4 : phase);
             var normalStyle = itemStyleModel.getModel('normal').getItemStyle();
             normalStyle.fill = data.getItemVisual(idx, 'color');
 
-            var x = radius * 2;
+            var x = radiusX * 2;
             var wave = new LiquidLayout({
                 shape: {
                     waveLength: waveLength,
-                    radius: radius,
+                    radius: radiusX,
                     cx: x,
                     cy: 0,
                     waterLevel: waterLevel,
@@ -342,8 +391,8 @@ echarts.extendChartView({
                 shape: {
                     x: left,
                     y: top,
-                    width: radius * 2,
-                    height: radius * 2
+                    width: (isFillContainer ? radius[0] : radius) * 2,
+                    height: (isFillContainer ? radius[1] : radius) * 2
                 },
                 style: {
                     fill: 'transparent',

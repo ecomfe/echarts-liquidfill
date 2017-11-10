@@ -10,8 +10,8 @@
   },
   "license": "BSD",
   "dependencies": {
-    "echarts": ">=3.7.0",
-    "zrender": ">=3.6.0"
+    "echarts": ">=3.8.2",
+    "zrender": ">=3.7.2"
   },
   "repository": {
     "type": "git",

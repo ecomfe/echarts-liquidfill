@@ -268,7 +268,11 @@ var option = {
 
 ### Shape
 
-Shape of water fill chart. It can be one of the default symbols: `'circle'`, `'rect'`, `'roundRect'`, `'triangle'`, `'diamond'`, `'pin'`, `'arrow'`. Or, an SVG path starting with `'path://'`.
+Shape of water fill chart. It can be:
+
+- one of the default symbols: `'circle'`, `'rect'`, `'roundRect'`, `'triangle'`, `'diamond'`, `'pin'`, `'arrow'`;
+- `'container'`: a shape that fully fills the container.
+- an SVG path starting with `'path://'`.
 
 ```js
 var options = [{
@@ -283,6 +287,23 @@ var options = [{
 ![Diamond wave](http://g.recordit.co/1v9490ijKg.gif)
 
 [Run](http://gallery.echartsjs.com/editor.html?c=xry0tUfcBe)
+
+```
+option = {
+    series: [{
+        type: 'liquidFill',
+        data: [0.5, 0.4, 0.3, 0.2],
+        shape: 'container',
+        outline: {
+            show: false
+        }
+    }]
+};
+```
+
+![Fill the container](http://g.recordit.co/iuMJckv5lB.gif)
+
+[Run](http://gallery.echartsjs.com/editor.html?c=xrko4E9zKb&v=1)
 
 ```js
 var option = {

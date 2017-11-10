@@ -19,9 +19,15 @@ module.exports = echarts.graphic.extendShape({
     },
 
     buildPath: function (ctx, shape) {
-        var curves = Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2;
-        var controls = [[0, 0]];
-        var positions = [];
+        /**
+         * We define a sine wave having 4 waves, and make sure at least 8 curves
+         * is drawn. Otherwise, it may cause blank area for some waves when
+         * wave length is large enough.
+         */
+        var curves = Math.max(
+            Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2,
+            8
+        );
 
         // map phase to [-Math.PI * 2, 0]
         while (shape.phase < -Math.PI * 2) {
@@ -53,7 +59,6 @@ module.exports = echarts.graphic.extendShape({
          * |      |
          * +------+
          */
-        var waveLeft = 0;
         var waveRight = 0;
         for (var c = 0; c < curves; ++c) {
             var stage = c % 4;

@@ -14,6 +14,7 @@ module.exports = {
     externals: {
         'echarts/lib/echarts': 'echarts'
     },
+    devtool: 'source-map',
     resolve: {
         alias: {
             'echarts/lib/echarts': 'echarts'

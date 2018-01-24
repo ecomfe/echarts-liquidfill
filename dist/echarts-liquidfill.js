@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var echarts = __webpack_require__(2);
 
 	__webpack_require__(3);
-	__webpack_require__(74);
+	__webpack_require__(14);
 
 
 	echarts.registerVisual(
@@ -139,27 +139,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 
 	        itemStyle: {
-	            normal: {
-	                opacity: 0.95,
-	                shadowBlur: 50,
-	                shadowColor: 'rgba(0, 0, 0, 0.4)'
-	            },
-	            emphasis: {
-	                opacity: 0.8
-	            }
+	            opacity: 0.95,
+	            shadowBlur: 50,
+	            shadowColor: 'rgba(0, 0, 0, 0.4)'
 	        },
 
 	        label: {
-	            normal: {
-	                show: true,
-	                color: '#294D99',
-	                insideColor: '#fff',
-	                fontSize: 50,
-	                fontWeight: 'bold',
+	            show: true,
+	            color: '#294D99',
+	            insideColor: '#fff',
+	            fontSize: 50,
+	            fontWeight: 'bold',
 
-	                align: 'center',
-	                baseline: 'middle',
-	                position: 'inside'
+	            align: 'center',
+	            baseline: 'middle',
+	            position: 'inside'
+	        },
+
+	        emphasis: {
+	            itemStyle: {
+	                opacity: 0.8
 	            }
 	        }
 	    }
@@ -170,24 +169,38 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
+	var _util = __webpack_require__(5);
+
+	var createHashMap = _util.createHashMap;
+	var each = _util.each;
+	var isString = _util.isString;
+	var defaults = _util.defaults;
+	var extend = _util.extend;
+	var isObject = _util.isObject;
+	var clone = _util.clone;
 
 	var _model = __webpack_require__(6);
 
 	var normalizeToArray = _model.normalizeToArray;
 
+	var _sourceHelper = __webpack_require__(7);
+
+	var guessOrdinal = _sourceHelper.guessOrdinal;
+
+	var Source = __webpack_require__(10);
+
+	var _dimensionHelper = __webpack_require__(13);
+
+	var OTHER_DIMENSIONS = _dimensionHelper.OTHER_DIMENSIONS;
+
 	/**
-	 * Complete dimensions by data (guess dimension).
+	 * @deprecated
+	 * Use `echarts/data/helper/createDimensions` instead.
 	 */
-	var each = zrUtil.each;
-	var isString = zrUtil.isString;
-	var defaults = zrUtil.defaults;
-	var OTHER_DIMS = {
-	  tooltip: 1,
-	  label: 1,
-	  itemName: 1
-	};
+
 	/**
+	 * @see {module:echarts/test/ut/spec/data/completeDimensions}
+	 *
 	 * Complete the dimensions array, by user defined `dimension` and `encode`,
 	 * and guessing from the data structure.
 	 * If no 'value' dimension specified, the first no-named dimension will be
@@ -195,86 +208,87 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Array.<string>} sysDims Necessary dimensions, like ['x', 'y'], which
 	 *      provides not only dim template, but also default order.
+	 *      properties: 'name', 'type', 'displayName'.
 	 *      `name` of each item provides default coord name.
-	 *      [{dimsDef: []}, ...] can be specified to give names.
-	 * @param {Array} data Data list. [[1, 2, 3], [2, 3, 4]].
+	 *      [{dimsDef: [string...]}, ...] can be specified to give names.
+	 *      [{ordinalMeta}] can be specified.
+	 * @param {module:echarts/data/Source|Array|Object} source or data (for compatibal with pervious)
 	 * @param {Object} [opt]
 	 * @param {Array.<Object|string>} [opt.dimsDef] option.series.dimensions User defined dimensions
 	 *      For example: ['asdf', {name, type}, ...].
-	 * @param {Object} [opt.encodeDef] option.series.encode {x: 2, y: [3, 1], tooltip: [1, 2], label: 3}
+	 * @param {Object|HashMap} [opt.encodeDef] option.series.encode {x: 2, y: [3, 1], tooltip: [1, 2], label: 3}
 	 * @param {string} [opt.extraPrefix] Prefix of name when filling the left dimensions.
 	 * @param {string} [opt.extraFromZero] If specified, extra dim names will be:
 	 *                      extraPrefix + 0, extraPrefix + extraBaseIndex + 1 ...
 	 *                      If not specified, extra dim names will be:
 	 *                      extraPrefix, extraPrefix + 0, extraPrefix + 1 ...
 	 * @param {number} [opt.dimCount] If not specified, guess by the first data item.
+	 * @param {number} [opt.encodeDefaulter] If not specified, auto find the next available data dim.
 	 * @return {Array.<Object>} [{
 	 *      name: string mandatory,
+	 *      displayName: string, the origin name in dimsDef, see source helper.
+	 *                 If displayName given, the tooltip will displayed vertically.
 	 *      coordDim: string mandatory,
+	 *      isSysCoord: boolean True if the coord is from sys dimension.
 	 *      coordDimIndex: number mandatory,
 	 *      type: string optional,
-	 *      tooltipName: string optional,
-	 *      otherDims: {
+	 *      otherDims: { never null/undefined
 	 *          tooltip: number optional,
-	 *          label: number optional
+	 *          label: number optional,
+	 *          itemName: number optional,
+	 *          seriesName: number optional,
 	 *      },
 	 *      isExtraCoord: boolean true or undefined.
 	 *      other props ...
 	 * }]
 	 */
+	function completeDimensions(sysDims, source, opt) {
+	  if (!Source.isInstance(source)) {
+	    source = Source.seriesDataToSource(source);
+	  }
 
-	function completeDimensions(sysDims, data, opt) {
-	  data = data || [];
 	  opt = opt || {};
 	  sysDims = (sysDims || []).slice();
 	  var dimsDef = (opt.dimsDef || []).slice();
-	  var encodeDef = zrUtil.createHashMap(opt.encodeDef);
-	  var dataDimNameMap = zrUtil.createHashMap();
-	  var coordDimNameMap = zrUtil.createHashMap(); // var valueCandidate;
+	  var encodeDef = createHashMap(opt.encodeDef);
+	  var dataDimNameMap = createHashMap();
+	  var coordDimNameMap = createHashMap(); // var valueCandidate;
 
 	  var result = [];
-	  var dimCount = opt.dimCount;
-
-	  if (dimCount == null) {
-	    var value0 = retrieveValue(data[0]);
-	    dimCount = Math.max(zrUtil.isArray(value0) && value0.length || 1, sysDims.length, dimsDef.length);
-	    each(sysDims, function (sysDimItem) {
-	      var sysDimItemDimsDef = sysDimItem.dimsDef;
-	      sysDimItemDimsDef && (dimCount = Math.max(dimCount, sysDimItemDimsDef.length));
-	    });
-	  } // Apply user defined dims (`name` and `type`) and init result.
-
+	  var dimCount = getDimCount(source, sysDims, dimsDef, opt.dimCount); // Apply user defined dims (`name` and `type`) and init result.
 
 	  for (var i = 0; i < dimCount; i++) {
-	    var dimDefItem = isString(dimsDef[i]) ? {
+	    var dimDefItem = dimsDef[i] = extend({}, isObject(dimsDef[i]) ? dimsDef[i] : {
 	      name: dimsDef[i]
-	    } : dimsDef[i] || {};
+	    });
 	    var userDimName = dimDefItem.name;
 	    var resultItem = result[i] = {
 	      otherDims: {}
 	    }; // Name will be applied later for avoiding duplication.
 
 	    if (userDimName != null && dataDimNameMap.get(userDimName) == null) {
-	      // Only if `series.dimensions` is defined in option, tooltipName
-	      // will be set, and dimension will be diplayed vertically in
+	      // Only if `series.dimensions` is defined in option
+	      // displayName, will be set, and dimension will be diplayed vertically in
 	      // tooltip by default.
-	      resultItem.name = resultItem.tooltipName = userDimName;
+	      resultItem.name = resultItem.displayName = userDimName;
 	      dataDimNameMap.set(userDimName, i);
 	    }
 
 	    dimDefItem.type != null && (resultItem.type = dimDefItem.type);
+	    dimDefItem.displayName != null && (resultItem.displayName = dimDefItem.displayName);
 	  } // Set `coordDim` and `coordDimIndex` by `encodeDef` and normalize `encodeDef`.
 
 
 	  encodeDef.each(function (dataDims, coordDim) {
-	    dataDims = encodeDef.set(coordDim, normalizeToArray(dataDims).slice());
-	    each(dataDims, function (resultDimIdx, coordDimIndex) {
+	    dataDims = normalizeToArray(dataDims).slice();
+	    var validDataDims = encodeDef.set(coordDim, []);
+	    each(dataDims, function (resultDimIdx, idx) {
 	      // The input resultDimIdx can be dim name or index.
 	      isString(resultDimIdx) && (resultDimIdx = dataDimNameMap.get(resultDimIdx));
 
 	      if (resultDimIdx != null && resultDimIdx < dimCount) {
-	        dataDims[coordDimIndex] = resultDimIdx;
-	        applyDim(result[resultDimIdx], coordDim, coordDimIndex);
+	        validDataDims[idx] = resultDimIdx;
+	        applyDim(result[resultDimIdx], coordDim, idx);
 	      }
 	    });
 	  }); // Apply templetes and default order from `sysDims`.
@@ -291,7 +305,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      sysDimItem = {};
 	    } else {
 	      coordDim = sysDimItem.name;
-	      sysDimItem = zrUtil.clone(sysDimItem); // `coordDimIndex` should not be set directly.
+	      var ordinalMeta = sysDimItem.ordinalMeta;
+	      sysDimItem.ordinalMeta = null;
+	      sysDimItem = clone(sysDimItem);
+	      sysDimItem.ordinalMeta = ordinalMeta; // `coordDimIndex` should not be set directly.
 
 	      sysDimItemDimsDef = sysDimItem.dimsDef;
 	      sysDimItemOtherDims = sysDimItem.otherDims;
@@ -316,12 +333,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	      applyDim(defaults(resultItem, sysDimItem), coordDim, coordDimIndex);
 
 	      if (resultItem.name == null && sysDimItemDimsDef) {
-	        resultItem.name = resultItem.tooltipName = sysDimItemDimsDef[coordDimIndex];
+	        resultItem.name = resultItem.displayName = sysDimItemDimsDef[coordDimIndex];
 	      }
+
+	      resultItem.isSysCoord = true; // FIXME refactor, currently only used in case: {otherDims: {tooltip: false}}
 
 	      sysDimItemOtherDims && defaults(resultItem.otherDims, sysDimItemOtherDims);
 	    });
-	  }); // Make sure the first extra dim is 'value'.
+	  });
+
+	  function applyDim(resultItem, coordDim, coordDimIndex) {
+	    if (OTHER_DIMENSIONS.get(coordDim) != null) {
+	      resultItem.otherDims[coordDim] = coordDimIndex;
+	    } else {
+	      resultItem.coordDim = coordDim;
+	      resultItem.coordDimIndex = coordDimIndex;
+	      coordDimNameMap.set(coordDim, true);
+	    }
+	  } // Make sure the first extra dim is 'value'.
+
 
 	  var extra = opt.extraPrefix || 'value'; // Set dim `name` and other `coordDim` and other props.
 
@@ -330,62 +360,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var coordDim = resultItem.coordDim;
 	    coordDim == null && (resultItem.coordDim = genName(extra, coordDimNameMap, opt.extraFromZero), resultItem.coordDimIndex = 0, resultItem.isExtraCoord = true);
 	    resultItem.name == null && (resultItem.name = genName(resultItem.coordDim, dataDimNameMap));
-	    resultItem.type == null && guessOrdinal(data, resultDimIdx) && (resultItem.type = 'ordinal');
+
+	    if (resultItem.type == null && guessOrdinal(source, resultDimIdx, resultItem.name)) {
+	      resultItem.type = 'ordinal';
+	    }
 	  }
 
 	  return result;
+	} // ??? TODO
+	// Originally detect dimCount by data[0]. Should we
+	// optimize it to only by sysDims and dimensions and encode.
+	// So only necessary dims will be initialized.
+	// But
+	// (1) custom series should be considered. where other dims
+	// may be visited.
+	// (2) sometimes user need to calcualte bubble size or use visualMap
+	// on other dimensions besides coordSys needed.
 
-	  function applyDim(resultItem, coordDim, coordDimIndex) {
-	    if (OTHER_DIMS[coordDim]) {
-	      resultItem.otherDims[coordDim] = coordDimIndex;
-	    } else {
-	      resultItem.coordDim = coordDim;
-	      resultItem.coordDimIndex = coordDimIndex;
-	      coordDimNameMap.set(coordDim, true);
-	    }
+
+	function getDimCount(source, sysDims, dimsDef, dimCount) {
+	  if (dimCount == null) {
+	    dimCount = Math.max(source.dimensionsDetectCount || 1, sysDims.length, dimsDef.length);
+	    each(sysDims, function (sysDimItem) {
+	      var sysDimItemDimsDef = sysDimItem.dimsDef;
+	      sysDimItemDimsDef && (dimCount = Math.max(dimCount, sysDimItemDimsDef.length));
+	    });
 	  }
 
-	  function genName(name, map, fromZero) {
-	    if (fromZero || map.get(name) != null) {
-	      var i = 0;
+	  return dimCount;
+	}
 
-	      while (map.get(name + i) != null) {
-	        i++;
-	      }
+	function genName(name, map, fromZero) {
+	  if (fromZero || map.get(name) != null) {
+	    var i = 0;
 
-	      name += i;
+	    while (map.get(name + i) != null) {
+	      i++;
 	    }
 
-	    map.set(name, true);
-	    return name;
-	  }
-	} // The rule should not be complex, otherwise user might not
-	// be able to known where the data is wrong.
-
-
-	var guessOrdinal = completeDimensions.guessOrdinal = function (data, dimIndex) {
-	  for (var i = 0, len = data.length; i < len; i++) {
-	    var value = retrieveValue(data[i]);
-
-	    if (!zrUtil.isArray(value)) {
-	      return false;
-	    }
-
-	    var value = value[dimIndex]; // Consider usage convenience, '1', '2' will be treated as "number".
-	    // `isFinit('')` get `true`.
-
-	    if (value != null && isFinite(value) && value !== '') {
-	      return false;
-	    } else if (isString(value) && value !== '-') {
-	      return true;
-	    }
+	    name += i;
 	  }
 
-	  return false;
-	};
-
-	function retrieveValue(o) {
-	  return zrUtil.isArray(o) ? o : zrUtil.isObject(o) ? o.value : o;
+	  map.set(name, true);
+	  return name;
 	}
 
 	var _default = completeDimensions;
@@ -427,7 +444,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	var nativeFilter = arrayProto.filter;
 	var nativeSlice = arrayProto.slice;
 	var nativeMap = arrayProto.map;
-	var nativeReduce = arrayProto.reduce;
+	var nativeReduce = arrayProto.reduce; // Avoid assign to an exported variable, for transforming to cjs.
+
+	var methods = {};
+
+	function $override(name, fn) {
+	  // Clear ctx instance for different environment
+	  if (name === 'createCanvas') {
+	    _ctx = null;
+	  }
+
+	  methods[name] = fn;
+	}
 	/**
 	 * Those data types can be cloned:
 	 *     Plain object, Array, TypedArray, number, string, null, undefined.
@@ -445,6 +473,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {*} new
 	 */
 
+
 	function clone(source) {
 	  if (source == null || typeof source != 'object') {
 	    return source;
@@ -454,21 +483,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var typeStr = objToString.call(source);
 
 	  if (typeStr === '[object Array]') {
-	    result = [];
-
-	    for (var i = 0, len = source.length; i < len; i++) {
-	      result[i] = clone(source[i]);
-	    }
-	  } else if (TYPED_ARRAY[typeStr]) {
-	    var Ctor = source.constructor;
-
-	    if (source.constructor.from) {
-	      result = Ctor.from(source);
-	    } else {
-	      result = new Ctor(source.length);
+	    if (!isPrimitive(source)) {
+	      result = [];
 
 	      for (var i = 0, len = source.length; i < len; i++) {
 	        result[i] = clone(source[i]);
+	      }
+	    }
+	  } else if (TYPED_ARRAY[typeStr]) {
+	    if (!isPrimitive(source)) {
+	      var Ctor = source.constructor;
+
+	      if (source.constructor.from) {
+	        result = Ctor.from(source);
+	      } else {
+	        result = new Ctor(source.length);
+
+	        for (var i = 0, len = source.length; i < len; i++) {
+	          result[i] = clone(source[i]);
+	        }
 	      }
 	    }
 	  } else if (!BUILTIN_OBJECT[typeStr] && !isPrimitive(source) && !isDom(source)) {
@@ -567,6 +600,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var createCanvas = function () {
+	  return methods.createCanvas();
+	};
+
+	methods.createCanvas = function () {
 	  return document.createElement('canvas');
 	}; // FIXME
 
@@ -874,6 +911,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
+	function isTypedArray(value) {
+	  return !!TYPED_ARRAY[objToString.call(value)];
+	}
+	/**
+	 * @memberOf module:zrender/core/util
+	 * @param {*} value
+	 * @return {boolean}
+	 */
+
+
 	function isDom(value) {
 	  return typeof value === 'object' && typeof value.nodeType === 'number' && typeof value.ownerDocument === 'object';
 	}
@@ -962,6 +1009,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw new Error(message);
 	  }
 	}
+	/**
+	 * @memberOf module:zrender/core/util
+	 * @param {string} str string to be trimed
+	 * @return {string} trimed string
+	 */
+
+
+	function trim(str) {
+	  if (str == null) {
+	    return null;
+	  } else if (typeof str.trim === 'function') {
+	    return str.trim();
+	  } else {
+	    return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+	  }
+	}
 
 	var primitiveKey = '__ec_primitive__';
 	/**
@@ -982,40 +1045,41 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	function HashMap(obj) {
-	  obj && each(obj, function (value, key) {
-	    this.set(key, value);
-	  }, this);
+	  var isArr = isArray(obj);
+	  var thisMap = this;
+	  obj instanceof HashMap ? obj.each(visit) : obj && each(obj, visit);
+
+	  function visit(value, key) {
+	    isArr ? thisMap.set(value, key) : thisMap.set(key, value);
+	  }
 	} // Add prefix to avoid conflict with Object.prototype.
 
 
-	var HASH_MAP_PREFIX = '_ec_';
-	var HASH_MAP_PREFIX_LENGTH = 4;
 	HashMap.prototype = {
 	  constructor: HashMap,
 	  // Do not provide `has` method to avoid defining what is `has`.
 	  // (We usually treat `null` and `undefined` as the same, different
 	  // from ES6 Map).
 	  get: function (key) {
-	    return this[HASH_MAP_PREFIX + key];
+	    return this.hasOwnProperty(key) ? this[key] : null;
 	  },
 	  set: function (key, value) {
-	    this[HASH_MAP_PREFIX + key] = value; // Comparing with invocation chaining, `return value` is more commonly
+	    // Comparing with invocation chaining, `return value` is more commonly
 	    // used in this case: `var someVal = map.set('a', genVal());`
-
-	    return value;
+	    return this[key] = value;
 	  },
 	  // Although util.each can be performed on this hashMap directly, user
 	  // should not use the exposed keys, who are prefixed.
 	  each: function (cb, context) {
 	    context !== void 0 && (cb = bind(cb, context));
 
-	    for (var prefixedKey in this) {
-	      this.hasOwnProperty(prefixedKey) && cb(this[prefixedKey], prefixedKey.slice(HASH_MAP_PREFIX_LENGTH));
+	    for (var key in this) {
+	      this.hasOwnProperty(key) && cb(this[key], key);
 	    }
 	  },
 	  // Do not use this method if performance sensitive.
 	  removeKey: function (key) {
-	    delete this[HASH_MAP_PREFIX + key];
+	    delete this[key];
 	  }
 	};
 
@@ -1023,13 +1087,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return new HashMap(obj);
 	}
 
+	function concatArray(a, b) {
+	  var newArray = new a.constructor(a.length + b.length);
+
+	  for (var i = 0; i < a.length; i++) {
+	    newArray[i] = a[i];
+	  }
+
+	  var offset = a.length;
+
+	  for (i = 0; i < b.length; i++) {
+	    newArray[i + offset] = b[i];
+	  }
+
+	  return newArray;
+	}
+
 	function noop() {}
 
-	var $inject = {
-	  createCanvas: function (f) {
-	    createCanvas = f;
-	  }
-	};
+	exports.$override = $override;
 	exports.clone = clone;
 	exports.merge = merge;
 	exports.mergeAll = mergeAll;
@@ -1053,6 +1129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isString = isString;
 	exports.isObject = isObject;
 	exports.isBuiltInObject = isBuiltInObject;
+	exports.isTypedArray = isTypedArray;
 	exports.isDom = isDom;
 	exports.eqNaN = eqNaN;
 	exports.retrieve = retrieve;
@@ -1061,11 +1138,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.slice = slice;
 	exports.normalizeCssArray = normalizeCssArray;
 	exports.assert = assert;
+	exports.trim = trim;
 	exports.setAsPrimitive = setAsPrimitive;
 	exports.isPrimitive = isPrimitive;
 	exports.createHashMap = createHashMap;
+	exports.concatArray = concatArray;
 	exports.noop = noop;
-	exports.$inject = $inject;
 
 /***/ },
 /* 6 */
@@ -1073,14 +1151,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var zrUtil = __webpack_require__(5);
 
-	var formatUtil = __webpack_require__(7);
-
-	var nubmerUtil = __webpack_require__(14);
-
-	var Model = __webpack_require__(15);
-
 	var each = zrUtil.each;
 	var isObject = zrUtil.isObject;
+	var isArray = zrUtil.isArray;
+	/**
+	 * name may be displayed on screen, so use '-'.
+	 * But we should make sure it is not duplicated
+	 * with user specified name, so use '\0';
+	 */
+
+	var DEFAULT_COMPONENT_NAME = '\0-';
 	/**
 	 * If value is not array, then translate it to array.
 	 * @param  {*} value
@@ -1094,30 +1174,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Sync default option between normal and emphasis like `position` and `show`
 	 * In case some one will write code like
 	 *     label: {
-	 *         normal: {
-	 *             show: false,
-	 *             position: 'outside',
-	 *             fontSize: 18
-	 *         },
-	 *         emphasis: {
-	 *             show: true
-	 *         }
+	 *          show: false,
+	 *          position: 'outside',
+	 *          fontSize: 18
+	 *     },
+	 *     emphasis: {
+	 *          label: { show: true }
 	 *     }
 	 * @param {Object} opt
+	 * @param {string} key
 	 * @param {Array.<string>} subOpts
 	 */
 
 
-	function defaultEmphasis(opt, subOpts) {
+	function defaultEmphasis(opt, key, subOpts) {
 	  if (opt) {
-	    var emphasisOpt = opt.emphasis = opt.emphasis || {};
-	    var normalOpt = opt.normal = opt.normal || {}; // Default emphasis option from normal
+	    opt[key] = opt[key] || {};
+	    opt.emphasis = opt.emphasis || {};
+	    opt.emphasis[key] = opt.emphasis[key] || {}; // Default emphasis option from normal
 
 	    for (var i = 0, len = subOpts.length; i < len; i++) {
 	      var subOptName = subOpts[i];
 
-	      if (!emphasisOpt.hasOwnProperty(subOptName) && normalOpt.hasOwnProperty(subOptName)) {
-	        emphasisOpt[subOptName] = normalOpt[subOptName];
+	      if (!opt.emphasis[key].hasOwnProperty(subOptName) && opt[key].hasOwnProperty(subOptName)) {
+	        opt.emphasis[key][subOptName] = opt[key][subOptName];
 	      }
 	    }
 	  }
@@ -1131,6 +1211,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// ]);
 
 	/**
+	 * The method do not ensure performance.
 	 * data could be [12, 2323, {value: 223}, [1221, 23], {value: [2, 23]}]
 	 * This helper method retieves value from data.
 	 * @param {string|number|Date|Array|Object} dataItem
@@ -1138,8 +1219,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function getDataItemValue(dataItem) {
-	  // Performance sensitive.
-	  return dataItem && (dataItem.value == null ? dataItem : dataItem.value);
+	  return isObject(dataItem) && !isArray(dataItem) && !(dataItem instanceof Date) ? dataItem.value : dataItem;
 	}
 	/**
 	 * data could be [12, 2323, {value: 223}, [1221, 23], {value: [2, 23]}]
@@ -1153,144 +1233,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // && !(dataItem[0] && isObject(dataItem[0]) && !(dataItem[0] instanceof Array));
 	}
 	/**
-	 * This helper method convert value in data.
-	 * @param {string|number|Date} value
-	 * @param {Object|string} [dimInfo] If string (like 'x'), dimType defaults 'number'.
-	 */
-
-
-	function converDataValue(value, dimInfo) {
-	  // Performance sensitive.
-	  var dimType = dimInfo && dimInfo.type;
-
-	  if (dimType === 'ordinal') {
-	    return value;
-	  }
-
-	  if (dimType === 'time' // spead up when using timestamp
-	  && typeof value !== 'number' && value != null && value !== '-') {
-	    value = +nubmerUtil.parseDate(value);
-	  } // dimType defaults 'number'.
-	  // If dimType is not ordinal and value is null or undefined or NaN or '-',
-	  // parse to NaN.
-
-
-	  return value == null || value === '' ? NaN : +value; // If string (like '-'), using '+' parse to NaN
-	}
-	/**
-	 * Create a model proxy to be used in tooltip for edge data, markLine data, markPoint data.
-	 * @param {module:echarts/data/List} data
-	 * @param {Object} opt
-	 * @param {string} [opt.seriesIndex]
-	 * @param {Object} [opt.name]
-	 * @param {Object} [opt.mainType]
-	 * @param {Object} [opt.subType]
-	 */
-
-
-	function createDataFormatModel(data, opt) {
-	  var model = new Model();
-	  zrUtil.mixin(model, dataFormatMixin);
-	  model.seriesIndex = opt.seriesIndex;
-	  model.name = opt.name || '';
-	  model.mainType = opt.mainType;
-	  model.subType = opt.subType;
-
-	  model.getData = function () {
-	    return data;
-	  };
-
-	  return model;
-	} // PENDING A little ugly
-
-
-	var dataFormatMixin = {
-	  /**
-	   * Get params for formatter
-	   * @param {number} dataIndex
-	   * @param {string} [dataType]
-	   * @return {Object}
-	   */
-	  getDataParams: function (dataIndex, dataType) {
-	    var data = this.getData(dataType);
-	    var rawValue = this.getRawValue(dataIndex, dataType);
-	    var rawDataIndex = data.getRawIndex(dataIndex);
-	    var name = data.getName(dataIndex, true);
-	    var itemOpt = data.getRawDataItem(dataIndex);
-	    var color = data.getItemVisual(dataIndex, 'color');
-	    return {
-	      componentType: this.mainType,
-	      componentSubType: this.subType,
-	      seriesType: this.mainType === 'series' ? this.subType : null,
-	      seriesIndex: this.seriesIndex,
-	      seriesId: this.id,
-	      seriesName: this.name,
-	      name: name,
-	      dataIndex: rawDataIndex,
-	      data: itemOpt,
-	      dataType: dataType,
-	      value: rawValue,
-	      color: color,
-	      marker: formatUtil.getTooltipMarker(color),
-	      // Param name list for mapping `a`, `b`, `c`, `d`, `e`
-	      $vars: ['seriesName', 'name', 'value']
-	    };
-	  },
-
-	  /**
-	   * Format label
-	   * @param {number} dataIndex
-	   * @param {string} [status='normal'] 'normal' or 'emphasis'
-	   * @param {string} [dataType]
-	   * @param {number} [dimIndex]
-	   * @param {string} [labelProp='label']
-	   * @return {string}
-	   */
-	  getFormattedLabel: function (dataIndex, status, dataType, dimIndex, labelProp) {
-	    status = status || 'normal';
-	    var data = this.getData(dataType);
-	    var itemModel = data.getItemModel(dataIndex);
-	    var params = this.getDataParams(dataIndex, dataType);
-
-	    if (dimIndex != null && params.value instanceof Array) {
-	      params.value = params.value[dimIndex];
-	    }
-
-	    var formatter = itemModel.get([labelProp || 'label', status, 'formatter']);
-
-	    if (typeof formatter === 'function') {
-	      params.status = status;
-	      return formatter(params);
-	    } else if (typeof formatter === 'string') {
-	      return formatUtil.formatTpl(formatter, params);
-	    }
-	  },
-
-	  /**
-	   * Get raw value in option
-	   * @param {number} idx
-	   * @param {string} [dataType]
-	   * @return {Object}
-	   */
-	  getRawValue: function (idx, dataType) {
-	    var data = this.getData(dataType);
-	    var dataItem = data.getRawDataItem(idx);
-
-	    if (dataItem != null) {
-	      return isObject(dataItem) && !(dataItem instanceof Array) ? dataItem.value : dataItem;
-	    }
-	  },
-
-	  /**
-	   * Should be implemented.
-	   * @param {number} dataIndex
-	   * @param {boolean} [multipleSeries=false]
-	   * @param {number} [dataType]
-	   * @return {string} tooltip string
-	   */
-	  formatTooltip: zrUtil.noop
-	};
-	/**
 	 * Mapping to exists for merge.
 	 *
 	 * @public
@@ -1299,6 +1241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Array.<Object>} Result, like [{exist: ..., option: ...}, {}],
 	 *                          index of which is the same as exists.
 	 */
+
 
 	function mappingToExists(exists, newCptOptions) {
 	  // Mapping by the order by original option (but not order of
@@ -1421,7 +1364,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // instance will be recreated, which can be accepted.
 
 
-	    keyInfo.name = opt.name != null ? opt.name + '' : existCpt ? existCpt.name : '\0-'; // name may be displayed on screen, so use '-'.
+	    keyInfo.name = opt.name != null ? opt.name + '' : existCpt ? existCpt.name : DEFAULT_COMPONENT_NAME;
 
 	    if (existCpt) {
 	      keyInfo.id = existCpt.id;
@@ -1534,10 +1477,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Notice: Serialization is not supported.
 	 *
 	 * For example:
-	 * var get = modelUitl.makeGetter();
+	 * var inner = zrUitl.makeInner();
 	 *
-	 * function some(hostObj) {
-	 *      get(hostObj)._someProperty = 1212;
+	 * function some1(hostObj) {
+	 *      inner(hostObj).someProperty = 1212;
+	 *      ...
+	 * }
+	 * function some2() {
+	 *      var fields = inner(this);
+	 *      fields.someProperty1 = 1212;
+	 *      fields.someProperty2 = 'xx';
 	 *      ...
 	 * }
 	 *
@@ -1545,15 +1494,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 
-	var makeGetter = function () {
-	  var index = 0;
-	  return function () {
-	    var key = '\0__ec_prop_getter_' + index++;
-	    return function (hostObj) {
-	      return hostObj[key] || (hostObj[key] = {});
-	    };
+	function makeInner() {
+	  // Consider different scope by es module import.
+	  var key = '__\0ec_inner_' + innerUniqueIndex++ + '_' + Math.random().toFixed(5);
+	  return function (hostObj) {
+	    return hostObj[key] || (hostObj[key] = {});
 	  };
-	}();
+	}
+
+	var innerUniqueIndex = 0;
 	/**
 	 * @param {module:echarts/model/Global} ecModel
 	 * @param {string|Object} finder
@@ -1589,7 +1538,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *            ...
 	 *        }
 	 */
-
 
 	function parseFinder(ecModel, finder, opt) {
 	  if (zrUtil.isString(finder)) {
@@ -1635,2795 +1583,895 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	  return result;
 	}
-	/**
-	 * @see {module:echarts/data/helper/completeDimensions}
-	 * @param {module:echarts/data/List} data
-	 * @param {string|number} dataDim
-	 * @return {string}
-	 */
-
-
-	function dataDimToCoordDim(data, dataDim) {
-	  var dimensions = data.dimensions;
-	  dataDim = data.getDimension(dataDim);
-
-	  for (var i = 0; i < dimensions.length; i++) {
-	    var dimItem = data.getDimensionInfo(dimensions[i]);
-
-	    if (dimItem.name === dataDim) {
-	      return dimItem.coordDim;
-	    }
-	  }
-	}
-	/**
-	 * @see {module:echarts/data/helper/completeDimensions}
-	 * @param {module:echarts/data/List} data
-	 * @param {string} coordDim
-	 * @return {Array.<string>} data dimensions on the coordDim.
-	 */
-
-
-	function coordDimToDataDim(data, coordDim) {
-	  var dataDim = [];
-	  each(data.dimensions, function (dimName) {
-	    var dimItem = data.getDimensionInfo(dimName);
-
-	    if (dimItem.coordDim === coordDim) {
-	      dataDim[dimItem.coordDimIndex] = dimItem.name;
-	    }
-	  });
-	  return dataDim;
-	}
-	/**
-	 * @see {module:echarts/data/helper/completeDimensions}
-	 * @param {module:echarts/data/List} data
-	 * @param {string} otherDim Can be `otherDims`
-	 *                        like 'label' or 'tooltip'.
-	 * @return {Array.<string>} data dimensions on the otherDim.
-	 */
-
-
-	function otherDimToDataDim(data, otherDim) {
-	  var dataDim = [];
-	  each(data.dimensions, function (dimName) {
-	    var dimItem = data.getDimensionInfo(dimName);
-	    var otherDims = dimItem.otherDims;
-	    var dimIndex = otherDims[otherDim];
-
-	    if (dimIndex != null && dimIndex !== false) {
-	      dataDim[dimIndex] = dimItem.name;
-	    }
-	  });
-	  return dataDim;
-	}
 
 	function has(obj, prop) {
 	  return obj && obj.hasOwnProperty(prop);
 	}
 
+	function setAttribute(dom, key, value) {
+	  dom.setAttribute ? dom.setAttribute(key, value) : dom[key] = value;
+	}
+
+	function getAttribute(dom, key) {
+	  return dom.getAttribute ? dom.getAttribute(key) : dom[key];
+	}
+
+	exports.DEFAULT_COMPONENT_NAME = DEFAULT_COMPONENT_NAME;
 	exports.normalizeToArray = normalizeToArray;
 	exports.defaultEmphasis = defaultEmphasis;
 	exports.TEXT_STYLE_OPTIONS = TEXT_STYLE_OPTIONS;
 	exports.getDataItemValue = getDataItemValue;
 	exports.isDataItemOption = isDataItemOption;
-	exports.converDataValue = converDataValue;
-	exports.createDataFormatModel = createDataFormatModel;
-	exports.dataFormatMixin = dataFormatMixin;
 	exports.mappingToExists = mappingToExists;
 	exports.makeIdAndName = makeIdAndName;
 	exports.isIdInner = isIdInner;
 	exports.compressBatches = compressBatches;
 	exports.queryDataIndex = queryDataIndex;
-	exports.makeGetter = makeGetter;
+	exports.makeInner = makeInner;
 	exports.parseFinder = parseFinder;
-	exports.dataDimToCoordDim = dataDimToCoordDim;
-	exports.coordDimToDataDim = coordDimToDataDim;
-	exports.otherDimToDataDim = otherDimToDataDim;
+	exports.setAttribute = setAttribute;
+	exports.getAttribute = getAttribute;
 
 /***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
+	var _config = __webpack_require__(8);
 
-	var textContain = __webpack_require__(8);
+	var __DEV__ = _config.__DEV__;
 
-	var numberUtil = __webpack_require__(14);
+	var _model = __webpack_require__(6);
 
-	/**
-	 * 每三位默认加,格式化
-	 * @param {string|number} x
-	 * @return {string}
-	 */
-	function addCommas(x) {
-	  if (isNaN(x)) {
-	    return '-';
-	  }
+	var makeInner = _model.makeInner;
+	var getDataItemValue = _model.getDataItemValue;
 
-	  x = (x + '').split('.');
-	  return x[0].replace(/(\d{1,3})(?=(?:\d{3})+(?!\d))/g, '$1,') + (x.length > 1 ? '.' + x[1] : '');
-	}
-	/**
-	 * @param {string} str
-	 * @param {boolean} [upperCaseFirst=false]
-	 * @return {string} str
-	 */
+	var _referHelper = __webpack_require__(9);
 
-
-	function toCamelCase(str, upperCaseFirst) {
-	  str = (str || '').toLowerCase().replace(/-(.)/g, function (match, group1) {
-	    return group1.toUpperCase();
-	  });
-
-	  if (upperCaseFirst && str) {
-	    str = str.charAt(0).toUpperCase() + str.slice(1);
-	  }
-
-	  return str;
-	}
-
-	var normalizeCssArray = zrUtil.normalizeCssArray;
-
-	function encodeHTML(source) {
-	  return String(source).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-	}
-
-	var TPL_VAR_ALIAS = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
-
-	var wrapVar = function (varName, seriesIdx) {
-	  return '{' + varName + (seriesIdx == null ? '' : seriesIdx) + '}';
-	};
-	/**
-	 * Template formatter
-	 * @param {string} tpl
-	 * @param {Array.<Object>|Object} paramsList
-	 * @param {boolean} [encode=false]
-	 * @return {string}
-	 */
-
-
-	function formatTpl(tpl, paramsList, encode) {
-	  if (!zrUtil.isArray(paramsList)) {
-	    paramsList = [paramsList];
-	  }
-
-	  var seriesLen = paramsList.length;
-
-	  if (!seriesLen) {
-	    return '';
-	  }
-
-	  var $vars = paramsList[0].$vars || [];
-
-	  for (var i = 0; i < $vars.length; i++) {
-	    var alias = TPL_VAR_ALIAS[i];
-	    var val = wrapVar(alias, 0);
-	    tpl = tpl.replace(wrapVar(alias), encode ? encodeHTML(val) : val);
-	  }
-
-	  for (var seriesIdx = 0; seriesIdx < seriesLen; seriesIdx++) {
-	    for (var k = 0; k < $vars.length; k++) {
-	      var val = paramsList[seriesIdx][$vars[k]];
-	      tpl = tpl.replace(wrapVar(TPL_VAR_ALIAS[k], seriesIdx), encode ? encodeHTML(val) : val);
-	    }
-	  }
-
-	  return tpl;
-	}
-	/**
-	 * simple Template formatter
-	 *
-	 * @param {string} tpl
-	 * @param {Object} param
-	 * @param {boolean} [encode=false]
-	 * @return {string}
-	 */
-
-
-	function formatTplSimple(tpl, param, encode) {
-	  zrUtil.each(param, function (value, key) {
-	    tpl = tpl.replace('{' + key + '}', encode ? encodeHTML(value) : value);
-	  });
-	  return tpl;
-	}
-	/**
-	 * @param {string} color
-	 * @param {string} [extraCssText]
-	 * @return {string}
-	 */
-
-
-	function getTooltipMarker(color, extraCssText) {
-	  return color ? '<span style="display:inline-block;margin-right:5px;' + 'border-radius:10px;width:9px;height:9px;background-color:' + encodeHTML(color) + ';' + (extraCssText || '') + '"></span>' : '';
-	}
-	/**
-	 * @param {string} str
-	 * @return {string}
-	 * @inner
-	 */
-
-
-	var s2d = function (str) {
-	  return str < 10 ? '0' + str : str;
-	};
-	/**
-	 * ISO Date format
-	 * @param {string} tpl
-	 * @param {number} value
-	 * @param {boolean} [isUTC=false] Default in local time.
-	 *           see `module:echarts/scale/Time`
-	 *           and `module:echarts/util/number#parseDate`.
-	 * @inner
-	 */
-
-
-	function formatTime(tpl, value, isUTC) {
-	  if (tpl === 'week' || tpl === 'month' || tpl === 'quarter' || tpl === 'half-year' || tpl === 'year') {
-	    tpl = 'MM-dd\nyyyy';
-	  }
-
-	  var date = numberUtil.parseDate(value);
-	  var utc = isUTC ? 'UTC' : '';
-	  var y = date['get' + utc + 'FullYear']();
-	  var M = date['get' + utc + 'Month']() + 1;
-	  var d = date['get' + utc + 'Date']();
-	  var h = date['get' + utc + 'Hours']();
-	  var m = date['get' + utc + 'Minutes']();
-	  var s = date['get' + utc + 'Seconds']();
-	  tpl = tpl.replace('MM', s2d(M)).replace('M', M).replace('yyyy', y).replace('yy', y % 100).replace('dd', s2d(d)).replace('d', d).replace('hh', s2d(h)).replace('h', h).replace('mm', s2d(m)).replace('m', m).replace('ss', s2d(s)).replace('s', s);
-	  return tpl;
-	}
-	/**
-	 * Capital first
-	 * @param {string} str
-	 * @return {string}
-	 */
-
-
-	function capitalFirst(str) {
-	  return str ? str.charAt(0).toUpperCase() + str.substr(1) : str;
-	}
-
-	var truncateText = textContain.truncateText;
-	var getTextRect = textContain.getBoundingRect;
-	exports.addCommas = addCommas;
-	exports.toCamelCase = toCamelCase;
-	exports.normalizeCssArray = normalizeCssArray;
-	exports.encodeHTML = encodeHTML;
-	exports.formatTpl = formatTpl;
-	exports.formatTplSimple = formatTplSimple;
-	exports.getTooltipMarker = getTooltipMarker;
-	exports.formatTime = formatTime;
-	exports.capitalFirst = capitalFirst;
-	exports.truncateText = truncateText;
-	exports.getTextRect = getTextRect;
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var BoundingRect = __webpack_require__(9);
-
-	var imageHelper = __webpack_require__(12);
+	var getCoordSysDefineBySeries = _referHelper.getCoordSysDefineBySeries;
 
 	var _util = __webpack_require__(5);
 
-	var getContext = _util.getContext;
+	var createHashMap = _util.createHashMap;
+	var each = _util.each;
+	var map = _util.map;
+	var isArray = _util.isArray;
+	var isString = _util.isString;
+	var isObject = _util.isObject;
+	var isTypedArray = _util.isTypedArray;
+	var isArrayLike = _util.isArrayLike;
 	var extend = _util.extend;
-	var retrieve2 = _util.retrieve2;
-	var retrieve3 = _util.retrieve3;
-	var textWidthCache = {};
-	var textWidthCacheCounter = 0;
-	var TEXT_CACHE_MAX = 5000;
-	var STYLE_REG = /\{([a-zA-Z0-9_]+)\|([^}]*)\}/g;
-	var DEFAULT_FONT = '12px sans-serif';
+	var assert = _util.assert;
+
+	var Source = __webpack_require__(10);
+
+	var _sourceType = __webpack_require__(12);
+
+	var SOURCE_FORMAT_ORIGINAL = _sourceType.SOURCE_FORMAT_ORIGINAL;
+	var SOURCE_FORMAT_ARRAY_ROWS = _sourceType.SOURCE_FORMAT_ARRAY_ROWS;
+	var SOURCE_FORMAT_OBJECT_ROWS = _sourceType.SOURCE_FORMAT_OBJECT_ROWS;
+	var SOURCE_FORMAT_KEYED_COLUMNS = _sourceType.SOURCE_FORMAT_KEYED_COLUMNS;
+	var SOURCE_FORMAT_UNKNOWN = _sourceType.SOURCE_FORMAT_UNKNOWN;
+	var SOURCE_FORMAT_TYPED_ARRAY = _sourceType.SOURCE_FORMAT_TYPED_ARRAY;
+	var SERIES_LAYOUT_BY_ROW = _sourceType.SERIES_LAYOUT_BY_ROW;
+	var inner = makeInner();
 	/**
-	 * @public
-	 * @param {string} text
-	 * @param {string} font
-	 * @return {number} width
+	 * @see {module:echarts/data/Source}
+	 * @param {module:echarts/component/dataset/DatasetModel} datasetModel
+	 * @return {string} sourceFormat
 	 */
 
-	function getWidth(text, font) {
-	  font = font || DEFAULT_FONT;
-	  var key = text + ':' + font;
+	function detectSourceFormat(datasetModel) {
+	  var data = datasetModel.option.source;
+	  var sourceFormat = SOURCE_FORMAT_UNKNOWN;
 
-	  if (textWidthCache[key]) {
-	    return textWidthCache[key];
+	  if (isTypedArray(data)) {
+	    sourceFormat = SOURCE_FORMAT_TYPED_ARRAY;
+	  } else if (isArray(data)) {
+	    // FIXME Whether tolerate null in top level array?
+	    for (var i = 0, len = data.length; i < len; i++) {
+	      var item = data[i];
+
+	      if (item == null) {
+	        continue;
+	      } else if (isArray(item)) {
+	        sourceFormat = SOURCE_FORMAT_ARRAY_ROWS;
+	        break;
+	      } else if (isObject(item)) {
+	        sourceFormat = SOURCE_FORMAT_OBJECT_ROWS;
+	        break;
+	      }
+	    }
+	  } else if (isObject(data)) {
+	    for (var key in data) {
+	      if (data.hasOwnProperty(key) && isArrayLike(data[key])) {
+	        sourceFormat = SOURCE_FORMAT_KEYED_COLUMNS;
+	        break;
+	      }
+	    }
+	  } else if (data != null) {
+	    throw new Error('Invalid data');
 	  }
 
-	  var textLines = (text + '').split('\n');
-	  var width = 0;
-
-	  for (var i = 0, l = textLines.length; i < l; i++) {
-	    // textContain.measureText may be overrided in SVG or VML
-	    width = Math.max(measureText(textLines[i], font).width, width);
-	  }
-
-	  if (textWidthCacheCounter > TEXT_CACHE_MAX) {
-	    textWidthCacheCounter = 0;
-	    textWidthCache = {};
-	  }
-
-	  textWidthCacheCounter++;
-	  textWidthCache[key] = width;
-	  return width;
+	  inner(datasetModel).sourceFormat = sourceFormat;
 	}
 	/**
-	 * @public
-	 * @param {string} text
-	 * @param {string} font
-	 * @param {string} [textAlign='left']
-	 * @param {string} [textVerticalAlign='top']
-	 * @param {Array.<number>} [textPadding]
-	 * @param {Object} [rich]
-	 * @param {Object} [truncate]
-	 * @return {Object} {x, y, width, height, lineHeight}
+	 * [Scenarios]:
+	 * (1) Provide source data directly:
+	 *     series: {
+	 *         encode: {...},
+	 *         dimensions: [...]
+	 *         seriesLayoutBy: 'row',
+	 *         data: [[...]]
+	 *     }
+	 * (2) Refer to datasetModel.
+	 *     series: [{
+	 *         encode: {...}
+	 *         // Ignore datasetIndex means `datasetIndex: 0`
+	 *         // and the dimensions defination in dataset is used
+	 *     }, {
+	 *         encode: {...},
+	 *         seriesLayoutBy: 'column',
+	 *         datasetIndex: 1
+	 *     }]
+	 *
+	 * Get data from series itself or datset.
+	 * @return {module:echarts/data/Source} source
 	 */
 
 
-	function getBoundingRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) {
-	  return rich ? getRichTextRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) : getPlainTextRect(text, font, textAlign, textVerticalAlign, textPadding, truncate);
+	function getSource(seriesModel) {
+	  return inner(seriesModel).source;
 	}
+	/**
+	 * MUST be called before mergeOption of all series.
+	 * @param {module:echarts/model/Global} ecModel
+	 */
 
-	function getPlainTextRect(text, font, textAlign, textVerticalAlign, textPadding, truncate) {
-	  var contentBlock = parsePlainText(text, font, textPadding, truncate);
-	  var outerWidth = getWidth(text, font);
 
-	  if (textPadding) {
-	    outerWidth += textPadding[1] + textPadding[3];
+	function resetSourceDefaulter(ecModel) {
+	  // `datasetMap` is used to make default encode.
+	  inner(ecModel).datasetMap = createHashMap();
+	}
+	/**
+	 * [Caution]:
+	 * MUST be called after series option merged and
+	 * before "series.getInitailData()" called.
+	 *
+	 * [The rule of making default encode]:
+	 * Category axis (if exists) alway map to the first dimension.
+	 * Each other axis occupies a subsequent dimension.
+	 *
+	 * [Why make default encode]:
+	 * Simplify the typing of encode in option, avoiding the case like that:
+	 * series: [{encode: {x: 0, y: 1}}, {encode: {x: 0, y: 2}}, {encode: {x: 0, y: 3}}],
+	 * where the "y" have to be manually typed as "1, 2, 3, ...".
+	 *
+	 * @param {module:echarts/model/Series} seriesModel
+	 */
+
+
+	function prepareSource(seriesModel) {
+	  var seriesOption = seriesModel.option;
+	  var data = seriesOption.data;
+	  var sourceFormat = isTypedArray(data) ? SOURCE_FORMAT_TYPED_ARRAY : SOURCE_FORMAT_ORIGINAL;
+	  var fromDataset = false;
+	  var seriesLayoutBy = seriesOption.seriesLayoutBy;
+	  var sourceHeader = seriesOption.sourceHeader;
+	  var dimensionsDefine = seriesOption.dimensions;
+	  var datasetModel = getDatasetModel(seriesModel);
+
+	  if (datasetModel) {
+	    var datasetOption = datasetModel.option;
+	    data = datasetOption.source;
+	    sourceFormat = inner(datasetModel).sourceFormat;
+	    fromDataset = true; // These settings from series has higher priority.
+
+	    seriesLayoutBy = seriesLayoutBy || datasetOption.seriesLayoutBy;
+	    sourceHeader == null && (sourceHeader = datasetOption.sourceHeader);
+	    dimensionsDefine = dimensionsDefine || datasetOption.dimensions;
 	  }
 
-	  var outerHeight = contentBlock.outerHeight;
-	  var x = adjustTextX(0, outerWidth, textAlign);
-	  var y = adjustTextY(0, outerHeight, textVerticalAlign);
-	  var rect = new BoundingRect(x, y, outerWidth, outerHeight);
-	  rect.lineHeight = contentBlock.lineHeight;
-	  return rect;
-	}
+	  var completeResult = completeBySourceData(data, sourceFormat, seriesLayoutBy, sourceHeader, dimensionsDefine); // Note: dataset option does not have `encode`.
 
-	function getRichTextRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) {
-	  var contentBlock = parseRichText(text, {
-	    rich: rich,
-	    truncate: truncate,
-	    font: font,
-	    textAlign: textAlign,
-	    textPadding: textPadding
+	  var encodeDefine = seriesOption.encode;
+
+	  if (!encodeDefine && datasetModel) {
+	    encodeDefine = makeDefaultEncode(seriesModel, datasetModel, data, sourceFormat, seriesLayoutBy, completeResult);
+	  }
+
+	  inner(seriesModel).source = new Source({
+	    data: data,
+	    fromDataset: fromDataset,
+	    seriesLayoutBy: seriesLayoutBy,
+	    sourceFormat: sourceFormat,
+	    dimensionsDefine: completeResult.dimensionsDefine,
+	    startIndex: completeResult.startIndex,
+	    dimensionsDetectCount: completeResult.dimensionsDetectCount,
+	    encodeDefine: encodeDefine
 	  });
-	  var outerWidth = contentBlock.outerWidth;
-	  var outerHeight = contentBlock.outerHeight;
-	  var x = adjustTextX(0, outerWidth, textAlign);
-	  var y = adjustTextY(0, outerHeight, textVerticalAlign);
-	  return new BoundingRect(x, y, outerWidth, outerHeight);
-	}
-	/**
-	 * @public
-	 * @param {number} x
-	 * @param {number} width
-	 * @param {string} [textAlign='left']
-	 * @return {number} Adjusted x.
-	 */
+	} // return {startIndex, dimensionsDefine, dimensionsCount}
 
 
-	function adjustTextX(x, width, textAlign) {
-	  // FIXME Right to left language
-	  if (textAlign === 'right') {
-	    x -= width;
-	  } else if (textAlign === 'center') {
-	    x -= width / 2;
+	function completeBySourceData(data, sourceFormat, seriesLayoutBy, sourceHeader, dimensionsDefine) {
+	  if (!data) {
+	    return {
+	      dimensionsDefine: normalizeDimensionsDefine(dimensionsDefine)
+	    };
 	  }
 
-	  return x;
-	}
-	/**
-	 * @public
-	 * @param {number} y
-	 * @param {number} height
-	 * @param {string} [textVerticalAlign='top']
-	 * @return {number} Adjusted y.
-	 */
-
-
-	function adjustTextY(y, height, textVerticalAlign) {
-	  if (textVerticalAlign === 'middle') {
-	    y -= height / 2;
-	  } else if (textVerticalAlign === 'bottom') {
-	    y -= height;
-	  }
-
-	  return y;
-	}
-	/**
-	 * @public
-	 * @param {stirng} textPosition
-	 * @param {Object} rect {x, y, width, height}
-	 * @param {number} distance
-	 * @return {Object} {x, y, textAlign, textVerticalAlign}
-	 */
-
-
-	function adjustTextPositionOnRect(textPosition, rect, distance) {
-	  var x = rect.x;
-	  var y = rect.y;
-	  var height = rect.height;
-	  var width = rect.width;
-	  var halfHeight = height / 2;
-	  var textAlign = 'left';
-	  var textVerticalAlign = 'top';
-
-	  switch (textPosition) {
-	    case 'left':
-	      x -= distance;
-	      y += halfHeight;
-	      textAlign = 'right';
-	      textVerticalAlign = 'middle';
-	      break;
-
-	    case 'right':
-	      x += distance + width;
-	      y += halfHeight;
-	      textVerticalAlign = 'middle';
-	      break;
-
-	    case 'top':
-	      x += width / 2;
-	      y -= distance;
-	      textAlign = 'center';
-	      textVerticalAlign = 'bottom';
-	      break;
-
-	    case 'bottom':
-	      x += width / 2;
-	      y += height + distance;
-	      textAlign = 'center';
-	      break;
-
-	    case 'inside':
-	      x += width / 2;
-	      y += halfHeight;
-	      textAlign = 'center';
-	      textVerticalAlign = 'middle';
-	      break;
-
-	    case 'insideLeft':
-	      x += distance;
-	      y += halfHeight;
-	      textVerticalAlign = 'middle';
-	      break;
-
-	    case 'insideRight':
-	      x += width - distance;
-	      y += halfHeight;
-	      textAlign = 'right';
-	      textVerticalAlign = 'middle';
-	      break;
-
-	    case 'insideTop':
-	      x += width / 2;
-	      y += distance;
-	      textAlign = 'center';
-	      break;
-
-	    case 'insideBottom':
-	      x += width / 2;
-	      y += height - distance;
-	      textAlign = 'center';
-	      textVerticalAlign = 'bottom';
-	      break;
-
-	    case 'insideTopLeft':
-	      x += distance;
-	      y += distance;
-	      break;
-
-	    case 'insideTopRight':
-	      x += width - distance;
-	      y += distance;
-	      textAlign = 'right';
-	      break;
-
-	    case 'insideBottomLeft':
-	      x += distance;
-	      y += height - distance;
-	      textVerticalAlign = 'bottom';
-	      break;
-
-	    case 'insideBottomRight':
-	      x += width - distance;
-	      y += height - distance;
-	      textAlign = 'right';
-	      textVerticalAlign = 'bottom';
-	      break;
-	  }
-
-	  return {
-	    x: x,
-	    y: y,
-	    textAlign: textAlign,
-	    textVerticalAlign: textVerticalAlign
-	  };
-	}
-	/**
-	 * Show ellipsis if overflow.
-	 *
-	 * @public
-	 * @param  {string} text
-	 * @param  {string} containerWidth
-	 * @param  {string} font
-	 * @param  {number} [ellipsis='...']
-	 * @param  {Object} [options]
-	 * @param  {number} [options.maxIterations=3]
-	 * @param  {number} [options.minChar=0] If truncate result are less
-	 *                  then minChar, ellipsis will not show, which is
-	 *                  better for user hint in some cases.
-	 * @param  {number} [options.placeholder=''] When all truncated, use the placeholder.
-	 * @return {string}
-	 */
-
-
-	function truncateText(text, containerWidth, font, ellipsis, options) {
-	  if (!containerWidth) {
-	    return '';
-	  }
-
-	  var textLines = (text + '').split('\n');
-	  options = prepareTruncateOptions(containerWidth, font, ellipsis, options); // FIXME
-	  // It is not appropriate that every line has '...' when truncate multiple lines.
-
-	  for (var i = 0, len = textLines.length; i < len; i++) {
-	    textLines[i] = truncateSingleLine(textLines[i], options);
-	  }
-
-	  return textLines.join('\n');
-	}
-
-	function prepareTruncateOptions(containerWidth, font, ellipsis, options) {
-	  options = extend({}, options);
-	  options.font = font;
-	  var ellipsis = retrieve2(ellipsis, '...');
-	  options.maxIterations = retrieve2(options.maxIterations, 2);
-	  var minChar = options.minChar = retrieve2(options.minChar, 0); // FIXME
-	  // Other languages?
-
-	  options.cnCharWidth = getWidth('国', font); // FIXME
-	  // Consider proportional font?
-
-	  var ascCharWidth = options.ascCharWidth = getWidth('a', font);
-	  options.placeholder = retrieve2(options.placeholder, ''); // Example 1: minChar: 3, text: 'asdfzxcv', truncate result: 'asdf', but not: 'a...'.
-	  // Example 2: minChar: 3, text: '维度', truncate result: '维', but not: '...'.
-
-	  var contentWidth = containerWidth = Math.max(0, containerWidth - 1); // Reserve some gap.
-
-	  for (var i = 0; i < minChar && contentWidth >= ascCharWidth; i++) {
-	    contentWidth -= ascCharWidth;
-	  }
-
-	  var ellipsisWidth = getWidth(ellipsis);
-
-	  if (ellipsisWidth > contentWidth) {
-	    ellipsis = '';
-	    ellipsisWidth = 0;
-	  }
-
-	  contentWidth = containerWidth - ellipsisWidth;
-	  options.ellipsis = ellipsis;
-	  options.ellipsisWidth = ellipsisWidth;
-	  options.contentWidth = contentWidth;
-	  options.containerWidth = containerWidth;
-	  return options;
-	}
-
-	function truncateSingleLine(textLine, options) {
-	  var containerWidth = options.containerWidth;
-	  var font = options.font;
-	  var contentWidth = options.contentWidth;
-
-	  if (!containerWidth) {
-	    return '';
-	  }
-
-	  var lineWidth = getWidth(textLine, font);
-
-	  if (lineWidth <= containerWidth) {
-	    return textLine;
-	  }
-
-	  for (var j = 0;; j++) {
-	    if (lineWidth <= contentWidth || j >= options.maxIterations) {
-	      textLine += options.ellipsis;
-	      break;
-	    }
-
-	    var subLength = j === 0 ? estimateLength(textLine, contentWidth, options.ascCharWidth, options.cnCharWidth) : lineWidth > 0 ? Math.floor(textLine.length * contentWidth / lineWidth) : 0;
-	    textLine = textLine.substr(0, subLength);
-	    lineWidth = getWidth(textLine, font);
-	  }
-
-	  if (textLine === '') {
-	    textLine = options.placeholder;
-	  }
-
-	  return textLine;
-	}
-
-	function estimateLength(text, contentWidth, ascCharWidth, cnCharWidth) {
-	  var width = 0;
-	  var i = 0;
-
-	  for (var len = text.length; i < len && width < contentWidth; i++) {
-	    var charCode = text.charCodeAt(i);
-	    width += 0 <= charCode && charCode <= 127 ? ascCharWidth : cnCharWidth;
-	  }
-
-	  return i;
-	}
-	/**
-	 * @public
-	 * @param {string} font
-	 * @return {number} line height
-	 */
-
-
-	function getLineHeight(font) {
-	  // FIXME A rough approach.
-	  return getWidth('国', font);
-	}
-	/**
-	 * @public
-	 * @param {string} text
-	 * @param {string} font
-	 * @return {Object} width
-	 */
-
-
-	var measureText = function (text, font) {
-	  var ctx = getContext();
-	  ctx.font = font || DEFAULT_FONT;
-	  return ctx.measureText(text);
-	};
-	/**
-	 * @public
-	 * @param {string} text
-	 * @param {string} font
-	 * @param {Object} [truncate]
-	 * @return {Object} block: {lineHeight, lines, height, outerHeight}
-	 *  Notice: for performance, do not calculate outerWidth util needed.
-	 */
-
-
-	function parsePlainText(text, font, padding, truncate) {
-	  text != null && (text += '');
-	  var lineHeight = getLineHeight(font);
-	  var lines = text ? text.split('\n') : [];
-	  var height = lines.length * lineHeight;
-	  var outerHeight = height;
-
-	  if (padding) {
-	    outerHeight += padding[0] + padding[2];
-	  }
-
-	  if (text && truncate) {
-	    var truncOuterHeight = truncate.outerHeight;
-	    var truncOuterWidth = truncate.outerWidth;
-
-	    if (truncOuterHeight != null && outerHeight > truncOuterHeight) {
-	      text = '';
-	      lines = [];
-	    } else if (truncOuterWidth != null) {
-	      var options = prepareTruncateOptions(truncOuterWidth - (padding ? padding[1] + padding[3] : 0), font, truncate.ellipsis, {
-	        minChar: truncate.minChar,
-	        placeholder: truncate.placeholder
-	      }); // FIXME
-	      // It is not appropriate that every line has '...' when truncate multiple lines.
-
-	      for (var i = 0, len = lines.length; i < len; i++) {
-	        lines[i] = truncateSingleLine(lines[i], options);
-	      }
-	    }
-	  }
-
-	  return {
-	    lines: lines,
-	    height: height,
-	    outerHeight: outerHeight,
-	    lineHeight: lineHeight
-	  };
-	}
-	/**
-	 * For example: 'some text {a|some text}other text{b|some text}xxx{c|}xxx'
-	 * Also consider 'bbbb{a|xxx\nzzz}xxxx\naaaa'.
-	 *
-	 * @public
-	 * @param {string} text
-	 * @param {Object} style
-	 * @return {Object} block
-	 * {
-	 *      width,
-	 *      height,
-	 *      lines: [{
-	 *          lineHeight,
-	 *          width,
-	 *          tokens: [[{
-	 *              styleName,
-	 *              text,
-	 *              width,      // include textPadding
-	 *              height,     // include textPadding
-	 *              textWidth, // pure text width
-	 *              textHeight, // pure text height
-	 *              lineHeihgt,
-	 *              font,
-	 *              textAlign,
-	 *              textVerticalAlign
-	 *          }], [...], ...]
-	 *      }, ...]
-	 * }
-	 * If styleName is undefined, it is plain text.
-	 */
-
-
-	function parseRichText(text, style) {
-	  var contentBlock = {
-	    lines: [],
-	    width: 0,
-	    height: 0
-	  };
-	  text != null && (text += '');
-
-	  if (!text) {
-	    return contentBlock;
-	  }
-
-	  var lastIndex = STYLE_REG.lastIndex = 0;
-	  var result;
-
-	  while ((result = STYLE_REG.exec(text)) != null) {
-	    var matchedIndex = result.index;
-
-	    if (matchedIndex > lastIndex) {
-	      pushTokens(contentBlock, text.substring(lastIndex, matchedIndex));
-	    }
-
-	    pushTokens(contentBlock, result[2], result[1]);
-	    lastIndex = STYLE_REG.lastIndex;
-	  }
-
-	  if (lastIndex < text.length) {
-	    pushTokens(contentBlock, text.substring(lastIndex, text.length));
-	  }
-
-	  var lines = contentBlock.lines;
-	  var contentHeight = 0;
-	  var contentWidth = 0; // For `textWidth: 100%`
-
-	  var pendingList = [];
-	  var stlPadding = style.textPadding;
-	  var truncate = style.truncate;
-	  var truncateWidth = truncate && truncate.outerWidth;
-	  var truncateHeight = truncate && truncate.outerHeight;
-
-	  if (stlPadding) {
-	    truncateWidth != null && (truncateWidth -= stlPadding[1] + stlPadding[3]);
-	    truncateHeight != null && (truncateHeight -= stlPadding[0] + stlPadding[2]);
-	  } // Calculate layout info of tokens.
-
-
-	  for (var i = 0; i < lines.length; i++) {
-	    var line = lines[i];
-	    var lineHeight = 0;
-	    var lineWidth = 0;
-
-	    for (var j = 0; j < line.tokens.length; j++) {
-	      var token = line.tokens[j];
-	      var tokenStyle = token.styleName && style.rich[token.styleName] || {}; // textPadding should not inherit from style.
-
-	      var textPadding = token.textPadding = tokenStyle.textPadding; // textFont has been asigned to font by `normalizeStyle`.
-
-	      var font = token.font = tokenStyle.font || style.font; // textHeight can be used when textVerticalAlign is specified in token.
-
-	      var tokenHeight = token.textHeight = retrieve2( // textHeight should not be inherited, consider it can be specified
-	      // as box height of the block.
-	      tokenStyle.textHeight, getLineHeight(font));
-	      textPadding && (tokenHeight += textPadding[0] + textPadding[2]);
-	      token.height = tokenHeight;
-	      token.lineHeight = retrieve3(tokenStyle.textLineHeight, style.textLineHeight, tokenHeight);
-	      token.textAlign = tokenStyle && tokenStyle.textAlign || style.textAlign;
-	      token.textVerticalAlign = tokenStyle && tokenStyle.textVerticalAlign || 'middle';
-
-	      if (truncateHeight != null && contentHeight + token.lineHeight > truncateHeight) {
-	        return {
-	          lines: [],
-	          width: 0,
-	          height: 0
-	        };
-	      }
-
-	      token.textWidth = getWidth(token.text, font);
-	      var tokenWidth = tokenStyle.textWidth;
-	      var tokenWidthNotSpecified = tokenWidth == null || tokenWidth === 'auto'; // Percent width, can be `100%`, can be used in drawing separate
-	      // line when box width is needed to be auto.
-
-	      if (typeof tokenWidth === 'string' && tokenWidth.charAt(tokenWidth.length - 1) === '%') {
-	        token.percentWidth = tokenWidth;
-	        pendingList.push(token);
-	        tokenWidth = 0; // Do not truncate in this case, because there is no user case
-	        // and it is too complicated.
-	      } else {
-	        if (tokenWidthNotSpecified) {
-	          tokenWidth = token.textWidth; // FIXME: If image is not loaded and textWidth is not specified, calling
-	          // `getBoundingRect()` will not get correct result.
-
-	          var textBackgroundColor = tokenStyle.textBackgroundColor;
-	          var bgImg = textBackgroundColor && textBackgroundColor.image; // Use cases:
-	          // (1) If image is not loaded, it will be loaded at render phase and call
-	          // `dirty()` and `textBackgroundColor.image` will be replaced with the loaded
-	          // image, and then the right size will be calculated here at the next tick.
-	          // See `graphic/helper/text.js`.
-	          // (2) If image loaded, and `textBackgroundColor.image` is image src string,
-	          // use `imageHelper.findExistImage` to find cached image.
-	          // `imageHelper.findExistImage` will always be called here before
-	          // `imageHelper.createOrUpdateImage` in `graphic/helper/text.js#renderRichText`
-	          // which ensures that image will not be rendered before correct size calcualted.
-
-	          if (bgImg) {
-	            bgImg = imageHelper.findExistImage(bgImg);
-
-	            if (imageHelper.isImageReady(bgImg)) {
-	              tokenWidth = Math.max(tokenWidth, bgImg.width * tokenHeight / bgImg.height);
-	            }
-	          }
-	        }
-
-	        var paddingW = textPadding ? textPadding[1] + textPadding[3] : 0;
-	        tokenWidth += paddingW;
-	        var remianTruncWidth = truncateWidth != null ? truncateWidth - lineWidth : null;
-
-	        if (remianTruncWidth != null && remianTruncWidth < tokenWidth) {
-	          if (!tokenWidthNotSpecified || remianTruncWidth < paddingW) {
-	            token.text = '';
-	            token.textWidth = tokenWidth = 0;
+	  var dimensionsDetectCount;
+	  var startIndex;
+	  var findPotentialName;
+
+	  if (sourceFormat === SOURCE_FORMAT_ARRAY_ROWS) {
+	    // Rule: Most of the first line are string: it is header.
+	    // Caution: consider a line with 5 string and 1 number,
+	    // it still can not be sure it is a head, because the
+	    // 5 string may be 5 values of category columns.
+	    if (sourceHeader === 'auto' || sourceHeader == null) {
+	      arrayRowsTravelFirst(function (val) {
+	        // '-' is regarded as null/undefined.
+	        if (val != null && val !== '-') {
+	          if (isString(val)) {
+	            startIndex == null && (startIndex = 1);
 	          } else {
-	            token.text = truncateText(token.text, remianTruncWidth - paddingW, font, truncate.ellipsis, {
-	              minChar: truncate.minChar
-	            });
-	            token.textWidth = getWidth(token.text, font);
-	            tokenWidth = token.textWidth + paddingW;
+	            startIndex = 0;
 	          }
+	        } // 10 is an experience number, avoid long loop.
+
+	      }, seriesLayoutBy, data, 10);
+	    } else {
+	      startIndex = sourceHeader ? 1 : 0;
+	    }
+
+	    if (!dimensionsDefine && startIndex === 1) {
+	      dimensionsDefine = [];
+	      arrayRowsTravelFirst(function (val, index) {
+	        dimensionsDefine[index] = val != null ? val : '';
+	      }, seriesLayoutBy, data);
+	    }
+
+	    dimensionsDetectCount = dimensionsDefine ? dimensionsDefine.length : seriesLayoutBy === SERIES_LAYOUT_BY_ROW ? data.length : data[0] ? data[0].length : null;
+	  } else if (sourceFormat === SOURCE_FORMAT_OBJECT_ROWS) {
+	    if (!dimensionsDefine) {
+	      dimensionsDefine = objectRowsCollectDimensions(data);
+	      findPotentialName = true;
+	    }
+	  } else if (sourceFormat === SOURCE_FORMAT_KEYED_COLUMNS) {
+	    if (!dimensionsDefine) {
+	      dimensionsDefine = [];
+	      findPotentialName = true;
+	      each(data, function (colArr, key) {
+	        dimensionsDefine.push(key);
+	      });
+	    }
+	  } else if (sourceFormat === SOURCE_FORMAT_ORIGINAL) {
+	    var value0 = getDataItemValue(data[0]);
+	    dimensionsDetectCount = isArray(value0) && value0.length || 1;
+	  } else if (sourceFormat === SOURCE_FORMAT_TYPED_ARRAY) {}
+
+	  var potentialNameDimIndex;
+
+	  if (findPotentialName) {
+	    each(dimensionsDefine, function (dim, idx) {
+	      if ((isObject(dim) ? dim.name : dim) === 'name') {
+	        potentialNameDimIndex = idx;
+	      }
+	    });
+	  }
+
+	  return {
+	    startIndex: startIndex,
+	    dimensionsDefine: normalizeDimensionsDefine(dimensionsDefine),
+	    dimensionsDetectCount: dimensionsDetectCount,
+	    potentialNameDimIndex: potentialNameDimIndex // TODO: potentialIdDimIdx
+
+	  };
+	} // Consider dimensions defined like ['A', 'price', 'B', 'price', 'C', 'price'],
+	// which is reasonable. But dimension name is duplicated.
+	// Returns undefined or an array contains only object without null/undefiend or string.
+
+
+	function normalizeDimensionsDefine(dimensionsDefine) {
+	  if (!dimensionsDefine) {
+	    // The meaning of null/undefined is different from empty array.
+	    return;
+	  }
+
+	  var nameMap = createHashMap();
+	  return map(dimensionsDefine, function (item, index) {
+	    item = extend({}, isObject(item) ? item : {
+	      name: item
+	    }); // User can set null in dimensions.
+	    // We dont auto specify name, othewise a given name may
+	    // cause it be refered unexpectedly.
+
+	    if (item.name == null) {
+	      return item;
+	    } // Also consider number form like 2012.
+
+
+	    item.name += ''; // User may also specify displayName.
+	    // displayName will always exists except user not
+	    // specified or dim name is not specified or detected.
+	    // (A auto generated dim name will not be used as
+	    // displayName).
+
+	    if (item.displayName == null) {
+	      item.displayName = item.name;
+	    }
+
+	    var exist = nameMap.get(item.name);
+
+	    if (!exist) {
+	      nameMap.set(item.name, {
+	        count: 1
+	      });
+	    } else {
+	      item.name += '-' + exist.count++;
+	    }
+
+	    return item;
+	  });
+	}
+
+	function arrayRowsTravelFirst(cb, seriesLayoutBy, data, maxLoop) {
+	  maxLoop == null && (maxLoop = Infinity);
+
+	  if (seriesLayoutBy === SERIES_LAYOUT_BY_ROW) {
+	    for (var i = 0; i < data.length && i < maxLoop; i++) {
+	      cb(data[i] ? data[i][0] : null, i);
+	    }
+	  } else {
+	    var value0 = data[0] || [];
+
+	    for (var i = 0; i < value0.length && i < maxLoop; i++) {
+	      cb(value0[i], i);
+	    }
+	  }
+	}
+
+	function objectRowsCollectDimensions(data) {
+	  var firstIndex = 0;
+	  var obj;
+
+	  while (firstIndex < data.length && !(obj = data[firstIndex++])) {} // jshint ignore: line
+
+
+	  if (obj) {
+	    var dimensions = [];
+	    each(obj, function (value, key) {
+	      dimensions.push(key);
+	    });
+	    return dimensions;
+	  }
+	} // ??? TODO merge to completedimensions, where also has
+	// default encode making logic. And the default rule
+	// should depends on series? consider 'map'.
+
+
+	function makeDefaultEncode(seriesModel, datasetModel, data, sourceFormat, seriesLayoutBy, completeResult) {
+	  var coordSysDefine = getCoordSysDefineBySeries(seriesModel);
+	  var encode = {}; // var encodeTooltip = [];
+	  // var encodeLabel = [];
+
+	  var encodeItemName = [];
+	  var encodeSeriesName = [];
+	  var seriesType = seriesModel.subType; // ??? TODO refactor: provide by series itself.
+	  // Consider the case: 'map' series is based on geo coordSys,
+	  // 'graph', 'heatmap' can be based on cartesian. But can not
+	  // give default rule simply here.
+
+	  var nSeriesMap = createHashMap(['pie', 'map', 'funnel']);
+	  var cSeriesMap = createHashMap(['line', 'bar', 'pictorialBar', 'scatter', 'effectScatter', 'candlestick', 'boxplot']); // Usually in this case series will use the first data
+	  // dimension as the "value" dimension, or other default
+	  // processes respectively.
+
+	  if (coordSysDefine && cSeriesMap.get(seriesType) != null) {
+	    var ecModel = seriesModel.ecModel;
+	    var datasetMap = inner(ecModel).datasetMap;
+	    var key = datasetModel.uid + '_' + seriesLayoutBy;
+	    var datasetRecord = datasetMap.get(key) || datasetMap.set(key, {
+	      categoryWayDim: 1,
+	      valueWayDim: 0
+	    }); // TODO
+	    // Auto detect first time axis and do arrangement.
+
+	    each(coordSysDefine.coordSysDims, function (coordDim) {
+	      // In value way.
+	      if (coordSysDefine.firstCategoryDimIndex == null) {
+	        var dataDim = datasetRecord.valueWayDim++;
+	        encode[coordDim] = dataDim; // ??? TODO give a better default series name rule?
+	        // especially when encode x y specified.
+	        // consider: when mutiple series share one dimension
+	        // category axis, series name should better use
+	        // the other dimsion name. On the other hand, use
+	        // both dimensions name.
+
+	        encodeSeriesName.push(dataDim); // encodeTooltip.push(dataDim);
+	        // encodeLabel.push(dataDim);
+	      } // In category way, category axis.
+	      else if (coordSysDefine.categoryAxisMap.get(coordDim)) {
+	          encode[coordDim] = 0;
+	          encodeItemName.push(0);
+	        } // In category way, non-category axis.
+	        else {
+	            var dataDim = datasetRecord.categoryWayDim++;
+	            encode[coordDim] = dataDim; // encodeTooltip.push(dataDim);
+	            // encodeLabel.push(dataDim);
+
+	            encodeSeriesName.push(dataDim);
+	          }
+	    });
+	  } // Do not make a complex rule! Hard to code maintain and not necessary.
+	  // ??? TODO refactor: provide by series itself.
+	  // [{name: ..., value: ...}, ...] like:
+	  else if (nSeriesMap.get(seriesType) != null) {
+	      // Find the first not ordinal. (5 is an experience value)
+	      var firstNotOrdinal;
+
+	      for (var i = 0; i < 5 && firstNotOrdinal == null; i++) {
+	        if (!doGuessOrdinal(data, sourceFormat, seriesLayoutBy, completeResult.dimensionsDefine, completeResult.startIndex, i)) {
+	          firstNotOrdinal = i;
 	        }
 	      }
 
-	      lineWidth += token.width = tokenWidth;
-	      tokenStyle && (lineHeight = Math.max(lineHeight, token.lineHeight));
+	      if (firstNotOrdinal != null) {
+	        encode.value = firstNotOrdinal;
+	        var nameDimIndex = completeResult.potentialNameDimIndex || Math.max(firstNotOrdinal - 1, 0); // By default, label use itemName in charts.
+	        // So we dont set encodeLabel here.
+
+	        encodeSeriesName.push(nameDimIndex);
+	        encodeItemName.push(nameDimIndex); // encodeTooltip.push(firstNotOrdinal);
+	      }
+	    } // encodeTooltip.length && (encode.tooltip = encodeTooltip);
+	  // encodeLabel.length && (encode.label = encodeLabel);
+
+
+	  encodeItemName.length && (encode.itemName = encodeItemName);
+	  encodeSeriesName.length && (encode.seriesName = encodeSeriesName);
+	  return encode;
+	}
+	/**
+	 * If return null/undefined, indicate that should not use datasetModel.
+	 */
+
+
+	function getDatasetModel(seriesModel) {
+	  var option = seriesModel.option; // Caution: consider the scenario:
+	  // A dataset is declared and a series is not expected to use the dataset,
+	  // and at the beginning `setOption({series: { noData })` (just prepare other
+	  // option but no data), then `setOption({series: {data: [...]}); In this case,
+	  // the user should set an empty array to avoid that dataset is used by default.
+
+	  var thisData = option.data;
+
+	  if (!thisData) {
+	    return seriesModel.ecModel.getComponent('dataset', option.datasetIndex || 0);
+	  }
+	}
+	/**
+	 * The rule should not be complex, otherwise user might not
+	 * be able to known where the data is wrong.
+	 * The code is ugly, but how to make it neat?
+	 *
+	 * @param {module:echars/data/Source} source
+	 * @param {number} dimIndex
+	 * @return {boolean} Whether ordinal.
+	 */
+
+
+	function guessOrdinal(source, dimIndex) {
+	  return doGuessOrdinal(source.data, source.sourceFormat, source.seriesLayoutBy, source.dimensionsDefine, source.startIndex, dimIndex);
+	} // dimIndex may be overflow source data.
+
+
+	function doGuessOrdinal(data, sourceFormat, seriesLayoutBy, dimensionsDefine, startIndex, dimIndex) {
+	  var result; // Experience value.
+
+	  var maxLoop = 5;
+
+	  if (isTypedArray(data)) {
+	    return false;
+	  } // When sourceType is 'objectRows' or 'keyedColumns', dimensionsDefine
+	  // always exists in source.
+
+
+	  var dimName;
+
+	  if (dimensionsDefine) {
+	    dimName = dimensionsDefine[dimIndex];
+	    dimName = isObject(dimName) ? dimName.name : dimName;
+	  }
+
+	  if (sourceFormat === SOURCE_FORMAT_ARRAY_ROWS) {
+	    if (seriesLayoutBy === SERIES_LAYOUT_BY_ROW) {
+	      var sample = data[dimIndex];
+
+	      for (var i = 0; i < (sample || []).length && i < maxLoop; i++) {
+	        if ((result = detectValue(sample[startIndex + i])) != null) {
+	          return result;
+	        }
+	      }
+	    } else {
+	      for (var i = 0; i < data.length && i < maxLoop; i++) {
+	        var row = data[startIndex + i];
+
+	        if (row && (result = detectValue(row[dimIndex])) != null) {
+	          return result;
+	        }
+	      }
+	    }
+	  } else if (sourceFormat === SOURCE_FORMAT_OBJECT_ROWS) {
+	    if (!dimName) {
+	      return;
 	    }
 
-	    line.width = lineWidth;
-	    line.lineHeight = lineHeight;
-	    contentHeight += lineHeight;
-	    contentWidth = Math.max(contentWidth, lineWidth);
-	  }
+	    for (var i = 0; i < data.length && i < maxLoop; i++) {
+	      var item = data[i];
 
-	  contentBlock.outerWidth = contentBlock.width = retrieve2(style.textWidth, contentWidth);
-	  contentBlock.outerHeight = contentBlock.height = retrieve2(style.textHeight, contentHeight);
-
-	  if (stlPadding) {
-	    contentBlock.outerWidth += stlPadding[1] + stlPadding[3];
-	    contentBlock.outerHeight += stlPadding[0] + stlPadding[2];
-	  }
-
-	  for (var i = 0; i < pendingList.length; i++) {
-	    var token = pendingList[i];
-	    var percentWidth = token.percentWidth; // Should not base on outerWidth, because token can not be placed out of padding.
-
-	    token.width = parseInt(percentWidth, 10) / 100 * contentWidth;
-	  }
-
-	  return contentBlock;
-	}
-
-	function pushTokens(block, str, styleName) {
-	  var isEmptyStr = str === '';
-	  var strs = str.split('\n');
-	  var lines = block.lines;
-
-	  for (var i = 0; i < strs.length; i++) {
-	    var text = strs[i];
-	    var token = {
-	      styleName: styleName,
-	      text: text,
-	      isLineHolder: !text && !isEmptyStr
-	    }; // The first token should be appended to the last line.
-
-	    if (!i) {
-	      var tokens = (lines[lines.length - 1] || (lines[0] = {
-	        tokens: []
-	      })).tokens; // Consider cases:
-	      // (1) ''.split('\n') => ['', '\n', ''], the '' at the first item
-	      // (which is a placeholder) should be replaced by new token.
-	      // (2) A image backage, where token likes {a|}.
-	      // (3) A redundant '' will affect textAlign in line.
-	      // (4) tokens with the same tplName should not be merged, because
-	      // they should be displayed in different box (with border and padding).
-
-	      var tokensLen = tokens.length;
-	      tokensLen === 1 && tokens[0].isLineHolder ? tokens[0] = token : // Consider text is '', only insert when it is the "lineHolder" or
-	      // "emptyStr". Otherwise a redundant '' will affect textAlign in line.
-	      (text || !tokensLen || isEmptyStr) && tokens.push(token);
-	    } // Other tokens always start a new line.
-	    else {
-	        // If there is '', insert it as a placeholder.
-	        lines.push({
-	          tokens: [token]
-	        });
+	      if (item && (result = detectValue(item[dimName])) != null) {
+	        return result;
 	      }
+	    }
+	  } else if (sourceFormat === SOURCE_FORMAT_KEYED_COLUMNS) {
+	    if (!dimName) {
+	      return;
+	    }
+
+	    var sample = data[dimName];
+
+	    if (!sample || isTypedArray(sample)) {
+	      return false;
+	    }
+
+	    for (var i = 0; i < sample.length && i < maxLoop; i++) {
+	      if ((result = detectValue(sample[i])) != null) {
+	        return result;
+	      }
+	    }
+	  } else if (sourceFormat === SOURCE_FORMAT_ORIGINAL) {
+	    for (var i = 0; i < data.length && i < maxLoop; i++) {
+	      var item = data[i];
+	      var val = getDataItemValue(item);
+
+	      if (!isArray(val)) {
+	        return false;
+	      }
+
+	      if ((result = detectValue(val[dimIndex])) != null) {
+	        return result;
+	      }
+	    }
 	  }
+
+	  function detectValue(val) {
+	    // Consider usage convenience, '1', '2' will be treated as "number".
+	    // `isFinit('')` get `true`.
+	    if (val != null && isFinite(val) && val !== '') {
+	      return false;
+	    } else if (isString(val) && val !== '-') {
+	      return true;
+	    }
+	  }
+
+	  return false;
 	}
 
-	function makeFont(style) {
-	  // FIXME in node-canvas fontWeight is before fontStyle
-	  // Use `fontSize` `fontFamily` to check whether font properties are defined.
-	  return (style.fontSize || style.fontFamily) && [style.fontStyle, style.fontWeight, (style.fontSize || 12) + 'px', // If font properties are defined, `fontFamily` should not be ignored.
-	  style.fontFamily || 'sans-serif'].join(' ') || style.textFont || style.font;
+	exports.detectSourceFormat = detectSourceFormat;
+	exports.getSource = getSource;
+	exports.resetSourceDefaulter = resetSourceDefaulter;
+	exports.prepareSource = prepareSource;
+	exports.guessOrdinal = guessOrdinal;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {// (1) The code `if (__DEV__) ...` can be removed by build tool.
+	// (2) If intend to use `__DEV__`, this module should be imported. Use a global
+	// variable `__DEV__` may cause that miss the declaration (see #6535), or the
+	// declaration is behind of the using position (for example in `Model.extent`,
+	// And tools like rollup can not analysis the dependency if not import).
+	var dev; // In browser
+
+	if (typeof window !== 'undefined') {
+	  dev = window.__DEV__;
+	} // In node
+	else if (typeof global !== 'undefined') {
+	    dev = global.__DEV__;
+	  }
+
+	if (typeof dev === 'undefined') {
+	  dev = true;
 	}
 
-	var $inject = {
-	  measureText: function (f) {
-	    measureText = f;
-	  }
-	};
-	exports.DEFAULT_FONT = DEFAULT_FONT;
-	exports.getWidth = getWidth;
-	exports.getBoundingRect = getBoundingRect;
-	exports.adjustTextX = adjustTextX;
-	exports.adjustTextY = adjustTextY;
-	exports.adjustTextPositionOnRect = adjustTextPositionOnRect;
-	exports.truncateText = truncateText;
-	exports.getLineHeight = getLineHeight;
-	exports.measureText = measureText;
-	exports.parsePlainText = parsePlainText;
-	exports.parseRichText = parseRichText;
-	exports.makeFont = makeFont;
-	exports.$inject = $inject;
+	var __DEV__ = dev;
+	exports.__DEV__ = __DEV__;
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var vec2 = __webpack_require__(10);
+	var _config = __webpack_require__(8);
 
-	var matrix = __webpack_require__(11);
+	var __DEV__ = _config.__DEV__;
+
+	var _util = __webpack_require__(5);
+
+	var createHashMap = _util.createHashMap;
+	var retrieve = _util.retrieve;
+	var each = _util.each;
 
 	/**
-	 * @module echarts/core/BoundingRect
+	 * Helper for model references.
+	 * There are many manners to refer axis/coordSys.
 	 */
-	var v2ApplyTransform = vec2.applyTransform;
-	var mathMin = Math.min;
-	var mathMax = Math.max;
+	// TODO
+	// merge relevant logic to this file?
+	// check: "modelHelper" of tooltip and "BrushTargetManager".
+
 	/**
-	 * @alias module:echarts/core/BoundingRect
+	 * @return {Object} For example:
+	 * {
+	 *     coordSysName: 'cartesian2d',
+	 *     coordSysDims: ['x', 'y', ...],
+	 *     axisMap: HashMap({
+	 *         x: xAxisModel,
+	 *         y: yAxisModel
+	 *     }),
+	 *     categoryAxisMap: HashMap({
+	 *         x: xAxisModel,
+	 *         y: undefined
+	 *     }),
+	 *     // It also indicate that whether there is category axis.
+	 *     firstCategoryDimIndex: 1,
+	 *     // To replace user specified encode.
+	 * }
 	 */
+	function getCoordSysDefineBySeries(seriesModel) {
+	  var coordSysName = seriesModel.get('coordinateSystem');
+	  var result = {
+	    coordSysName: coordSysName,
+	    coordSysDims: [],
+	    axisMap: createHashMap(),
+	    categoryAxisMap: createHashMap()
+	  };
+	  var fetch = fetchers[coordSysName];
 
-	function BoundingRect(x, y, width, height) {
-	  if (width < 0) {
-	    x = x + width;
-	    width = -width;
+	  if (fetch) {
+	    fetch(seriesModel, result, result.axisMap, result.categoryAxisMap);
+	    return result;
 	  }
-
-	  if (height < 0) {
-	    y = y + height;
-	    height = -height;
-	  }
-	  /**
-	   * @type {number}
-	   */
-
-
-	  this.x = x;
-	  /**
-	   * @type {number}
-	   */
-
-	  this.y = y;
-	  /**
-	   * @type {number}
-	   */
-
-	  this.width = width;
-	  /**
-	   * @type {number}
-	   */
-
-	  this.height = height;
 	}
 
-	BoundingRect.prototype = {
-	  constructor: BoundingRect,
+	var fetchers = {
+	  cartesian2d: function (seriesModel, result, axisMap, categoryAxisMap) {
+	    var xAxisModel = seriesModel.getReferringComponents('xAxis')[0];
+	    var yAxisModel = seriesModel.getReferringComponents('yAxis')[0];
+	    result.coordSysDims = ['x', 'y'];
+	    axisMap.set('x', xAxisModel);
+	    axisMap.set('y', yAxisModel);
 
-	  /**
-	   * @param {module:echarts/core/BoundingRect} other
-	   */
-	  union: function (other) {
-	    var x = mathMin(other.x, this.x);
-	    var y = mathMin(other.y, this.y);
-	    this.width = mathMax(other.x + other.width, this.x + this.width) - x;
-	    this.height = mathMax(other.y + other.height, this.y + this.height) - y;
-	    this.x = x;
-	    this.y = y;
+	    if (isCategory(xAxisModel)) {
+	      categoryAxisMap.set('x', xAxisModel);
+	      result.firstCategoryDimIndex = 0;
+	    }
+
+	    if (isCategory(yAxisModel)) {
+	      categoryAxisMap.set('y', yAxisModel);
+	      result.firstCategoryDimIndex = 1;
+	    }
 	  },
+	  singleAxis: function (seriesModel, result, axisMap, categoryAxisMap) {
+	    var singleAxisModel = seriesModel.getReferringComponents('singleAxis')[0];
+	    result.coordSysDims = ['single'];
+	    axisMap.set('single', singleAxisModel);
 
-	  /**
-	   * @param {Array.<number>} m
-	   * @methods
-	   */
-	  applyTransform: function () {
-	    var lt = [];
-	    var rb = [];
-	    var lb = [];
-	    var rt = [];
-	    return function (m) {
-	      // In case usage like this
-	      // el.getBoundingRect().applyTransform(el.transform)
-	      // And element has no transform
-	      if (!m) {
-	        return;
+	    if (isCategory(singleAxisModel)) {
+	      categoryAxisMap.set('single', singleAxisModel);
+	      result.firstCategoryDimIndex = 0;
+	    }
+	  },
+	  polar: function (seriesModel, result, axisMap, categoryAxisMap) {
+	    var polarModel = seriesModel.getReferringComponents('polar')[0];
+	    var radiusAxisModel = polarModel.findAxisModel('radiusAxis');
+	    var angleAxisModel = polarModel.findAxisModel('angleAxis');
+	    result.coordSysDims = ['radius', 'angle'];
+	    axisMap.set('radius', radiusAxisModel);
+	    axisMap.set('angle', angleAxisModel);
+
+	    if (isCategory(radiusAxisModel)) {
+	      categoryAxisMap.set('radius', radiusAxisModel);
+	      result.firstCategoryDimIndex = 0;
+	    }
+
+	    if (isCategory(angleAxisModel)) {
+	      categoryAxisMap.set('angle', angleAxisModel);
+	      result.firstCategoryDimIndex = 1;
+	    }
+	  },
+	  geo: function (seriesModel, result, axisMap, categoryAxisMap) {
+	    result.coordSysDims = ['lng', 'lat'];
+	  },
+	  parallel: function (seriesModel, result, axisMap, categoryAxisMap) {
+	    var ecModel = seriesModel.ecModel;
+	    var parallelModel = ecModel.getComponent('parallel', seriesModel.get('parallelIndex'));
+	    var coordSysDims = result.coordSysDims = parallelModel.dimensions.slice();
+	    each(parallelModel.parallelAxisIndex, function (axisIndex, index) {
+	      var axisModel = ecModel.getComponent('parallelAxis', axisIndex);
+	      var axisDim = coordSysDims[index];
+	      axisMap.set(axisDim, axisModel);
+
+	      if (isCategory(axisModel) && result.firstCategoryDimIndex == null) {
+	        categoryAxisMap.set(axisDim, axisModel);
+	        result.firstCategoryDimIndex = index;
 	      }
-
-	      lt[0] = lb[0] = this.x;
-	      lt[1] = rt[1] = this.y;
-	      rb[0] = rt[0] = this.x + this.width;
-	      rb[1] = lb[1] = this.y + this.height;
-	      v2ApplyTransform(lt, lt, m);
-	      v2ApplyTransform(rb, rb, m);
-	      v2ApplyTransform(lb, lb, m);
-	      v2ApplyTransform(rt, rt, m);
-	      this.x = mathMin(lt[0], rb[0], lb[0], rt[0]);
-	      this.y = mathMin(lt[1], rb[1], lb[1], rt[1]);
-	      var maxX = mathMax(lt[0], rb[0], lb[0], rt[0]);
-	      var maxY = mathMax(lt[1], rb[1], lb[1], rt[1]);
-	      this.width = maxX - this.x;
-	      this.height = maxY - this.y;
-	    };
-	  }(),
-
-	  /**
-	   * Calculate matrix of transforming from self to target rect
-	   * @param  {module:zrender/core/BoundingRect} b
-	   * @return {Array.<number>}
-	   */
-	  calculateTransform: function (b) {
-	    var a = this;
-	    var sx = b.width / a.width;
-	    var sy = b.height / a.height;
-	    var m = matrix.create(); // 矩阵右乘
-
-	    matrix.translate(m, m, [-a.x, -a.y]);
-	    matrix.scale(m, m, [sx, sy]);
-	    matrix.translate(m, m, [b.x, b.y]);
-	    return m;
-	  },
-
-	  /**
-	   * @param {(module:echarts/core/BoundingRect|Object)} b
-	   * @return {boolean}
-	   */
-	  intersect: function (b) {
-	    if (!b) {
-	      return false;
-	    }
-
-	    if (!(b instanceof BoundingRect)) {
-	      // Normalize negative width/height.
-	      b = BoundingRect.create(b);
-	    }
-
-	    var a = this;
-	    var ax0 = a.x;
-	    var ax1 = a.x + a.width;
-	    var ay0 = a.y;
-	    var ay1 = a.y + a.height;
-	    var bx0 = b.x;
-	    var bx1 = b.x + b.width;
-	    var by0 = b.y;
-	    var by1 = b.y + b.height;
-	    return !(ax1 < bx0 || bx1 < ax0 || ay1 < by0 || by1 < ay0);
-	  },
-	  contain: function (x, y) {
-	    var rect = this;
-	    return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
-	  },
-
-	  /**
-	   * @return {module:echarts/core/BoundingRect}
-	   */
-	  clone: function () {
-	    return new BoundingRect(this.x, this.y, this.width, this.height);
-	  },
-
-	  /**
-	   * Copy from another rect
-	   */
-	  copy: function (other) {
-	    this.x = other.x;
-	    this.y = other.y;
-	    this.width = other.width;
-	    this.height = other.height;
-	  },
-	  plain: function () {
-	    return {
-	      x: this.x,
-	      y: this.y,
-	      width: this.width,
-	      height: this.height
-	    };
+	    });
 	  }
 	};
-	/**
-	 * @param {Object|module:zrender/core/BoundingRect} rect
-	 * @param {number} rect.x
-	 * @param {number} rect.y
-	 * @param {number} rect.width
-	 * @param {number} rect.height
-	 * @return {module:zrender/core/BoundingRect}
-	 */
 
-	BoundingRect.create = function (rect) {
-	  return new BoundingRect(rect.x, rect.y, rect.width, rect.height);
-	};
+	function isCategory(axisModel) {
+	  return axisModel.get('type') === 'category';
+	}
 
-	var _default = BoundingRect;
-	module.exports = _default;
+	exports.getCoordSysDefineBySeries = getCoordSysDefineBySeries;
 
 /***/ },
 /* 10 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	var ArrayCtor = typeof Float32Array === 'undefined' ? Array : Float32Array;
+	var _util = __webpack_require__(5);
+
+	var createHashMap = _util.createHashMap;
+	var isTypedArray = _util.isTypedArray;
+
+	var _clazz = __webpack_require__(11);
+
+	var enableClassCheck = _clazz.enableClassCheck;
+
+	var _sourceType = __webpack_require__(12);
+
+	var SOURCE_FORMAT_ORIGINAL = _sourceType.SOURCE_FORMAT_ORIGINAL;
+	var SERIES_LAYOUT_BY_COLUMN = _sourceType.SERIES_LAYOUT_BY_COLUMN;
+	var SOURCE_FORMAT_UNKNOWN = _sourceType.SOURCE_FORMAT_UNKNOWN;
+	var SOURCE_FORMAT_TYPED_ARRAY = _sourceType.SOURCE_FORMAT_TYPED_ARRAY;
+	var SOURCE_FORMAT_KEYED_COLUMNS = _sourceType.SOURCE_FORMAT_KEYED_COLUMNS;
+
 	/**
-	 * 创建一个向量
-	 * @param {number} [x=0]
-	 * @param {number} [y=0]
-	 * @return {Vector2}
+	 * [sourceFormat]
+	 *
+	 * + "original":
+	 * This format is only used in series.data, where
+	 * itemStyle can be specified in data item.
+	 *
+	 * + "arrayRows":
+	 * [
+	 *     ['product', 'score', 'amount'],
+	 *     ['Matcha Latte', 89.3, 95.8],
+	 *     ['Milk Tea', 92.1, 89.4],
+	 *     ['Cheese Cocoa', 94.4, 91.2],
+	 *     ['Walnut Brownie', 85.4, 76.9]
+	 * ]
+	 *
+	 * + "objectRows":
+	 * [
+	 *     {product: 'Matcha Latte', score: 89.3, amount: 95.8},
+	 *     {product: 'Milk Tea', score: 92.1, amount: 89.4},
+	 *     {product: 'Cheese Cocoa', score: 94.4, amount: 91.2},
+	 *     {product: 'Walnut Brownie', score: 85.4, amount: 76.9}
+	 * ]
+	 *
+	 * + "keyedColumns":
+	 * {
+	 *     'product': ['Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
+	 *     'count': [823, 235, 1042, 988],
+	 *     'score': [95.8, 81.4, 91.2, 76.9]
+	 * }
+	 *
+	 * + "typedArray"
+	 *
+	 * + "unknown"
 	 */
 
-	function create(x, y) {
-	  var out = new ArrayCtor(2);
-
-	  if (x == null) {
-	    x = 0;
-	  }
-
-	  if (y == null) {
-	    y = 0;
-	  }
-
-	  out[0] = x;
-	  out[1] = y;
-	  return out;
-	}
 	/**
-	 * 复制向量数据
-	 * @param {Vector2} out
-	 * @param {Vector2} v
-	 * @return {Vector2}
+	 * @constructor
+	 * @param {Object} fields
+	 * @param {string} fields.sourceFormat
+	 * @param {Array|Object} fields.fromDataset
+	 * @param {Array|Object} [fields.data]
+	 * @param {string} [seriesLayoutBy='column']
+	 * @param {Array.<Object|string>} [dimensionsDefine]
+	 * @param {Objet|HashMap} [encodeDefine]
+	 * @param {number} [startIndex=0]
+	 * @param {number} [dimensionsDetectCount]
 	 */
+	function Source(fields) {
+	  /**
+	   * @type {boolean}
+	   */
+	  this.fromDataset = fields.fromDataset;
+	  /**
+	   * Not null/undefined.
+	   * @type {Array|Object}
+	   */
 
+	  this.data = fields.data || (fields.sourceFormat === SOURCE_FORMAT_KEYED_COLUMNS ? {} : []);
+	  /**
+	   * See also "detectSourceFormat".
+	   * Not null/undefined.
+	   * @type {string}
+	   */
 
-	function copy(out, v) {
-	  out[0] = v[0];
-	  out[1] = v[1];
-	  return out;
+	  this.sourceFormat = fields.sourceFormat || SOURCE_FORMAT_UNKNOWN;
+	  /**
+	   * 'row' or 'column'
+	   * Not null/undefined.
+	   * @type {string} seriesLayoutBy
+	   */
+
+	  this.seriesLayoutBy = fields.seriesLayoutBy || SERIES_LAYOUT_BY_COLUMN;
+	  /**
+	   * dimensions definition in option.
+	   * can be null/undefined.
+	   * @type {Array.<Object|string>}
+	   */
+
+	  this.dimensionsDefine = fields.dimensionsDefine;
+	  /**
+	   * encode definition in option.
+	   * can be null/undefined.
+	   * @type {Objet|HashMap}
+	   */
+
+	  this.encodeDefine = fields.encodeDefine && createHashMap(fields.encodeDefine);
+	  /**
+	   * Not null/undefined, uint.
+	   * @type {number}
+	   */
+
+	  this.startIndex = fields.startIndex || 0;
+	  /**
+	   * Can be null/undefined (when unknown), uint.
+	   * @type {number}
+	   */
+
+	  this.dimensionsDetectCount = fields.dimensionsDetectCount;
 	}
 	/**
-	 * 克隆一个向量
-	 * @param {Vector2} v
-	 * @return {Vector2}
-	 */
-
-
-	function clone(v) {
-	  var out = new ArrayCtor(2);
-	  out[0] = v[0];
-	  out[1] = v[1];
-	  return out;
-	}
-	/**
-	 * 设置向量的两个项
-	 * @param {Vector2} out
-	 * @param {number} a
-	 * @param {number} b
-	 * @return {Vector2} 结果
-	 */
-
-
-	function set(out, a, b) {
-	  out[0] = a;
-	  out[1] = b;
-	  return out;
-	}
-	/**
-	 * 向量相加
-	 * @param {Vector2} out
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
-	 */
-
-
-	function add(out, v1, v2) {
-	  out[0] = v1[0] + v2[0];
-	  out[1] = v1[1] + v2[1];
-	  return out;
-	}
-	/**
-	 * 向量缩放后相加
-	 * @param {Vector2} out
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
-	 * @param {number} a
-	 */
-
-
-	function scaleAndAdd(out, v1, v2, a) {
-	  out[0] = v1[0] + v2[0] * a;
-	  out[1] = v1[1] + v2[1] * a;
-	  return out;
-	}
-	/**
-	 * 向量相减
-	 * @param {Vector2} out
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
-	 */
-
-
-	function sub(out, v1, v2) {
-	  out[0] = v1[0] - v2[0];
-	  out[1] = v1[1] - v2[1];
-	  return out;
-	}
-	/**
-	 * 向量长度
-	 * @param {Vector2} v
-	 * @return {number}
-	 */
-
-
-	function len(v) {
-	  return Math.sqrt(lenSquare(v));
-	}
-
-	var length = len; // jshint ignore:line
-
-	/**
-	 * 向量长度平方
-	 * @param {Vector2} v
-	 * @return {number}
-	 */
-
-	function lenSquare(v) {
-	  return v[0] * v[0] + v[1] * v[1];
-	}
-
-	var lengthSquare = lenSquare;
-	/**
-	 * 向量乘法
-	 * @param {Vector2} out
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
-	 */
-
-	function mul(out, v1, v2) {
-	  out[0] = v1[0] * v2[0];
-	  out[1] = v1[1] * v2[1];
-	  return out;
-	}
-	/**
-	 * 向量除法
-	 * @param {Vector2} out
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
+	 * Wrap original series data for some compatibility cases.
 	 */
 
 
-	function div(out, v1, v2) {
-	  out[0] = v1[0] / v2[0];
-	  out[1] = v1[1] / v2[1];
-	  return out;
-	}
-	/**
-	 * 向量点乘
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
-	 * @return {number}
-	 */
+	Source.seriesDataToSource = function (data) {
+	  return new Source({
+	    data: data,
+	    sourceFormat: isTypedArray(data) ? SOURCE_FORMAT_TYPED_ARRAY : SOURCE_FORMAT_ORIGINAL,
+	    fromDataset: false
+	  });
+	};
 
-
-	function dot(v1, v2) {
-	  return v1[0] * v2[0] + v1[1] * v2[1];
-	}
-	/**
-	 * 向量缩放
-	 * @param {Vector2} out
-	 * @param {Vector2} v
-	 * @param {number} s
-	 */
-
-
-	function scale(out, v, s) {
-	  out[0] = v[0] * s;
-	  out[1] = v[1] * s;
-	  return out;
-	}
-	/**
-	 * 向量归一化
-	 * @param {Vector2} out
-	 * @param {Vector2} v
-	 */
-
-
-	function normalize(out, v) {
-	  var d = len(v);
-
-	  if (d === 0) {
-	    out[0] = 0;
-	    out[1] = 0;
-	  } else {
-	    out[0] = v[0] / d;
-	    out[1] = v[1] / d;
-	  }
-
-	  return out;
-	}
-	/**
-	 * 计算向量间距离
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
-	 * @return {number}
-	 */
-
-
-	function distance(v1, v2) {
-	  return Math.sqrt((v1[0] - v2[0]) * (v1[0] - v2[0]) + (v1[1] - v2[1]) * (v1[1] - v2[1]));
-	}
-
-	var dist = distance;
-	/**
-	 * 向量距离平方
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
-	 * @return {number}
-	 */
-
-	function distanceSquare(v1, v2) {
-	  return (v1[0] - v2[0]) * (v1[0] - v2[0]) + (v1[1] - v2[1]) * (v1[1] - v2[1]);
-	}
-
-	var distSquare = distanceSquare;
-	/**
-	 * 求负向量
-	 * @param {Vector2} out
-	 * @param {Vector2} v
-	 */
-
-	function negate(out, v) {
-	  out[0] = -v[0];
-	  out[1] = -v[1];
-	  return out;
-	}
-	/**
-	 * 插值两个点
-	 * @param {Vector2} out
-	 * @param {Vector2} v1
-	 * @param {Vector2} v2
-	 * @param {number} t
-	 */
-
-
-	function lerp(out, v1, v2, t) {
-	  out[0] = v1[0] + t * (v2[0] - v1[0]);
-	  out[1] = v1[1] + t * (v2[1] - v1[1]);
-	  return out;
-	}
-	/**
-	 * 矩阵左乘向量
-	 * @param {Vector2} out
-	 * @param {Vector2} v
-	 * @param {Vector2} m
-	 */
-
-
-	function applyTransform(out, v, m) {
-	  var x = v[0];
-	  var y = v[1];
-	  out[0] = m[0] * x + m[2] * y + m[4];
-	  out[1] = m[1] * x + m[3] * y + m[5];
-	  return out;
-	}
-	/**
-	 * 求两个向量最小值
-	 * @param  {Vector2} out
-	 * @param  {Vector2} v1
-	 * @param  {Vector2} v2
-	 */
-
-
-	function min(out, v1, v2) {
-	  out[0] = Math.min(v1[0], v2[0]);
-	  out[1] = Math.min(v1[1], v2[1]);
-	  return out;
-	}
-	/**
-	 * 求两个向量最大值
-	 * @param  {Vector2} out
-	 * @param  {Vector2} v1
-	 * @param  {Vector2} v2
-	 */
-
-
-	function max(out, v1, v2) {
-	  out[0] = Math.max(v1[0], v2[0]);
-	  out[1] = Math.max(v1[1], v2[1]);
-	  return out;
-	}
-
-	exports.create = create;
-	exports.copy = copy;
-	exports.clone = clone;
-	exports.set = set;
-	exports.add = add;
-	exports.scaleAndAdd = scaleAndAdd;
-	exports.sub = sub;
-	exports.len = len;
-	exports.length = length;
-	exports.lenSquare = lenSquare;
-	exports.lengthSquare = lengthSquare;
-	exports.mul = mul;
-	exports.div = div;
-	exports.dot = dot;
-	exports.scale = scale;
-	exports.normalize = normalize;
-	exports.distance = distance;
-	exports.dist = dist;
-	exports.distanceSquare = distanceSquare;
-	exports.distSquare = distSquare;
-	exports.negate = negate;
-	exports.lerp = lerp;
-	exports.applyTransform = applyTransform;
-	exports.min = min;
-	exports.max = max;
+	enableClassCheck(Source);
+	var _default = Source;
+	module.exports = _default;
 
 /***/ },
 /* 11 */
-/***/ function(module, exports) {
-
-	/**
-	 * 3x2矩阵操作类
-	 * @exports zrender/tool/matrix
-	 */
-	var ArrayCtor = typeof Float32Array === 'undefined' ? Array : Float32Array;
-	/**
-	 * 创建一个单位矩阵
-	 * @return {Float32Array|Array.<number>}
-	 */
-
-	function create() {
-	  var out = new ArrayCtor(6);
-	  identity(out);
-	  return out;
-	}
-	/**
-	 * 设置矩阵为单位矩阵
-	 * @param {Float32Array|Array.<number>} out
-	 */
-
-
-	function identity(out) {
-	  out[0] = 1;
-	  out[1] = 0;
-	  out[2] = 0;
-	  out[3] = 1;
-	  out[4] = 0;
-	  out[5] = 0;
-	  return out;
-	}
-	/**
-	 * 复制矩阵
-	 * @param {Float32Array|Array.<number>} out
-	 * @param {Float32Array|Array.<number>} m
-	 */
-
-
-	function copy(out, m) {
-	  out[0] = m[0];
-	  out[1] = m[1];
-	  out[2] = m[2];
-	  out[3] = m[3];
-	  out[4] = m[4];
-	  out[5] = m[5];
-	  return out;
-	}
-	/**
-	 * 矩阵相乘
-	 * @param {Float32Array|Array.<number>} out
-	 * @param {Float32Array|Array.<number>} m1
-	 * @param {Float32Array|Array.<number>} m2
-	 */
-
-
-	function mul(out, m1, m2) {
-	  // Consider matrix.mul(m, m2, m);
-	  // where out is the same as m2.
-	  // So use temp variable to escape error.
-	  var out0 = m1[0] * m2[0] + m1[2] * m2[1];
-	  var out1 = m1[1] * m2[0] + m1[3] * m2[1];
-	  var out2 = m1[0] * m2[2] + m1[2] * m2[3];
-	  var out3 = m1[1] * m2[2] + m1[3] * m2[3];
-	  var out4 = m1[0] * m2[4] + m1[2] * m2[5] + m1[4];
-	  var out5 = m1[1] * m2[4] + m1[3] * m2[5] + m1[5];
-	  out[0] = out0;
-	  out[1] = out1;
-	  out[2] = out2;
-	  out[3] = out3;
-	  out[4] = out4;
-	  out[5] = out5;
-	  return out;
-	}
-	/**
-	 * 平移变换
-	 * @param {Float32Array|Array.<number>} out
-	 * @param {Float32Array|Array.<number>} a
-	 * @param {Float32Array|Array.<number>} v
-	 */
-
-
-	function translate(out, a, v) {
-	  out[0] = a[0];
-	  out[1] = a[1];
-	  out[2] = a[2];
-	  out[3] = a[3];
-	  out[4] = a[4] + v[0];
-	  out[5] = a[5] + v[1];
-	  return out;
-	}
-	/**
-	 * 旋转变换
-	 * @param {Float32Array|Array.<number>} out
-	 * @param {Float32Array|Array.<number>} a
-	 * @param {number} rad
-	 */
-
-
-	function rotate(out, a, rad) {
-	  var aa = a[0];
-	  var ac = a[2];
-	  var atx = a[4];
-	  var ab = a[1];
-	  var ad = a[3];
-	  var aty = a[5];
-	  var st = Math.sin(rad);
-	  var ct = Math.cos(rad);
-	  out[0] = aa * ct + ab * st;
-	  out[1] = -aa * st + ab * ct;
-	  out[2] = ac * ct + ad * st;
-	  out[3] = -ac * st + ct * ad;
-	  out[4] = ct * atx + st * aty;
-	  out[5] = ct * aty - st * atx;
-	  return out;
-	}
-	/**
-	 * 缩放变换
-	 * @param {Float32Array|Array.<number>} out
-	 * @param {Float32Array|Array.<number>} a
-	 * @param {Float32Array|Array.<number>} v
-	 */
-
-
-	function scale(out, a, v) {
-	  var vx = v[0];
-	  var vy = v[1];
-	  out[0] = a[0] * vx;
-	  out[1] = a[1] * vy;
-	  out[2] = a[2] * vx;
-	  out[3] = a[3] * vy;
-	  out[4] = a[4] * vx;
-	  out[5] = a[5] * vy;
-	  return out;
-	}
-	/**
-	 * 求逆矩阵
-	 * @param {Float32Array|Array.<number>} out
-	 * @param {Float32Array|Array.<number>} a
-	 */
-
-
-	function invert(out, a) {
-	  var aa = a[0];
-	  var ac = a[2];
-	  var atx = a[4];
-	  var ab = a[1];
-	  var ad = a[3];
-	  var aty = a[5];
-	  var det = aa * ad - ab * ac;
-
-	  if (!det) {
-	    return null;
-	  }
-
-	  det = 1.0 / det;
-	  out[0] = ad * det;
-	  out[1] = -ab * det;
-	  out[2] = -ac * det;
-	  out[3] = aa * det;
-	  out[4] = (ac * aty - ad * atx) * det;
-	  out[5] = (ab * atx - aa * aty) * det;
-	  return out;
-	}
-
-	exports.create = create;
-	exports.identity = identity;
-	exports.copy = copy;
-	exports.mul = mul;
-	exports.translate = translate;
-	exports.rotate = rotate;
-	exports.scale = scale;
-	exports.invert = invert;
-
-/***/ },
-/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LRU = __webpack_require__(13);
+	var _config = __webpack_require__(8);
 
-	var globalImageCache = new LRU(50);
-	/**
-	 * @param {string|HTMLImageElement|HTMLCanvasElement|Canvas} newImageOrSrc
-	 * @return {HTMLImageElement|HTMLCanvasElement|Canvas} image
-	 */
-
-	function findExistImage(newImageOrSrc) {
-	  if (typeof newImageOrSrc === 'string') {
-	    var cachedImgObj = globalImageCache.get(newImageOrSrc);
-	    return cachedImgObj && cachedImgObj.image;
-	  } else {
-	    return newImageOrSrc;
-	  }
-	}
-	/**
-	 * Caution: User should cache loaded images, but not just count on LRU.
-	 * Consider if required images more than LRU size, will dead loop occur?
-	 *
-	 * @param {string|HTMLImageElement|HTMLCanvasElement|Canvas} newImageOrSrc
-	 * @param {HTMLImageElement|HTMLCanvasElement|Canvas} image Existent image.
-	 * @param {module:zrender/Element} [hostEl] For calling `dirty`.
-	 * @param {Function} [cb] params: (image, cbPayload)
-	 * @param {Object} [cbPayload] Payload on cb calling.
-	 * @return {HTMLImageElement|HTMLCanvasElement|Canvas} image
-	 */
-
-
-	function createOrUpdateImage(newImageOrSrc, image, hostEl, cb, cbPayload) {
-	  if (!newImageOrSrc) {
-	    return image;
-	  } else if (typeof newImageOrSrc === 'string') {
-	    // Image should not be loaded repeatly.
-	    if (image && image.__zrImageSrc === newImageOrSrc || !hostEl) {
-	      return image;
-	    } // Only when there is no existent image or existent image src
-	    // is different, this method is responsible for load.
-
-
-	    var cachedImgObj = globalImageCache.get(newImageOrSrc);
-	    var pendingWrap = {
-	      hostEl: hostEl,
-	      cb: cb,
-	      cbPayload: cbPayload
-	    };
-
-	    if (cachedImgObj) {
-	      image = cachedImgObj.image;
-	      !isImageReady(image) && cachedImgObj.pending.push(pendingWrap);
-	    } else {
-	      !image && (image = new Image());
-	      image.onload = imageOnLoad;
-	      globalImageCache.put(newImageOrSrc, image.__cachedImgObj = {
-	        image: image,
-	        pending: [pendingWrap]
-	      });
-	      image.src = image.__zrImageSrc = newImageOrSrc;
-	    }
-
-	    return image;
-	  } // newImageOrSrc is an HTMLImageElement or HTMLCanvasElement or Canvas
-	  else {
-	      return newImageOrSrc;
-	    }
-	}
-
-	function imageOnLoad() {
-	  var cachedImgObj = this.__cachedImgObj;
-	  this.onload = this.__cachedImgObj = null;
-
-	  for (var i = 0; i < cachedImgObj.pending.length; i++) {
-	    var pendingWrap = cachedImgObj.pending[i];
-	    var cb = pendingWrap.cb;
-	    cb && cb(this, pendingWrap.cbPayload);
-	    pendingWrap.hostEl.dirty();
-	  }
-
-	  cachedImgObj.pending.length = 0;
-	}
-
-	function isImageReady(image) {
-	  return image && image.width && image.height;
-	}
-
-	exports.findExistImage = findExistImage;
-	exports.createOrUpdateImage = createOrUpdateImage;
-	exports.isImageReady = isImageReady;
-
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	// Simple LRU cache use doubly linked list
-	// @module zrender/core/LRU
-
-	/**
-	 * Simple double linked list. Compared with array, it has O(1) remove operation.
-	 * @constructor
-	 */
-	var LinkedList = function () {
-	  /**
-	   * @type {module:zrender/core/LRU~Entry}
-	   */
-	  this.head = null;
-	  /**
-	   * @type {module:zrender/core/LRU~Entry}
-	   */
-
-	  this.tail = null;
-	  this._len = 0;
-	};
-
-	var linkedListProto = LinkedList.prototype;
-	/**
-	 * Insert a new value at the tail
-	 * @param  {} val
-	 * @return {module:zrender/core/LRU~Entry}
-	 */
-
-	linkedListProto.insert = function (val) {
-	  var entry = new Entry(val);
-	  this.insertEntry(entry);
-	  return entry;
-	};
-	/**
-	 * Insert an entry at the tail
-	 * @param  {module:zrender/core/LRU~Entry} entry
-	 */
-
-
-	linkedListProto.insertEntry = function (entry) {
-	  if (!this.head) {
-	    this.head = this.tail = entry;
-	  } else {
-	    this.tail.next = entry;
-	    entry.prev = this.tail;
-	    entry.next = null;
-	    this.tail = entry;
-	  }
-
-	  this._len++;
-	};
-	/**
-	 * Remove entry.
-	 * @param  {module:zrender/core/LRU~Entry} entry
-	 */
-
-
-	linkedListProto.remove = function (entry) {
-	  var prev = entry.prev;
-	  var next = entry.next;
-
-	  if (prev) {
-	    prev.next = next;
-	  } else {
-	    // Is head
-	    this.head = next;
-	  }
-
-	  if (next) {
-	    next.prev = prev;
-	  } else {
-	    // Is tail
-	    this.tail = prev;
-	  }
-
-	  entry.next = entry.prev = null;
-	  this._len--;
-	};
-	/**
-	 * @return {number}
-	 */
-
-
-	linkedListProto.len = function () {
-	  return this._len;
-	};
-	/**
-	 * Clear list
-	 */
-
-
-	linkedListProto.clear = function () {
-	  this.head = this.tail = null;
-	  this._len = 0;
-	};
-	/**
-	 * @constructor
-	 * @param {} val
-	 */
-
-
-	var Entry = function (val) {
-	  /**
-	   * @type {}
-	   */
-	  this.value = val;
-	  /**
-	   * @type {module:zrender/core/LRU~Entry}
-	   */
-
-	  this.next;
-	  /**
-	   * @type {module:zrender/core/LRU~Entry}
-	   */
-
-	  this.prev;
-	};
-	/**
-	 * LRU Cache
-	 * @constructor
-	 * @alias module:zrender/core/LRU
-	 */
-
-
-	var LRU = function (maxSize) {
-	  this._list = new LinkedList();
-	  this._map = {};
-	  this._maxSize = maxSize || 10;
-	  this._lastRemovedEntry = null;
-	};
-
-	var LRUProto = LRU.prototype;
-	/**
-	 * @param  {string} key
-	 * @param  {} value
-	 * @return {} Removed value
-	 */
-
-	LRUProto.put = function (key, value) {
-	  var list = this._list;
-	  var map = this._map;
-	  var removed = null;
-
-	  if (map[key] == null) {
-	    var len = list.len(); // Reuse last removed entry
-
-	    var entry = this._lastRemovedEntry;
-
-	    if (len >= this._maxSize && len > 0) {
-	      // Remove the least recently used
-	      var leastUsedEntry = list.head;
-	      list.remove(leastUsedEntry);
-	      delete map[leastUsedEntry.key];
-	      removed = leastUsedEntry.value;
-	      this._lastRemovedEntry = leastUsedEntry;
-	    }
-
-	    if (entry) {
-	      entry.value = value;
-	    } else {
-	      entry = new Entry(value);
-	    }
-
-	    entry.key = key;
-	    list.insertEntry(entry);
-	    map[key] = entry;
-	  }
-
-	  return removed;
-	};
-	/**
-	 * @param  {string} key
-	 * @return {}
-	 */
-
-
-	LRUProto.get = function (key) {
-	  var entry = this._map[key];
-	  var list = this._list;
-
-	  if (entry != null) {
-	    // Put the latest used entry in the tail
-	    if (entry !== list.tail) {
-	      list.remove(entry);
-	      list.insertEntry(entry);
-	    }
-
-	    return entry.value;
-	  }
-	};
-	/**
-	 * Clear the cache
-	 */
-
-
-	LRUProto.clear = function () {
-	  this._list.clear();
-
-	  this._map = {};
-	};
-
-	var _default = LRU;
-	module.exports = _default;
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var zrUtil = __webpack_require__(5);
-
-	var RADIAN_EPSILON = 1e-4;
-
-	function _trim(str) {
-	  return str.replace(/^\s+/, '').replace(/\s+$/, '');
-	}
-	/**
-	 * Linear mapping a value from domain to range
-	 * @memberOf module:echarts/util/number
-	 * @param  {(number|Array.<number>)} val
-	 * @param  {Array.<number>} domain Domain extent domain[0] can be bigger than domain[1]
-	 * @param  {Array.<number>} range  Range extent range[0] can be bigger than range[1]
-	 * @param  {boolean} clamp
-	 * @return {(number|Array.<number>}
-	 */
-
-
-	function linearMap(val, domain, range, clamp) {
-	  var subDomain = domain[1] - domain[0];
-	  var subRange = range[1] - range[0];
-
-	  if (subDomain === 0) {
-	    return subRange === 0 ? range[0] : (range[0] + range[1]) / 2;
-	  } // Avoid accuracy problem in edge, such as
-	  // 146.39 - 62.83 === 83.55999999999999.
-	  // See echarts/test/ut/spec/util/number.js#linearMap#accuracyError
-	  // It is a little verbose for efficiency considering this method
-	  // is a hotspot.
-
-
-	  if (clamp) {
-	    if (subDomain > 0) {
-	      if (val <= domain[0]) {
-	        return range[0];
-	      } else if (val >= domain[1]) {
-	        return range[1];
-	      }
-	    } else {
-	      if (val >= domain[0]) {
-	        return range[0];
-	      } else if (val <= domain[1]) {
-	        return range[1];
-	      }
-	    }
-	  } else {
-	    if (val === domain[0]) {
-	      return range[0];
-	    }
-
-	    if (val === domain[1]) {
-	      return range[1];
-	    }
-	  }
-
-	  return (val - domain[0]) / subDomain * subRange + range[0];
-	}
-	/**
-	 * Convert a percent string to absolute number.
-	 * Returns NaN if percent is not a valid string or number
-	 * @memberOf module:echarts/util/number
-	 * @param {string|number} percent
-	 * @param {number} all
-	 * @return {number}
-	 */
-
-
-	function parsePercent(percent, all) {
-	  switch (percent) {
-	    case 'center':
-	    case 'middle':
-	      percent = '50%';
-	      break;
-
-	    case 'left':
-	    case 'top':
-	      percent = '0%';
-	      break;
-
-	    case 'right':
-	    case 'bottom':
-	      percent = '100%';
-	      break;
-	  }
-
-	  if (typeof percent === 'string') {
-	    if (_trim(percent).match(/%$/)) {
-	      return parseFloat(percent) / 100 * all;
-	    }
-
-	    return parseFloat(percent);
-	  }
-
-	  return percent == null ? NaN : +percent;
-	}
-	/**
-	 * (1) Fix rounding error of float numbers.
-	 * (2) Support return string to avoid scientific notation like '3.5e-7'.
-	 *
-	 * @param {number} x
-	 * @param {number} [precision]
-	 * @param {boolean} [returnStr]
-	 * @return {number|string}
-	 */
-
-
-	function round(x, precision, returnStr) {
-	  if (precision == null) {
-	    precision = 10;
-	  } // Avoid range error
-
-
-	  precision = Math.min(Math.max(0, precision), 20);
-	  x = (+x).toFixed(precision);
-	  return returnStr ? x : +x;
-	}
-
-	function asc(arr) {
-	  arr.sort(function (a, b) {
-	    return a - b;
-	  });
-	  return arr;
-	}
-	/**
-	 * Get precision
-	 * @param {number} val
-	 */
-
-
-	function getPrecision(val) {
-	  val = +val;
-
-	  if (isNaN(val)) {
-	    return 0;
-	  } // It is much faster than methods converting number to string as follows
-	  //      var tmp = val.toString();
-	  //      return tmp.length - 1 - tmp.indexOf('.');
-	  // especially when precision is low
-
-
-	  var e = 1;
-	  var count = 0;
-
-	  while (Math.round(val * e) / e !== val) {
-	    e *= 10;
-	    count++;
-	  }
-
-	  return count;
-	}
-	/**
-	 * @param {string|number} val
-	 * @return {number}
-	 */
-
-
-	function getPrecisionSafe(val) {
-	  var str = val.toString(); // Consider scientific notation: '3.4e-12' '3.4e+12'
-
-	  var eIndex = str.indexOf('e');
-
-	  if (eIndex > 0) {
-	    var precision = +str.slice(eIndex + 1);
-	    return precision < 0 ? -precision : 0;
-	  } else {
-	    var dotIndex = str.indexOf('.');
-	    return dotIndex < 0 ? 0 : str.length - 1 - dotIndex;
-	  }
-	}
-	/**
-	 * Minimal dicernible data precisioin according to a single pixel.
-	 *
-	 * @param {Array.<number>} dataExtent
-	 * @param {Array.<number>} pixelExtent
-	 * @return {number} precision
-	 */
-
-
-	function getPixelPrecision(dataExtent, pixelExtent) {
-	  var log = Math.log;
-	  var LN10 = Math.LN10;
-	  var dataQuantity = Math.floor(log(dataExtent[1] - dataExtent[0]) / LN10);
-	  var sizeQuantity = Math.round(log(Math.abs(pixelExtent[1] - pixelExtent[0])) / LN10); // toFixed() digits argument must be between 0 and 20.
-
-	  var precision = Math.min(Math.max(-dataQuantity + sizeQuantity, 0), 20);
-	  return !isFinite(precision) ? 20 : precision;
-	}
-	/**
-	 * Get a data of given precision, assuring the sum of percentages
-	 * in valueList is 1.
-	 * The largest remainer method is used.
-	 * https://en.wikipedia.org/wiki/Largest_remainder_method
-	 *
-	 * @param {Array.<number>} valueList a list of all data
-	 * @param {number} idx index of the data to be processed in valueList
-	 * @param {number} precision integer number showing digits of precision
-	 * @return {number} percent ranging from 0 to 100
-	 */
-
-
-	function getPercentWithPrecision(valueList, idx, precision) {
-	  if (!valueList[idx]) {
-	    return 0;
-	  }
-
-	  var sum = zrUtil.reduce(valueList, function (acc, val) {
-	    return acc + (isNaN(val) ? 0 : val);
-	  }, 0);
-
-	  if (sum === 0) {
-	    return 0;
-	  }
-
-	  var digits = Math.pow(10, precision);
-	  var votesPerQuota = zrUtil.map(valueList, function (val) {
-	    return (isNaN(val) ? 0 : val) / sum * digits * 100;
-	  });
-	  var targetSeats = digits * 100;
-	  var seats = zrUtil.map(votesPerQuota, function (votes) {
-	    // Assign automatic seats.
-	    return Math.floor(votes);
-	  });
-	  var currentSum = zrUtil.reduce(seats, function (acc, val) {
-	    return acc + val;
-	  }, 0);
-	  var remainder = zrUtil.map(votesPerQuota, function (votes, idx) {
-	    return votes - seats[idx];
-	  }); // Has remainding votes.
-
-	  while (currentSum < targetSeats) {
-	    // Find next largest remainder.
-	    var max = Number.NEGATIVE_INFINITY;
-	    var maxId = null;
-
-	    for (var i = 0, len = remainder.length; i < len; ++i) {
-	      if (remainder[i] > max) {
-	        max = remainder[i];
-	        maxId = i;
-	      }
-	    } // Add a vote to max remainder.
-
-
-	    ++seats[maxId];
-	    remainder[maxId] = 0;
-	    ++currentSum;
-	  }
-
-	  return seats[idx] / digits;
-	} // Number.MAX_SAFE_INTEGER, ie do not support.
-
-
-	var MAX_SAFE_INTEGER = 9007199254740991;
-	/**
-	 * To 0 - 2 * PI, considering negative radian.
-	 * @param {number} radian
-	 * @return {number}
-	 */
-
-	function remRadian(radian) {
-	  var pi2 = Math.PI * 2;
-	  return (radian % pi2 + pi2) % pi2;
-	}
-	/**
-	 * @param {type} radian
-	 * @return {boolean}
-	 */
-
-
-	function isRadianAroundZero(val) {
-	  return val > -RADIAN_EPSILON && val < RADIAN_EPSILON;
-	}
-
-	var TIME_REG = /^(?:(\d{4})(?:[-\/](\d{1,2})(?:[-\/](\d{1,2})(?:[T ](\d{1,2})(?::(\d\d)(?::(\d\d)(?:[.,](\d+))?)?)?(Z|[\+\-]\d\d:?\d\d)?)?)?)?)?$/; // jshint ignore:line
-
-	/**
-	 * @param {string|Date|number} value These values can be accepted:
-	 *   + An instance of Date, represent a time in its own time zone.
-	 *   + Or string in a subset of ISO 8601, only including:
-	 *     + only year, month, date: '2012-03', '2012-03-01', '2012-03-01 05', '2012-03-01 05:06',
-	 *     + separated with T or space: '2012-03-01T12:22:33.123', '2012-03-01 12:22:33.123',
-	 *     + time zone: '2012-03-01T12:22:33Z', '2012-03-01T12:22:33+8000', '2012-03-01T12:22:33-05:00',
-	 *     all of which will be treated as local time if time zone is not specified
-	 *     (see <https://momentjs.com/>).
-	 *   + Or other string format, including (all of which will be treated as loacal time):
-	 *     '2012', '2012-3-1', '2012/3/1', '2012/03/01',
-	 *     '2009/6/12 2:00', '2009/6/12 2:05:08', '2009/6/12 2:05:08.123'
-	 *   + a timestamp, which represent a time in UTC.
-	 * @return {Date} date
-	 */
-
-	function parseDate(value) {
-	  if (value instanceof Date) {
-	    return value;
-	  } else if (typeof value === 'string') {
-	    // Different browsers parse date in different way, so we parse it manually.
-	    // Some other issues:
-	    // new Date('1970-01-01') is UTC,
-	    // new Date('1970/01/01') and new Date('1970-1-01') is local.
-	    // See issue #3623
-	    var match = TIME_REG.exec(value);
-
-	    if (!match) {
-	      // return Invalid Date.
-	      return new Date(NaN);
-	    } // Use local time when no timezone offset specifed.
-
-
-	    if (!match[8]) {
-	      // match[n] can only be string or undefined.
-	      // But take care of '12' + 1 => '121'.
-	      return new Date(+match[1], +(match[2] || 1) - 1, +match[3] || 1, +match[4] || 0, +(match[5] || 0), +match[6] || 0, +match[7] || 0);
-	    } // Timezoneoffset of Javascript Date has considered DST (Daylight Saving Time,
-	    // https://tc39.github.io/ecma262/#sec-daylight-saving-time-adjustment).
-	    // For example, system timezone is set as "Time Zone: America/Toronto",
-	    // then these code will get different result:
-	    // `new Date(1478411999999).getTimezoneOffset();  // get 240`
-	    // `new Date(1478412000000).getTimezoneOffset();  // get 300`
-	    // So we should not use `new Date`, but use `Date.UTC`.
-	    else {
-	        var hour = +match[4] || 0;
-
-	        if (match[8].toUpperCase() !== 'Z') {
-	          hour -= match[8].slice(0, 3);
-	        }
-
-	        return new Date(Date.UTC(+match[1], +(match[2] || 1) - 1, +match[3] || 1, hour, +(match[5] || 0), +match[6] || 0, +match[7] || 0));
-	      }
-	  } else if (value == null) {
-	    return new Date(NaN);
-	  }
-
-	  return new Date(Math.round(value));
-	}
-	/**
-	 * Quantity of a number. e.g. 0.1, 1, 10, 100
-	 *
-	 * @param  {number} val
-	 * @return {number}
-	 */
-
-
-	function quantity(val) {
-	  return Math.pow(10, quantityExponent(val));
-	}
-
-	function quantityExponent(val) {
-	  return Math.floor(Math.log(val) / Math.LN10);
-	}
-	/**
-	 * find a “nice” number approximately equal to x. Round the number if round = true,
-	 * take ceiling if round = false. The primary observation is that the “nicest”
-	 * numbers in decimal are 1, 2, and 5, and all power-of-ten multiples of these numbers.
-	 *
-	 * See "Nice Numbers for Graph Labels" of Graphic Gems.
-	 *
-	 * @param  {number} val Non-negative value.
-	 * @param  {boolean} round
-	 * @return {number}
-	 */
-
-
-	function nice(val, round) {
-	  var exponent = quantityExponent(val);
-	  var exp10 = Math.pow(10, exponent);
-	  var f = val / exp10; // 1 <= f < 10
-
-	  var nf;
-
-	  if (round) {
-	    if (f < 1.5) {
-	      nf = 1;
-	    } else if (f < 2.5) {
-	      nf = 2;
-	    } else if (f < 4) {
-	      nf = 3;
-	    } else if (f < 7) {
-	      nf = 5;
-	    } else {
-	      nf = 10;
-	    }
-	  } else {
-	    if (f < 1) {
-	      nf = 1;
-	    } else if (f < 2) {
-	      nf = 2;
-	    } else if (f < 3) {
-	      nf = 3;
-	    } else if (f < 5) {
-	      nf = 5;
-	    } else {
-	      nf = 10;
-	    }
-	  }
-
-	  val = nf * exp10; // Fix 3 * 0.1 === 0.30000000000000004 issue (see IEEE 754).
-	  // 20 is the uppper bound of toFixed.
-
-	  return exponent >= -20 ? +val.toFixed(exponent < 0 ? -exponent : 0) : val;
-	}
-	/**
-	 * Order intervals asc, and split them when overlap.
-	 * expect(numberUtil.reformIntervals([
-	 *     {interval: [18, 62], close: [1, 1]},
-	 *     {interval: [-Infinity, -70], close: [0, 0]},
-	 *     {interval: [-70, -26], close: [1, 1]},
-	 *     {interval: [-26, 18], close: [1, 1]},
-	 *     {interval: [62, 150], close: [1, 1]},
-	 *     {interval: [106, 150], close: [1, 1]},
-	 *     {interval: [150, Infinity], close: [0, 0]}
-	 * ])).toEqual([
-	 *     {interval: [-Infinity, -70], close: [0, 0]},
-	 *     {interval: [-70, -26], close: [1, 1]},
-	 *     {interval: [-26, 18], close: [0, 1]},
-	 *     {interval: [18, 62], close: [0, 1]},
-	 *     {interval: [62, 150], close: [0, 1]},
-	 *     {interval: [150, Infinity], close: [0, 0]}
-	 * ]);
-	 * @param {Array.<Object>} list, where `close` mean open or close
-	 *        of the interval, and Infinity can be used.
-	 * @return {Array.<Object>} The origin list, which has been reformed.
-	 */
-
-
-	function reformIntervals(list) {
-	  list.sort(function (a, b) {
-	    return littleThan(a, b, 0) ? -1 : 1;
-	  });
-	  var curr = -Infinity;
-	  var currClose = 1;
-
-	  for (var i = 0; i < list.length;) {
-	    var interval = list[i].interval;
-	    var close = list[i].close;
-
-	    for (var lg = 0; lg < 2; lg++) {
-	      if (interval[lg] <= curr) {
-	        interval[lg] = curr;
-	        close[lg] = !lg ? 1 - currClose : 1;
-	      }
-
-	      curr = interval[lg];
-	      currClose = close[lg];
-	    }
-
-	    if (interval[0] === interval[1] && close[0] * close[1] !== 1) {
-	      list.splice(i, 1);
-	    } else {
-	      i++;
-	    }
-	  }
-
-	  return list;
-
-	  function littleThan(a, b, lg) {
-	    return a.interval[lg] < b.interval[lg] || a.interval[lg] === b.interval[lg] && (a.close[lg] - b.close[lg] === (!lg ? 1 : -1) || !lg && littleThan(a, b, 1));
-	  }
-	}
-	/**
-	 * parseFloat NaNs numeric-cast false positives (null|true|false|"")
-	 * ...but misinterprets leading-number strings, particularly hex literals ("0x...")
-	 * subtraction forces infinities to NaN
-	 *
-	 * @param {*} v
-	 * @return {boolean}
-	 */
-
-
-	function isNumeric(v) {
-	  return v - parseFloat(v) >= 0;
-	}
-
-	exports.linearMap = linearMap;
-	exports.parsePercent = parsePercent;
-	exports.round = round;
-	exports.asc = asc;
-	exports.getPrecision = getPrecision;
-	exports.getPrecisionSafe = getPrecisionSafe;
-	exports.getPixelPrecision = getPixelPrecision;
-	exports.getPercentWithPrecision = getPercentWithPrecision;
-	exports.MAX_SAFE_INTEGER = MAX_SAFE_INTEGER;
-	exports.remRadian = remRadian;
-	exports.isRadianAroundZero = isRadianAroundZero;
-	exports.parseDate = parseDate;
-	exports.quantity = quantity;
-	exports.nice = nice;
-	exports.reformIntervals = reformIntervals;
-	exports.isNumeric = isNumeric;
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var zrUtil = __webpack_require__(5);
-
-	var env = __webpack_require__(16);
-
-	var clazzUtil = __webpack_require__(17);
-
-	var lineStyleMixin = __webpack_require__(18);
-
-	var areaStyleMixin = __webpack_require__(20);
-
-	var textStyleMixin = __webpack_require__(21);
-
-	var itemStyleMixin = __webpack_require__(73);
-
-	/**
-	 * @module echarts/model/Model
-	 */
-	var mixin = zrUtil.mixin;
-	/**
-	 * @alias module:echarts/model/Model
-	 * @constructor
-	 * @param {Object} option
-	 * @param {module:echarts/model/Model} [parentModel]
-	 * @param {module:echarts/model/Global} [ecModel]
-	 */
-
-	function Model(option, parentModel, ecModel) {
-	  /**
-	   * @type {module:echarts/model/Model}
-	   * @readOnly
-	   */
-	  this.parentModel = parentModel;
-	  /**
-	   * @type {module:echarts/model/Global}
-	   * @readOnly
-	   */
-
-	  this.ecModel = ecModel;
-	  /**
-	   * @type {Object}
-	   * @protected
-	   */
-
-	  this.option = option; // Simple optimization
-	  // if (this.init) {
-	  //     if (arguments.length <= 4) {
-	  //         this.init(option, parentModel, ecModel, extraOpt);
-	  //     }
-	  //     else {
-	  //         this.init.apply(this, arguments);
-	  //     }
-	  // }
-	}
-
-	Model.prototype = {
-	  constructor: Model,
-
-	  /**
-	   * Model 的初始化函数
-	   * @param {Object} option
-	   */
-	  init: null,
-
-	  /**
-	   * 从新的 Option merge
-	   */
-	  mergeOption: function (option) {
-	    zrUtil.merge(this.option, option, true);
-	  },
-
-	  /**
-	   * @param {string|Array.<string>} path
-	   * @param {boolean} [ignoreParent=false]
-	   * @return {*}
-	   */
-	  get: function (path, ignoreParent) {
-	    if (path == null) {
-	      return this.option;
-	    }
-
-	    return doGet(this.option, this.parsePath(path), !ignoreParent && getParent(this, path));
-	  },
-
-	  /**
-	   * @param {string} key
-	   * @param {boolean} [ignoreParent=false]
-	   * @return {*}
-	   */
-	  getShallow: function (key, ignoreParent) {
-	    var option = this.option;
-	    var val = option == null ? option : option[key];
-	    var parentModel = !ignoreParent && getParent(this, key);
-
-	    if (val == null && parentModel) {
-	      val = parentModel.getShallow(key);
-	    }
-
-	    return val;
-	  },
-
-	  /**
-	   * @param {string|Array.<string>} [path]
-	   * @param {module:echarts/model/Model} [parentModel]
-	   * @return {module:echarts/model/Model}
-	   */
-	  getModel: function (path, parentModel) {
-	    var obj = path == null ? this.option : doGet(this.option, path = this.parsePath(path));
-	    var thisParentModel;
-	    parentModel = parentModel || (thisParentModel = getParent(this, path)) && thisParentModel.getModel(path);
-	    return new Model(obj, parentModel, this.ecModel);
-	  },
-
-	  /**
-	   * If model has option
-	   */
-	  isEmpty: function () {
-	    return this.option == null;
-	  },
-	  restoreData: function () {},
-	  // Pending
-	  clone: function () {
-	    var Ctor = this.constructor;
-	    return new Ctor(zrUtil.clone(this.option));
-	  },
-	  setReadOnly: function (properties) {
-	    clazzUtil.setReadOnly(this, properties);
-	  },
-	  // If path is null/undefined, return null/undefined.
-	  parsePath: function (path) {
-	    if (typeof path === 'string') {
-	      path = path.split('.');
-	    }
-
-	    return path;
-	  },
-
-	  /**
-	   * @param {Function} getParentMethod
-	   *        param {Array.<string>|string} path
-	   *        return {module:echarts/model/Model}
-	   */
-	  customizeGetParent: function (getParentMethod) {
-	    clazzUtil.set(this, 'getParent', getParentMethod);
-	  },
-	  isAnimationEnabled: function () {
-	    if (!env.node) {
-	      if (this.option.animation != null) {
-	        return !!this.option.animation;
-	      } else if (this.parentModel) {
-	        return this.parentModel.isAnimationEnabled();
-	      }
-	    }
-	  }
-	};
-
-	function doGet(obj, pathArr, parentModel) {
-	  for (var i = 0; i < pathArr.length; i++) {
-	    // Ignore empty
-	    if (!pathArr[i]) {
-	      continue;
-	    } // obj could be number/string/... (like 0)
-
-
-	    obj = obj && typeof obj === 'object' ? obj[pathArr[i]] : null;
-
-	    if (obj == null) {
-	      break;
-	    }
-	  }
-
-	  if (obj == null && parentModel) {
-	    obj = parentModel.get(pathArr);
-	  }
-
-	  return obj;
-	} // `path` can be null/undefined
-
-
-	function getParent(model, path) {
-	  var getParentMethod = clazzUtil.get(model, 'getParent');
-	  return getParentMethod ? getParentMethod.call(model, path) : model.parentModel;
-	} // Enable Model.extend.
-
-
-	clazzUtil.enableClassExtend(Model);
-	mixin(Model, lineStyleMixin);
-	mixin(Model, areaStyleMixin);
-	mixin(Model, textStyleMixin);
-	mixin(Model, itemStyleMixin);
-	var _default = Model;
-	module.exports = _default;
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	/**
-	 * echarts设备环境识别
-	 *
-	 * @desc echarts基于Canvas，纯Javascript图表库，提供直观，生动，可交互，可个性化定制的数据统计图表。
-	 * @author firede[firede@firede.us]
-	 * @desc thanks zepto.
-	 */
-	var env = {};
-
-	if (typeof navigator === 'undefined') {
-	  // In node
-	  env = {
-	    browser: {},
-	    os: {},
-	    node: true,
-	    // Assume canvas is supported
-	    canvasSupported: true,
-	    svgSupported: true
-	  };
-	} else {
-	  env = detect(navigator.userAgent);
-	}
-
-	var _default = env; // Zepto.js
-	// (c) 2010-2013 Thomas Fuchs
-	// Zepto.js may be freely distributed under the MIT license.
-
-	function detect(ua) {
-	  var os = {};
-	  var browser = {}; // var webkit = ua.match(/Web[kK]it[\/]{0,1}([\d.]+)/);
-	  // var android = ua.match(/(Android);?[\s\/]+([\d.]+)?/);
-	  // var ipad = ua.match(/(iPad).*OS\s([\d_]+)/);
-	  // var ipod = ua.match(/(iPod)(.*OS\s([\d_]+))?/);
-	  // var iphone = !ipad && ua.match(/(iPhone\sOS)\s([\d_]+)/);
-	  // var webos = ua.match(/(webOS|hpwOS)[\s\/]([\d.]+)/);
-	  // var touchpad = webos && ua.match(/TouchPad/);
-	  // var kindle = ua.match(/Kindle\/([\d.]+)/);
-	  // var silk = ua.match(/Silk\/([\d._]+)/);
-	  // var blackberry = ua.match(/(BlackBerry).*Version\/([\d.]+)/);
-	  // var bb10 = ua.match(/(BB10).*Version\/([\d.]+)/);
-	  // var rimtabletos = ua.match(/(RIM\sTablet\sOS)\s([\d.]+)/);
-	  // var playbook = ua.match(/PlayBook/);
-	  // var chrome = ua.match(/Chrome\/([\d.]+)/) || ua.match(/CriOS\/([\d.]+)/);
-
-	  var firefox = ua.match(/Firefox\/([\d.]+)/); // var safari = webkit && ua.match(/Mobile\//) && !chrome;
-	  // var webview = ua.match(/(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/) && !chrome;
-
-	  var ie = ua.match(/MSIE\s([\d.]+)/) // IE 11 Trident/7.0; rv:11.0
-	  || ua.match(/Trident\/.+?rv:(([\d.]+))/);
-	  var edge = ua.match(/Edge\/([\d.]+)/); // IE 12 and 12+
-
-	  var weChat = /micromessenger/i.test(ua); // Todo: clean this up with a better OS/browser seperation:
-	  // - discern (more) between multiple browsers on android
-	  // - decide if kindle fire in silk mode is android or not
-	  // - Firefox on Android doesn't specify the Android version
-	  // - possibly devide in os, device and browser hashes
-	  // if (browser.webkit = !!webkit) browser.version = webkit[1];
-	  // if (android) os.android = true, os.version = android[2];
-	  // if (iphone && !ipod) os.ios = os.iphone = true, os.version = iphone[2].replace(/_/g, '.');
-	  // if (ipad) os.ios = os.ipad = true, os.version = ipad[2].replace(/_/g, '.');
-	  // if (ipod) os.ios = os.ipod = true, os.version = ipod[3] ? ipod[3].replace(/_/g, '.') : null;
-	  // if (webos) os.webos = true, os.version = webos[2];
-	  // if (touchpad) os.touchpad = true;
-	  // if (blackberry) os.blackberry = true, os.version = blackberry[2];
-	  // if (bb10) os.bb10 = true, os.version = bb10[2];
-	  // if (rimtabletos) os.rimtabletos = true, os.version = rimtabletos[2];
-	  // if (playbook) browser.playbook = true;
-	  // if (kindle) os.kindle = true, os.version = kindle[1];
-	  // if (silk) browser.silk = true, browser.version = silk[1];
-	  // if (!silk && os.android && ua.match(/Kindle Fire/)) browser.silk = true;
-	  // if (chrome) browser.chrome = true, browser.version = chrome[1];
-
-	  if (firefox) {
-	    browser.firefox = true;
-	    browser.version = firefox[1];
-	  } // if (safari && (ua.match(/Safari/) || !!os.ios)) browser.safari = true;
-	  // if (webview) browser.webview = true;
-
-
-	  if (ie) {
-	    browser.ie = true;
-	    browser.version = ie[1];
-	  }
-
-	  if (edge) {
-	    browser.edge = true;
-	    browser.version = edge[1];
-	  } // It is difficult to detect WeChat in Win Phone precisely, because ua can
-	  // not be set on win phone. So we do not consider Win Phone.
-
-
-	  if (weChat) {
-	    browser.weChat = true;
-	  } // os.tablet = !!(ipad || playbook || (android && !ua.match(/Mobile/)) ||
-	  //     (firefox && ua.match(/Tablet/)) || (ie && !ua.match(/Phone/) && ua.match(/Touch/)));
-	  // os.phone  = !!(!os.tablet && !os.ipod && (android || iphone || webos ||
-	  //     (chrome && ua.match(/Android/)) || (chrome && ua.match(/CriOS\/([\d.]+)/)) ||
-	  //     (firefox && ua.match(/Mobile/)) || (ie && ua.match(/Touch/))));
-
-
-	  return {
-	    browser: browser,
-	    os: os,
-	    node: false,
-	    // 原生canvas支持，改极端点了
-	    // canvasSupported : !(browser.ie && parseFloat(browser.version) < 9)
-	    canvasSupported: !!document.createElement('canvas').getContext,
-	    svgSupported: typeof SVGRect !== 'undefined',
-	    // @see <http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript>
-	    // works on most browsers
-	    // IE10/11 does not support touch event, and MS Edge supports them but not by
-	    // default, so we dont check navigator.maxTouchPoints for them here.
-	    touchEventsSupported: 'ontouchstart' in window && !browser.ie && !browser.edge,
-	    // <http://caniuse.com/#search=pointer%20event>.
-	    pointerEventsSupported: 'onpointerdown' in window // Firefox supports pointer but not by default, only MS browsers are reliable on pointer
-	    // events currently. So we dont use that on other browsers unless tested sufficiently.
-	    // Although IE 10 supports pointer event, it use old style and is different from the
-	    // standard. So we exclude that. (IE 10 is hardly used on touch device)
-	    && (browser.edge || browser.ie && browser.version >= 11)
-	  };
-	}
-
-	module.exports = _default;
-
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
+	var __DEV__ = _config.__DEV__;
 
 	var zrUtil = __webpack_require__(5);
 
 	var TYPE_DELIMITER = '.';
 	var IS_CONTAINER = '___EC__COMPONENT__CONTAINER___';
-	var MEMBER_PRIFIX = '\0ec_\0';
-	/**
-	 * Hide private class member.
-	 * The same behavior as `host[name] = value;` (can be right-value)
-	 * @public
-	 */
-
-	function set(host, name, value) {
-	  return host[MEMBER_PRIFIX + name] = value;
-	}
-	/**
-	 * Hide private class member.
-	 * The same behavior as `host[name];`
-	 * @public
-	 */
-
-
-	function get(host, name) {
-	  return host[MEMBER_PRIFIX + name];
-	}
-	/**
-	 * For hidden private class member.
-	 * The same behavior as `host.hasOwnProperty(name);`
-	 * @public
-	 */
-
-
-	function hasOwn(host, name) {
-	  return host.hasOwnProperty(MEMBER_PRIFIX + name);
-	}
 	/**
 	 * Notice, parseClassType('') should returns {main: '', sub: ''}
 	 * @public
 	 */
-
 
 	function parseClassType(componentType) {
 	  var ret = {
@@ -4473,6 +2521,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    zrUtil.inherits(ExtendedClass, this);
 	    ExtendedClass.superClass = superClass;
 	    return ExtendedClass;
+	  };
+	}
+
+	var classBase = 0;
+	/**
+	 * Can not use instanceof, consider different scope by
+	 * cross domain or es module import in ec extensions.
+	 * Mount a method "isInstance()" to Clz.
+	 */
+
+	function enableClassCheck(Clz) {
+	  var classAttr = ['__\0is_clz', classBase++, Math.random().toFixed(3)].join('_');
+	  Clz.prototype[classAttr] = true;
+
+	  Clz.isInstance = function (obj) {
+	    return !!(obj && obj[classAttr]);
 	  };
 	} // superCall should have class info, which can not be fetch from 'this'.
 	// Consider this case:
@@ -4634,213 +2698,982 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // });
 	}
 
-	exports.set = set;
-	exports.get = get;
-	exports.hasOwn = hasOwn;
 	exports.parseClassType = parseClassType;
 	exports.enableClassExtend = enableClassExtend;
+	exports.enableClassCheck = enableClassCheck;
 	exports.enableClassManagement = enableClassManagement;
 	exports.setReadOnly = setReadOnly;
 
 /***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
+/* 12 */
+/***/ function(module, exports) {
 
-	var makeStyleMapper = __webpack_require__(19);
+	// Avoid typo.
+	var SOURCE_FORMAT_ORIGINAL = 'original';
+	var SOURCE_FORMAT_ARRAY_ROWS = 'arrayRows';
+	var SOURCE_FORMAT_OBJECT_ROWS = 'objectRows';
+	var SOURCE_FORMAT_KEYED_COLUMNS = 'keyedColumns';
+	var SOURCE_FORMAT_UNKNOWN = 'unknown'; // ??? CHANGE A NAME
 
-	var getLineStyle = makeStyleMapper([['lineWidth', 'width'], ['stroke', 'color'], ['opacity'], ['shadowBlur'], ['shadowOffsetX'], ['shadowOffsetY'], ['shadowColor']]);
-	var _default = {
-	  getLineStyle: function (excludes) {
-	    var style = getLineStyle(this, excludes);
-	    var lineDash = this.getLineDash(style.lineWidth);
-	    lineDash && (style.lineDash = lineDash);
-	    return style;
-	  },
-	  getLineDash: function (lineWidth) {
-	    if (lineWidth == null) {
-	      lineWidth = 1;
-	    }
-
-	    var lineType = this.get('type');
-	    var dotSize = Math.max(lineWidth, 2);
-	    var dashSize = lineWidth * 4;
-	    return lineType === 'solid' || lineType == null ? null : lineType === 'dashed' ? [dashSize, dashSize] : [dotSize, dotSize];
-	  }
-	};
-	module.exports = _default;
+	var SOURCE_FORMAT_TYPED_ARRAY = 'typedArray';
+	var SERIES_LAYOUT_BY_COLUMN = 'column';
+	var SERIES_LAYOUT_BY_ROW = 'row';
+	exports.SOURCE_FORMAT_ORIGINAL = SOURCE_FORMAT_ORIGINAL;
+	exports.SOURCE_FORMAT_ARRAY_ROWS = SOURCE_FORMAT_ARRAY_ROWS;
+	exports.SOURCE_FORMAT_OBJECT_ROWS = SOURCE_FORMAT_OBJECT_ROWS;
+	exports.SOURCE_FORMAT_KEYED_COLUMNS = SOURCE_FORMAT_KEYED_COLUMNS;
+	exports.SOURCE_FORMAT_UNKNOWN = SOURCE_FORMAT_UNKNOWN;
+	exports.SOURCE_FORMAT_TYPED_ARRAY = SOURCE_FORMAT_TYPED_ARRAY;
+	exports.SERIES_LAYOUT_BY_COLUMN = SERIES_LAYOUT_BY_COLUMN;
+	exports.SERIES_LAYOUT_BY_ROW = SERIES_LAYOUT_BY_ROW;
 
 /***/ },
-/* 19 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
+	var _util = __webpack_require__(5);
 
-	// TODO Parse shadow style
-	// TODO Only shallow path support
-	function _default(properties) {
-	  // Normalize
-	  for (var i = 0; i < properties.length; i++) {
-	    if (!properties[i][1]) {
-	      properties[i][1] = properties[i][0];
+	var each = _util.each;
+	var createHashMap = _util.createHashMap;
+	var assert = _util.assert;
+
+	var _config = __webpack_require__(8);
+
+	var __DEV__ = _config.__DEV__;
+	var OTHER_DIMENSIONS = createHashMap(['tooltip', 'label', 'itemName', 'itemId', 'seriesName']);
+
+	function summarizeDimensions(data) {
+	  var summary = {};
+	  var encode = summary.encode = {};
+	  var coordDimMap = summary.coordDimMap = createHashMap();
+	  var defaultedLabel = [];
+	  each(data.dimensions, function (dimName) {
+	    var dimItem = data.getDimensionInfo(dimName);
+	    var coordDim = dimItem.coordDim;
+
+	    if (coordDim) {
+	      var coordDimArr = encode[coordDim];
+
+	      if (!encode.hasOwnProperty(coordDim)) {
+	        coordDimArr = encode[coordDim] = [];
+	      }
+
+	      coordDimArr[dimItem.coordDimIndex] = dimName;
+
+	      if (dimItem.isSysCoord && mayLabelDimType(dimItem.type)) {
+	        // Use the last coord dim (and label friendly) as default label,
+	        // because both show x, y on label is not look good, and usually
+	        // y axis is more focusd conventionally.
+	        defaultedLabel[0] = dimName;
+	      }
+
+	      coordDimMap.set(coordDim, 1);
 	    }
+
+	    OTHER_DIMENSIONS.each(function (v, otherDim) {
+	      var otherDimArr = encode[otherDim];
+
+	      if (!encode.hasOwnProperty(otherDim)) {
+	        otherDimArr = encode[otherDim] = [];
+	      }
+
+	      var dimIndex = dimItem.otherDims[otherDim];
+
+	      if (dimIndex != null && dimIndex !== false) {
+	        otherDimArr[dimIndex] = dimItem.name;
+	      }
+	    });
+	  });
+	  var dataDimsOnCoord = [];
+	  coordDimMap.each(function (v, coordDim) {
+	    dataDimsOnCoord = dataDimsOnCoord.concat(encode[coordDim]);
+	  });
+	  summary.dataDimsOnCoord = dataDimsOnCoord;
+	  var encodeLabel = encode.label; // FIXME `encode.label` is not recommanded, because formatter can not be set
+	  // in this way. Use label.formatter instead. May be remove this approach someday.
+
+	  if (encodeLabel && encodeLabel.length) {
+	    defaultedLabel = encodeLabel.slice();
 	  }
 
-	  return function (model, excludes, includes) {
-	    var style = {};
+	  var defaultedTooltip = defaultedLabel.slice();
+	  var encodeTooltip = encode.tooltip;
 
-	    for (var i = 0; i < properties.length; i++) {
-	      var propName = properties[i][1];
+	  if (encodeTooltip && encodeTooltip.length) {
+	    defaultedTooltip = encodeTooltip.slice();
+	  }
 
-	      if (excludes && zrUtil.indexOf(excludes, propName) >= 0 || includes && zrUtil.indexOf(includes, propName) < 0) {
-	        continue;
-	      }
-
-	      var val = model.getShallow(propName);
-
-	      if (val != null) {
-	        style[properties[i][0]] = val;
-	      }
-	    }
-
-	    return style;
-	  };
+	  encode.defaultedLabel = defaultedLabel;
+	  encode.defaultedTooltip = defaultedTooltip;
+	  return summary;
 	}
 
-	module.exports = _default;
+	function getDimensionTypeByAxis(axisType) {
+	  return axisType === 'category' ? 'ordinal' : axisType === 'time' ? 'time' : 'float';
+	}
+
+	function mayLabelDimType(dimType) {
+	  // In most cases, ordinal and time do not suitable for label.
+	  // Ordinal info can be displayed on axis. Time is too long.
+	  return !(dimType === 'ordinal' || dimType === 'time');
+	} // function findTheLastDimMayLabel(data) {
+	//     // Get last value dim
+	//     var dimensions = data.dimensions.slice();
+	//     var valueType;
+	//     var valueDim;
+	//     while (dimensions.length && (
+	//         valueDim = dimensions.pop(),
+	//         valueType = data.getDimensionInfo(valueDim).type,
+	//         valueType === 'ordinal' || valueType === 'time'
+	//     )) {} // jshint ignore:line
+	//     return valueDim;
+	// }
+
+
+	exports.OTHER_DIMENSIONS = OTHER_DIMENSIONS;
+	exports.summarizeDimensions = summarizeDimensions;
+	exports.getDimensionTypeByAxis = getDimensionTypeByAxis;
 
 /***/ },
-/* 20 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var makeStyleMapper = __webpack_require__(19);
+	var echarts = __webpack_require__(2);
+	var numberUtil = echarts.number;
+	var symbolUtil = __webpack_require__(15);
+	var parsePercent = numberUtil.parsePercent;
 
-	var getAreaStyle = makeStyleMapper([['fill', 'color'], ['shadowBlur'], ['shadowOffsetX'], ['shadowOffsetY'], ['opacity'], ['shadowColor']]);
-	var _default = {
-	  getAreaStyle: function (excludes, includes) {
-	    return getAreaStyle(this, excludes, includes);
-	  }
-	};
-	module.exports = _default;
+	var LiquidLayout = __webpack_require__(76);
+
+	function getShallow(model, path) {
+	    return model && model.getShallow(path);
+	}
+
+	echarts.extendChartView({
+
+	    type: 'liquidFill',
+
+	    render: function (seriesModel, ecModel, api) {
+	        var group = this.group;
+	        group.removeAll();
+
+	        var data = seriesModel.getData();
+
+	        var itemModel = data.getItemModel(0);
+
+	        var center = itemModel.get('center');
+	        var radius = itemModel.get('radius');
+
+	        var width = api.getWidth();
+	        var height = api.getHeight();
+	        var size = Math.min(width, height);
+	        // itemStyle
+	        var outlineDistance = 0;
+	        var outlineBorderWidth = 0;
+	        var showOutline = seriesModel.get('outline.show');
+
+	        if (showOutline) {
+	            outlineDistance = seriesModel.get('outline.borderDistance');
+	            outlineBorderWidth = parsePercent(
+	                seriesModel.get('outline.itemStyle.borderWidth'), size
+	            );
+	        }
+
+	        var cx = parsePercent(center[0], width);
+	        var cy = parsePercent(center[1], height);
+
+	        var outterRadius;
+	        var innerRadius;
+	        var paddingRadius;
+
+	        var isFillContainer = false;
+
+	        var symbol = seriesModel.get('shape');
+	        if (symbol === 'container') {
+	            // a shape that fully fills the container
+	            isFillContainer = true;
+
+	            outterRadius = [
+	                width / 2,
+	                height / 2
+	            ];
+	            innerRadius = [
+	                outterRadius[0] - outlineBorderWidth / 2,
+	                outterRadius[1] - outlineBorderWidth / 2
+	            ];
+	            paddingRadius = [
+	                parsePercent(outlineDistance, width),
+	                parsePercent(outlineDistance, height)
+	            ];
+
+	            radius = [
+	                innerRadius[0] - paddingRadius[0],
+	                innerRadius[1] - paddingRadius[1]
+	            ];
+	        }
+	        else {
+	            outterRadius = parsePercent(radius, size) / 2;
+	            innerRadius = outterRadius - outlineBorderWidth / 2;
+	            paddingRadius = parsePercent(outlineDistance, size);
+
+	            radius = innerRadius - paddingRadius;
+	        }
+
+	        if (showOutline) {
+	            var outline = getOutline();
+	            outline.style.lineWidth = outlineBorderWidth;
+	            group.add(getOutline());
+	        }
+
+	        var left = isFillContainer ? 0 : cx - radius;
+	        var top = isFillContainer ? 0 : cy - radius;
+
+	        var wavePath = null;
+
+	        group.add(getBackground());
+
+	        // each data item for a wave
+	        var oldData = this._data;
+	        var waves = [];
+	        data.diff(oldData)
+	            .add(function (idx) {
+	                var wave = getWave(idx, false);
+
+	                var waterLevel = wave.shape.waterLevel;
+	                wave.shape.waterLevel = isFillContainer ? radius[1] : radius;
+	                echarts.graphic.initProps(wave, {
+	                    shape: {
+	                        waterLevel: waterLevel
+	                    }
+	                }, seriesModel);
+
+	                wave.z2 = 2;
+	                setWaveAnimation(idx, wave, null);
+
+	                group.add(wave);
+	                data.setItemGraphicEl(idx, wave);
+	                waves.push(wave);
+	            })
+	            .update(function (newIdx, oldIdx) {
+	                var waveElement = oldData.getItemGraphicEl(oldIdx);
+
+	                // new wave is used to calculate position, but not added
+	                var newWave = getWave(newIdx, false, waveElement);
+
+	                // Shallow copy shape and style to avoid comparing style.host
+	                // when animating
+	                var shape = Object.assign({}, newWave.shape);
+	                var style = Object.assign({}, newWave.style);
+	                style.host = null;
+
+	                // update old wave with parameters of new wave
+	                echarts.graphic.updateProps(waveElement, {
+	                    shape: shape,
+	                    style: style
+	                }, seriesModel);
+	                waveElement.position = newWave.position;
+	                waveElement.setClipPath(newWave.clipPath);
+
+	                setWaveAnimation(newIdx, waveElement, waveElement);
+	                group.add(waveElement);
+	                data.setItemGraphicEl(newIdx, waveElement);
+	                waves.push(waveElement);
+	            })
+	            .remove(function (idx) {
+	                var wave = oldData.getItemGraphicEl(idx);
+	                group.remove(wave);
+	            })
+	            .execute();
+
+	        group.add(getText(waves));
+
+	        this._data = data;
+
+	        /**
+	         * Get path for outline, background and clipping
+	         *
+	         * @param {number} r outter radius of shape
+	         * @param {boolean|undefined} isForClipping if the shape is used
+	         *                                          for clipping
+	         */
+	        function getPath(r, isForClipping) {
+	            if (symbol) {
+	                // customed symbol path
+	                if (symbol.indexOf('path://') === 0) {
+	                    var path = echarts.graphic.makePath(symbol.slice(7), {});
+	                    var bouding = path.getBoundingRect();
+	                    var w = bouding.width;
+	                    var h = bouding.height;
+	                    if (w > h) {
+	                        h = r * 2 / w * h;
+	                        w = r * 2;
+	                    }
+	                    else {
+	                        w = r * 2 / h * w;
+	                        h = r * 2;
+	                    }
+
+	                    var left = isForClipping ? 0 : cx - w / 2;
+	                    var top = isForClipping ? 0 : cy - h / 2;
+	                    path = echarts.graphic.makePath(
+	                        symbol.slice(7),
+	                        {},
+	                        new echarts.graphic.BoundingRect(left, top, w, h)
+	                    );
+	                    if (isForClipping) {
+	                        path.position = [-w / 2, -h / 2];
+	                    }
+	                    return path;
+	                }
+	                else if (isFillContainer) {
+	                    // fully fill the container
+	                    var x = isForClipping ? -r[0] : cx - r[0];
+	                    var y = isForClipping ? -r[1] : cy - r[1];
+	                    return symbolUtil.createSymbol(
+	                        'rect', x, y, r[0] * 2, r[1] * 2
+	                    );
+	                }
+	                else {
+	                    var x = isForClipping ? -r : cx - r;
+	                    var y = isForClipping ? -r : cy - r;
+	                    if (symbol === 'pin') {
+	                        y += r;
+	                    }
+	                    else if (symbol === 'arrow') {
+	                        y -= r;
+	                    }
+	                    return symbolUtil.createSymbol(symbol, x, y, r * 2, r * 2);
+	                }
+	            }
+
+	            return new echarts.graphic.Circle({
+	                shape: {
+	                    cx: isForClipping ? 0 : cx,
+	                    cy: isForClipping ? 0 : cy,
+	                    r: r
+	                }
+	            });
+	        }
+	        /**
+	         * Create outline
+	         */
+	        function getOutline() {
+	            var outlinePath = getPath(outterRadius);
+	            outlinePath.style.fill = null;
+
+	            outlinePath.setStyle(seriesModel.getModel('outline.itemStyle')
+	                .getItemStyle());
+
+	            return outlinePath;
+	        }
+
+	        /**
+	         * Create background
+	         */
+	        function getBackground() {
+	            // Seperate stroke and fill, so we can use stroke to cover the alias of clipping.
+	            var strokePath = getPath(radius);
+	            strokePath.setStyle(seriesModel.getModel('backgroundStyle')
+	                .getItemStyle());
+	            strokePath.style.fill = null;
+
+	            // Stroke is front of wave
+	            strokePath.z2 = 5;
+
+	            var fillPath = getPath(radius);
+	            fillPath.setStyle(seriesModel.getModel('backgroundStyle')
+	                .getItemStyle());
+	            fillPath.style.stroke = null;
+
+	            var group = new echarts.graphic.Group();
+	            group.add(strokePath);
+	            group.add(fillPath);
+
+	            return group;
+	        }
+
+	        /**
+	         * wave shape
+	         */
+	        function getWave(idx, isInverse, oldWave) {
+	            var radiusX = isFillContainer ? radius[0] : radius;
+	            var radiusY = isFillContainer ? radius[1] : radius;
+
+	            var itemModel = data.getItemModel(idx);
+	            var itemStyleModel = itemModel.getModel('itemStyle');
+	            var phase = itemModel.get('phase');
+	            var amplitude = parsePercent(itemModel.get('amplitude'),
+	                radiusY * 2);
+	            var waveLength = parsePercent(itemModel.get('waveLength'),
+	                radiusX * 2);
+
+	            var value = data.get('value', idx);
+	            var waterLevel = radiusY - value * radiusY * 2;
+	            phase = oldWave ? oldWave.shape.phase
+	                : (phase === 'auto' ? idx * Math.PI / 4 : phase);
+	            var normalStyle = itemStyleModel.getItemStyle();
+	            if (!normalStyle.fill) {
+	                var seriesColor = seriesModel.get('color');
+	                var id = idx % seriesColor.length;
+	                normalStyle.fill = seriesColor[id];
+	            }
+
+	            var x = radiusX * 2;
+	            var wave = new LiquidLayout({
+	                shape: {
+	                    waveLength: waveLength,
+	                    radius: radiusX,
+	                    cx: x,
+	                    cy: 0,
+	                    waterLevel: waterLevel,
+	                    amplitude: amplitude,
+	                    phase: phase,
+	                    inverse: isInverse
+	                },
+	                style: normalStyle,
+	                position: [cx, cy]
+	            });
+	            wave.shape._waterLevel = waterLevel;
+
+	            var hoverStyle = itemModel.getModel('emphasis.itemStyle')
+	                .getItemStyle();
+	            hoverStyle.lineWidth = 0;
+	            echarts.graphic.setHoverStyle(wave, hoverStyle);
+
+	            // clip out the part outside the circle
+	            var clip = getPath(radius, true);
+	            // set fill for clipPath, otherwise it will not trigger hover event
+	            clip.setStyle({
+	                fill: 'white'
+	            });
+	            wave.setClipPath(clip);
+
+	            return wave;
+	        }
+
+	        function setWaveAnimation(idx, wave, oldWave) {
+	            var itemModel = data.getItemModel(idx);
+
+	            var maxSpeed = itemModel.get('period');
+	            var direction = itemModel.get('direction');
+
+	            var value = data.get('value', idx);
+
+	            var phase = itemModel.get('phase');
+	            phase = oldWave ? oldWave.shape.phase
+	                : (phase === 'auto' ? idx * Math.PI / 4 : phase);
+
+	            var defaultSpeed = function (maxSpeed) {
+	                var cnt = data.count();
+	                return cnt === 0 ? maxSpeed : maxSpeed *
+	                    (0.2 + (cnt - idx) / cnt * 0.8);
+	            };
+	            var speed = 0;
+	            if (maxSpeed === 'auto') {
+	                speed = defaultSpeed(5000);
+	            }
+	            else {
+	                speed = typeof maxSpeed === 'function'
+	                    ? maxSpeed(value, idx) : maxSpeed;
+	            }
+
+	            // phase for moving left/right
+	            var phaseOffset = 0;
+	            if (direction === 'right' || direction == null) {
+	                phaseOffset = Math.PI;
+	            }
+	            else if (direction === 'left') {
+	                phaseOffset = -Math.PI;
+	            }
+	            else if (direction === 'none') {
+	                phaseOffset = 0;
+	            }
+	            else {
+	                console.error('Illegal direction value for liquid fill.');
+	            }
+
+	            // wave animation of moving left/right
+	            if (direction !== 'none' && itemModel.get('waveAnimation')) {
+	                wave
+	                    .animate('shape', true)
+	                    .when(0, {
+	                        phase: phase
+	                    })
+	                    .when(speed / 2, {
+	                        phase: phaseOffset + phase
+	                    })
+	                    .when(speed, {
+	                        phase: phaseOffset * 2 + phase
+	                    })
+	                    .during(function () {
+	                        if (wavePath) {
+	                            wavePath.dirty(true);
+	                        }
+	                    })
+	                    .start();
+	            }
+	        }
+
+	        /**
+	         * text on wave
+	         */
+	        function getText(waves) {
+	            var labelModel = itemModel.getModel('label');
+
+	            function formatLabel() {
+	                var formatted = seriesModel.getFormattedLabel(0, 'normal');
+	                var defaultVal = (data.get('value', 0) * 100);
+	                var defaultLabel = data.getName(0) || seriesModel.name;
+	                if (!isNaN(defaultVal)) {
+	                    defaultLabel = defaultVal.toFixed(0) + '%';
+	                }
+	                return formatted == null ? defaultLabel : formatted;
+	            }
+
+	            var textOption = {
+	                z2: 10,
+	                shape: {
+	                    x: left,
+	                    y: top,
+	                    width: (isFillContainer ? radius[0] : radius) * 2,
+	                    height: (isFillContainer ? radius[1] : radius) * 2
+	                },
+	                style: {
+	                    fill: 'transparent',
+	                    text: formatLabel(),
+	                    textAlign: labelModel.get('align'),
+	                    textVerticalAlign: labelModel.get('baseline')
+	                },
+	                silent: true
+	            };
+
+	            var outsideTextRect = new echarts.graphic.Rect(textOption);
+	            var color = labelModel.get('color');
+	            echarts.graphic.setText(outsideTextRect.style, labelModel, color);
+
+	            var insideTextRect = new echarts.graphic.Rect(textOption);
+	            var insColor = labelModel.get('insideColor');
+	            echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
+	            insideTextRect.style.textFill = insColor;
+
+	            var group = new echarts.graphic.Group();
+	            group.add(outsideTextRect);
+	            group.add(insideTextRect);
+
+	            // clip out waves for insideText
+	            var boundingCircle = getPath(radius, true);
+
+	            wavePath = new echarts.graphic.CompoundPath({
+	                shape: {
+	                    paths: waves
+	                },
+	                position: [cx, cy]
+	            });
+
+	            wavePath.setClipPath(boundingCircle);
+	            insideTextRect.setClipPath(wavePath);
+
+	            return group;
+	        }
+	    },
+
+	    dispose: function () {
+	        // dispose nothing here
+	    }
+	});
+
 
 /***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var textContain = __webpack_require__(8);
-
-	var graphicUtil = __webpack_require__(22);
-
-	var PATH_COLOR = ['textStyle', 'color'];
-	var _default = {
-	  /**
-	   * Get color property or get color from option.textStyle.color
-	   * @param {boolean} [isEmphasis]
-	   * @return {string}
-	   */
-	  getTextColor: function (isEmphasis) {
-	    var ecModel = this.ecModel;
-	    return this.getShallow('color') || (!isEmphasis && ecModel ? ecModel.get(PATH_COLOR) : null);
-	  },
-
-	  /**
-	   * Create font string from fontStyle, fontWeight, fontSize, fontFamily
-	   * @return {string}
-	   */
-	  getFont: function () {
-	    return graphicUtil.getFont({
-	      fontStyle: this.getShallow('fontStyle'),
-	      fontWeight: this.getShallow('fontWeight'),
-	      fontSize: this.getShallow('fontSize'),
-	      fontFamily: this.getShallow('fontFamily')
-	    }, this.ecModel);
-	  },
-	  getTextRect: function (text) {
-	    return textContain.getBoundingRect(text, this.getFont(), this.getShallow('align'), this.getShallow('verticalAlign') || this.getShallow('baseline'), this.getShallow('padding'), this.getShallow('rich'), this.getShallow('truncateText'));
-	  }
-	};
-	module.exports = _default;
-
-/***/ },
-/* 22 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var zrUtil = __webpack_require__(5);
 
-	var pathTool = __webpack_require__(23);
+	var graphic = __webpack_require__(16);
 
-	var colorTool = __webpack_require__(35);
+	var BoundingRect = __webpack_require__(39);
 
-	var matrix = __webpack_require__(11);
+	// Symbol factory
 
-	var vector = __webpack_require__(10);
+	/**
+	 * Triangle shape
+	 * @inner
+	 */
+	var Triangle = graphic.extendShape({
+	  type: 'triangle',
+	  shape: {
+	    cx: 0,
+	    cy: 0,
+	    width: 0,
+	    height: 0
+	  },
+	  buildPath: function (path, shape) {
+	    var cx = shape.cx;
+	    var cy = shape.cy;
+	    var width = shape.width / 2;
+	    var height = shape.height / 2;
+	    path.moveTo(cx, cy - height);
+	    path.lineTo(cx + width, cy + height);
+	    path.lineTo(cx - width, cy + height);
+	    path.closePath();
+	  }
+	});
+	/**
+	 * Diamond shape
+	 * @inner
+	 */
 
-	var Path = __webpack_require__(24);
+	var Diamond = graphic.extendShape({
+	  type: 'diamond',
+	  shape: {
+	    cx: 0,
+	    cy: 0,
+	    width: 0,
+	    height: 0
+	  },
+	  buildPath: function (path, shape) {
+	    var cx = shape.cx;
+	    var cy = shape.cy;
+	    var width = shape.width / 2;
+	    var height = shape.height / 2;
+	    path.moveTo(cx, cy - height);
+	    path.lineTo(cx + width, cy);
+	    path.lineTo(cx, cy + height);
+	    path.lineTo(cx - width, cy);
+	    path.closePath();
+	  }
+	});
+	/**
+	 * Pin shape
+	 * @inner
+	 */
 
-	var Transformable = __webpack_require__(30);
+	var Pin = graphic.extendShape({
+	  type: 'pin',
+	  shape: {
+	    // x, y on the cusp
+	    x: 0,
+	    y: 0,
+	    width: 0,
+	    height: 0
+	  },
+	  buildPath: function (path, shape) {
+	    var x = shape.x;
+	    var y = shape.y;
+	    var w = shape.width / 5 * 3; // Height must be larger than width
 
-	var Image = __webpack_require__(53);
+	    var h = Math.max(w, shape.height);
+	    var r = w / 2; // Dist on y with tangent point and circle center
 
-	exports.Image = Image;
+	    var dy = r * r / (h - r);
+	    var cy = y - h + r + dy;
+	    var angle = Math.asin(dy / r); // Dist on x with tangent point and circle center
 
-	var Group = __webpack_require__(54);
+	    var dx = Math.cos(angle) * r;
+	    var tanX = Math.sin(angle);
+	    var tanY = Math.cos(angle);
+	    var cpLen = r * 0.6;
+	    var cpLen2 = r * 0.7;
+	    path.moveTo(x - dx, cy + dy);
+	    path.arc(x, cy, r, Math.PI - angle, Math.PI * 2 + angle);
+	    path.bezierCurveTo(x + dx - tanX * cpLen, cy + dy + tanY * cpLen, x, y - cpLen2, x, y);
+	    path.bezierCurveTo(x, y - cpLen2, x - dx + tanX * cpLen, cy + dy + tanY * cpLen, x - dx, cy + dy);
+	    path.closePath();
+	  }
+	});
+	/**
+	 * Arrow shape
+	 * @inner
+	 */
+
+	var Arrow = graphic.extendShape({
+	  type: 'arrow',
+	  shape: {
+	    x: 0,
+	    y: 0,
+	    width: 0,
+	    height: 0
+	  },
+	  buildPath: function (ctx, shape) {
+	    var height = shape.height;
+	    var width = shape.width;
+	    var x = shape.x;
+	    var y = shape.y;
+	    var dx = width / 3 * 2;
+	    ctx.moveTo(x, y);
+	    ctx.lineTo(x + dx, y + height);
+	    ctx.lineTo(x, y + height / 4 * 3);
+	    ctx.lineTo(x - dx, y + height);
+	    ctx.lineTo(x, y);
+	    ctx.closePath();
+	  }
+	});
+	/**
+	 * Map of path contructors
+	 * @type {Object.<string, module:zrender/graphic/Path>}
+	 */
+
+	var symbolCtors = {
+	  line: graphic.Line,
+	  rect: graphic.Rect,
+	  roundRect: graphic.Rect,
+	  square: graphic.Rect,
+	  circle: graphic.Circle,
+	  diamond: Diamond,
+	  pin: Pin,
+	  arrow: Arrow,
+	  triangle: Triangle
+	};
+	var symbolShapeMakers = {
+	  line: function (x, y, w, h, shape) {
+	    // FIXME
+	    shape.x1 = x;
+	    shape.y1 = y + h / 2;
+	    shape.x2 = x + w;
+	    shape.y2 = y + h / 2;
+	  },
+	  rect: function (x, y, w, h, shape) {
+	    shape.x = x;
+	    shape.y = y;
+	    shape.width = w;
+	    shape.height = h;
+	  },
+	  roundRect: function (x, y, w, h, shape) {
+	    shape.x = x;
+	    shape.y = y;
+	    shape.width = w;
+	    shape.height = h;
+	    shape.r = Math.min(w, h) / 4;
+	  },
+	  square: function (x, y, w, h, shape) {
+	    var size = Math.min(w, h);
+	    shape.x = x;
+	    shape.y = y;
+	    shape.width = size;
+	    shape.height = size;
+	  },
+	  circle: function (x, y, w, h, shape) {
+	    // Put circle in the center of square
+	    shape.cx = x + w / 2;
+	    shape.cy = y + h / 2;
+	    shape.r = Math.min(w, h) / 2;
+	  },
+	  diamond: function (x, y, w, h, shape) {
+	    shape.cx = x + w / 2;
+	    shape.cy = y + h / 2;
+	    shape.width = w;
+	    shape.height = h;
+	  },
+	  pin: function (x, y, w, h, shape) {
+	    shape.x = x + w / 2;
+	    shape.y = y + h / 2;
+	    shape.width = w;
+	    shape.height = h;
+	  },
+	  arrow: function (x, y, w, h, shape) {
+	    shape.x = x + w / 2;
+	    shape.y = y + h / 2;
+	    shape.width = w;
+	    shape.height = h;
+	  },
+	  triangle: function (x, y, w, h, shape) {
+	    shape.cx = x + w / 2;
+	    shape.cy = y + h / 2;
+	    shape.width = w;
+	    shape.height = h;
+	  }
+	};
+	var symbolBuildProxies = {};
+	zrUtil.each(symbolCtors, function (Ctor, name) {
+	  symbolBuildProxies[name] = new Ctor();
+	});
+	var SymbolClz = graphic.extendShape({
+	  type: 'symbol',
+	  shape: {
+	    symbolType: '',
+	    x: 0,
+	    y: 0,
+	    width: 0,
+	    height: 0
+	  },
+	  beforeBrush: function () {
+	    var style = this.style;
+	    var shape = this.shape; // FIXME
+
+	    if (shape.symbolType === 'pin' && style.textPosition === 'inside') {
+	      style.textPosition = ['50%', '40%'];
+	      style.textAlign = 'center';
+	      style.textVerticalAlign = 'middle';
+	    }
+	  },
+	  buildPath: function (ctx, shape, inBundle) {
+	    var symbolType = shape.symbolType;
+	    var proxySymbol = symbolBuildProxies[symbolType];
+
+	    if (shape.symbolType !== 'none') {
+	      if (!proxySymbol) {
+	        // Default rect
+	        symbolType = 'rect';
+	        proxySymbol = symbolBuildProxies[symbolType];
+	      }
+
+	      symbolShapeMakers[symbolType](shape.x, shape.y, shape.width, shape.height, proxySymbol.shape);
+	      proxySymbol.buildPath(ctx, proxySymbol.shape, inBundle);
+	    }
+	  }
+	}); // Provide setColor helper method to avoid determine if set the fill or stroke outside
+
+	function symbolPathSetColor(color, innerColor) {
+	  if (this.type !== 'image') {
+	    var symbolStyle = this.style;
+	    var symbolShape = this.shape;
+
+	    if (symbolShape && symbolShape.symbolType === 'line') {
+	      symbolStyle.stroke = color;
+	    } else if (this.__isEmptyBrush) {
+	      symbolStyle.stroke = color;
+	      symbolStyle.fill = innerColor || '#fff';
+	    } else {
+	      // FIXME 判断图形默认是填充还是描边，使用 onlyStroke ?
+	      symbolStyle.fill && (symbolStyle.fill = color);
+	      symbolStyle.stroke && (symbolStyle.stroke = color);
+	    }
+
+	    this.dirty(false);
+	  }
+	}
+	/**
+	 * Create a symbol element with given symbol configuration: shape, x, y, width, height, color
+	 * @param {string} symbolType
+	 * @param {number} x
+	 * @param {number} y
+	 * @param {number} w
+	 * @param {number} h
+	 * @param {string} color
+	 * @param {boolean} [keepAspect=false] whether to keep the ratio of w/h,
+	 *                            for path and image only.
+	 */
+
+
+	function createSymbol(symbolType, x, y, w, h, color, keepAspect) {
+	  // TODO Support image object, DynamicImage.
+	  var isEmpty = symbolType.indexOf('empty') === 0;
+
+	  if (isEmpty) {
+	    symbolType = symbolType.substr(5, 1).toLowerCase() + symbolType.substr(6);
+	  }
+
+	  var symbolPath;
+
+	  if (symbolType.indexOf('image://') === 0) {
+	    symbolPath = graphic.makeImage(symbolType.slice(8), new BoundingRect(x, y, w, h), keepAspect ? 'center' : 'cover');
+	  } else if (symbolType.indexOf('path://') === 0) {
+	    symbolPath = graphic.makePath(symbolType.slice(7), {}, new BoundingRect(x, y, w, h), keepAspect ? 'center' : 'cover');
+	  } else {
+	    symbolPath = new SymbolClz({
+	      shape: {
+	        symbolType: symbolType,
+	        x: x,
+	        y: y,
+	        width: w,
+	        height: h
+	      }
+	    });
+	  }
+
+	  symbolPath.__isEmptyBrush = isEmpty;
+	  symbolPath.setColor = symbolPathSetColor;
+	  symbolPath.setColor(color);
+	  return symbolPath;
+	}
+
+	exports.createSymbol = createSymbol;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var zrUtil = __webpack_require__(5);
+
+	var pathTool = __webpack_require__(17);
+
+	var colorTool = __webpack_require__(32);
+
+	var matrix = __webpack_require__(26);
+
+	var vector = __webpack_require__(27);
+
+	var Path = __webpack_require__(18);
+
+	var Transformable = __webpack_require__(25);
+
+	var ZImage = __webpack_require__(54);
+
+	exports.Image = ZImage;
+
+	var Group = __webpack_require__(55);
 
 	exports.Group = Group;
 
-	var Text = __webpack_require__(55);
+	var Text = __webpack_require__(56);
 
 	exports.Text = Text;
 
-	var Circle = __webpack_require__(56);
+	var Circle = __webpack_require__(57);
 
 	exports.Circle = Circle;
 
-	var Sector = __webpack_require__(57);
+	var Sector = __webpack_require__(58);
 
 	exports.Sector = Sector;
 
-	var Ring = __webpack_require__(59);
+	var Ring = __webpack_require__(61);
 
 	exports.Ring = Ring;
 
-	var Polygon = __webpack_require__(60);
+	var Polygon = __webpack_require__(62);
 
 	exports.Polygon = Polygon;
 
-	var Polyline = __webpack_require__(64);
+	var Polyline = __webpack_require__(66);
 
 	exports.Polyline = Polyline;
 
-	var Rect = __webpack_require__(65);
+	var Rect = __webpack_require__(67);
 
 	exports.Rect = Rect;
 
-	var Line = __webpack_require__(66);
+	var Line = __webpack_require__(68);
 
 	exports.Line = Line;
 
-	var BezierCurve = __webpack_require__(67);
+	var BezierCurve = __webpack_require__(69);
 
 	exports.BezierCurve = BezierCurve;
 
-	var Arc = __webpack_require__(68);
+	var Arc = __webpack_require__(70);
 
 	exports.Arc = Arc;
 
-	var CompoundPath = __webpack_require__(69);
+	var CompoundPath = __webpack_require__(71);
 
 	exports.CompoundPath = CompoundPath;
 
-	var LinearGradient = __webpack_require__(70);
+	var LinearGradient = __webpack_require__(72);
 
 	exports.LinearGradient = LinearGradient;
 
-	var RadialGradient = __webpack_require__(72);
+	var RadialGradient = __webpack_require__(74);
 
 	exports.RadialGradient = RadialGradient;
 
-	var BoundingRect = __webpack_require__(9);
+	var BoundingRect = __webpack_require__(39);
 
 	exports.BoundingRect = BoundingRect;
+
+	var IncrementalDisplayable = __webpack_require__(75);
+
+	exports.IncrementalDisplayable = IncrementalDisplayable;
 	var round = Math.round;
 	var mathMax = Math.max;
 	var mathMin = Math.min;
@@ -4893,7 +3726,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	function makeImage(imageUrl, rect, layout) {
-	  var path = new Image({
+	  var path = new ZImage({
 	    style: {
 	      image: imageUrl,
 	      x: rect.x,
@@ -5090,16 +3923,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    insideRollbackOpt && rollbackInsideStyle(style); // styles can be:
 	    // {
-	    //     label: {
-	    //         normal: {
-	    //             show: false,
-	    //             position: 'outside',
-	    //             fontSize: 18
-	    //         },
-	    //         emphasis: {
-	    //             show: true
-	    //         }
-	    //     }
+	    //    label: {
+	    //        show: false,
+	    //        position: 'outside',
+	    //        fontSize: 18
+	    //    },
+	    //    emphasis: {
+	    //        label: {
+	    //            show: true
+	    //        }
+	    //    }
 	    // },
 	    // where properties of `emphasis` may not appear in `normal`. We previously use
 	    // module:echarts/util/model#defaultEmphasis to merge `normal` to `emphasis`.
@@ -5263,7 +4096,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {module:echarts/model/Model} normalModel
 	 * @param {module:echarts/model/Model} emphasisModel
 	 * @param {Object} opt Check `opt` of `setTextStyleCommon` to find other props.
-	 * @param {Object} [opt.defaultText]
+	 * @param {string|Function} [opt.defaultText]
 	 * @param {module:echarts/model/Model} [opt.labelFetcher] Fetch text by
 	 *      `opt.labelFetcher.getFormattedLabel(opt.labelDataIndex, 'normal'/'emphasis', null, opt.labelDimIndex)`
 	 * @param {module:echarts/model/Model} [opt.labelDataIndex] Fetch text by
@@ -5287,7 +4120,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // If `normal.show` is `false` and `emphasis.show` is `true` and `emphasis.formatter` is not set,
 	  // label should be displayed, where text is fetched by `normal.formatter` or `opt.defaultText`.
 
-	  var baseText = showNormal || showEmphasis ? zrUtil.retrieve2(labelFetcher ? labelFetcher.getFormattedLabel(labelDataIndex, 'normal', null, labelDimIndex) : null, opt.defaultText) : null;
+	  var baseText;
+
+	  if (showNormal || showEmphasis) {
+	    if (labelFetcher) {
+	      baseText = labelFetcher.getFormattedLabel(labelDataIndex, 'normal', null, labelDimIndex);
+	    }
+
+	    if (baseText == null) {
+	      baseText = zrUtil.isFunction(opt.defaultText) ? opt.defaultText(labelDataIndex, opt) : opt.defaultText;
+	    }
+	  }
+
 	  var normalStyleText = showNormal ? baseText : null;
 	  var emphasisStyleText = showEmphasis ? zrUtil.retrieve2(labelFetcher ? labelFetcher.getFormattedLabel(labelDataIndex, 'emphasis', null, labelDimIndex) : null, baseText) : null; // Optimize: If style.text is null, text will not be drawn.
 
@@ -5388,10 +4232,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //     data: [{
 	  //         value: 12,
 	  //         label: {
-	  //             normal: {
-	  //                 rich: {
-	  //                     // no 'a' here but using parent 'a'.
-	  //                 }
+	  //             rich: {
+	  //                 // no 'a' here but using parent 'a'.
 	  //             }
 	  //         }
 	  //     }],
@@ -5429,10 +4271,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	//     data: [{
 	//         value: 12,
 	//         label: {
-	//             normal: {
-	//                 rich: {
-	//                     // no 'a' here but using parent 'a'.
-	//                 }
+	//             rich: {
+	//                 // no 'a' here but using parent 'a'.
 	//             }
 	//         }
 	//     }],
@@ -5560,8 +4400,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function getFont(opt, ecModel) {
 	  // ecModel or default text style model.
 	  var gTextStyleModel = ecModel || ecModel.getModel('textStyle');
-	  return [// FIXME in node-canvas fontWeight is before fontStyle
-	  opt.fontStyle || gTextStyleModel && gTextStyleModel.getShallow('fontStyle') || '', opt.fontWeight || gTextStyleModel && gTextStyleModel.getShallow('fontWeight') || '', (opt.fontSize || gTextStyleModel && gTextStyleModel.getShallow('fontSize') || 12) + 'px', opt.fontFamily || gTextStyleModel && gTextStyleModel.getShallow('fontFamily') || 'sans-serif'].join(' ');
+	  return zrUtil.trim([// FIXME in node-canvas fontWeight is before fontStyle
+	  opt.fontStyle || gTextStyleModel && gTextStyleModel.getShallow('fontStyle') || '', opt.fontWeight || gTextStyleModel && gTextStyleModel.getShallow('fontWeight') || '', (opt.fontSize || gTextStyleModel && gTextStyleModel.getShallow('fontSize') || 12) + 'px', opt.fontFamily || gTextStyleModel && gTextStyleModel.getShallow('fontFamily') || 'sans-serif'].join(' '));
 	}
 
 	function animateOrSetProps(isUpdate, el, props, animatableModel, dataIndex, cb) {
@@ -5814,7 +4654,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  if (iconStr) {
-	    return iconStr.indexOf('image://') === 0 ? (style.image = iconStr.slice(8), zrUtil.defaults(style, rect), new Image(opt)) : makePath(iconStr.replace('path://', ''), opt, rect, 'center');
+	    return iconStr.indexOf('image://') === 0 ? (style.image = iconStr.slice(8), zrUtil.defaults(style, rect), new ZImage(opt)) : makePath(iconStr.replace('path://', ''), opt, rect, 'center');
 	  }
 	}
 
@@ -5843,14 +4683,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.createIcon = createIcon;
 
 /***/ },
-/* 23 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
-	var PathProxy = __webpack_require__(41);
+	var PathProxy = __webpack_require__(42);
 
-	var transformPath = __webpack_require__(52);
+	var transformPath = __webpack_require__(53);
 
 	// command chars
 	var cc = ['m', 'M', 'l', 'L', 'v', 'V', 'h', 'H', 'z', 'Z', 'c', 'C', 'q', 'Q', 't', 'T', 's', 'S', 'a', 'A'];
@@ -6257,18 +5097,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.mergePath = mergePath;
 
 /***/ },
-/* 24 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Displayable = __webpack_require__(25);
+	var Displayable = __webpack_require__(19);
 
 	var zrUtil = __webpack_require__(5);
 
-	var PathProxy = __webpack_require__(41);
+	var PathProxy = __webpack_require__(42);
 
-	var pathContain = __webpack_require__(44);
+	var pathContain = __webpack_require__(45);
 
-	var Pattern = __webpack_require__(51);
+	var Pattern = __webpack_require__(52);
 
 	var getCanvasPattern = Pattern.prototype.getCanvasPattern;
 	var abs = Math.abs;
@@ -6380,11 +5220,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // PENDING
 	      // Remove lineDash
 	      ctx.setLineDash([]);
-	    }
+	    } // Draw rect text
 
-	    this.restoreTransform(ctx); // Draw rect text
 
 	    if (style.text != null) {
+	      // Only restore transform when needs draw text.
+	      this.restoreTransform(ctx);
 	      this.drawRectText(ctx, this.getBoundingRect());
 	    }
 	  },
@@ -6611,16 +5452,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 25 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var zrUtil = __webpack_require__(5);
 
-	var Style = __webpack_require__(26);
+	var Style = __webpack_require__(20);
 
-	var Element = __webpack_require__(27);
+	var Element = __webpack_require__(22);
 
-	var RectText = __webpack_require__(38);
+	var RectText = __webpack_require__(36);
 
 	/**
 	 * 可绘制的图形基类
@@ -6745,9 +5586,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Render the element progressively when the value >= 0,
 	   * usefull for large data.
-	   * @type {number}
+	   * @type {boolean}
 	   */
-	  progressive: -1,
+	  progressive: false,
+
+	  /**
+	   * @type {boolean}
+	   */
+	  incremental: false,
+	  // inplace is used with incremental
+	  inplace: false,
 	  beforeBrush: function (ctx) {},
 	  afterBrush: function (ctx) {},
 
@@ -6865,8 +5713,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 26 */
-/***/ function(module, exports) {
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var fixShadow = __webpack_require__(21);
 
 	var STYLE_COMMON_PROPS = [['shadowBlur', 0], ['shadowOffsetX', 0], ['shadowOffsetY', 0], ['shadowColor', '#000'], ['lineCap', 'butt'], ['lineJoin', 'miter'], ['miterLimit', 10]]; // var SHADOW_PROPS = STYLE_COMMON_PROPS.slice(0, 4);
 	// var LINE_PROPS = STYLE_COMMON_PROPS.slice(4);
@@ -7216,7 +6066,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (firstDraw || style[styleName] !== prevStyle[styleName]) {
 	        // FIXME Invalid property value will cause style leak from previous element.
-	        ctx[styleName] = style[styleName] || prop[1];
+	        ctx[styleName] = fixShadow(ctx, styleName, style[styleName] || prop[1]);
 	      }
 	    }
 
@@ -7317,16 +6167,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 27 */
+/* 21 */
+/***/ function(module, exports) {
+
+	var SHADOW_PROPS = {
+	  'shadowBlur': 1,
+	  'shadowOffsetX': 1,
+	  'shadowOffsetY': 1,
+	  'textShadowBlur': 1,
+	  'textShadowOffsetX': 1,
+	  'textShadowOffsetY': 1,
+	  'textBoxShadowBlur': 1,
+	  'textBoxShadowOffsetX': 1,
+	  'textBoxShadowOffsetY': 1
+	};
+
+	function _default(ctx, propName, value) {
+	  if (SHADOW_PROPS.hasOwnProperty(propName)) {
+	    return value *= ctx.dpr;
+	  }
+
+	  return value;
+	}
+
+	module.exports = _default;
+
+/***/ },
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var guid = __webpack_require__(28);
+	var guid = __webpack_require__(23);
 
-	var Eventful = __webpack_require__(29);
+	var Eventful = __webpack_require__(24);
 
-	var Transformable = __webpack_require__(30);
+	var Transformable = __webpack_require__(25);
 
-	var Animatable = __webpack_require__(31);
+	var Animatable = __webpack_require__(28);
 
 	var zrUtil = __webpack_require__(5);
 
@@ -7390,6 +6266,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @readOnly
 	   */
 	  clipPath: null,
+
+	  /**
+	   * 是否是 Group
+	   * @type {boolean}
+	   */
+	  isGroup: false,
 
 	  /**
 	   * Drift element
@@ -7585,7 +6467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 28 */
+/* 23 */
 /***/ function(module, exports) {
 
 	/**
@@ -7602,7 +6484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 29 */
+/* 24 */
 /***/ function(module, exports) {
 
 	/**
@@ -7935,12 +6817,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 30 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var matrix = __webpack_require__(11);
+	var matrix = __webpack_require__(26);
 
-	var vector = __webpack_require__(10);
+	var vector = __webpack_require__(27);
 
 	/**
 	 * 提供变换扩展
@@ -8223,12 +7105,518 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 31 */
+/* 26 */
+/***/ function(module, exports) {
+
+	/**
+	 * 3x2矩阵操作类
+	 * @exports zrender/tool/matrix
+	 */
+	var ArrayCtor = typeof Float32Array === 'undefined' ? Array : Float32Array;
+	/**
+	 * Create a identity matrix.
+	 * @return {Float32Array|Array.<number>}
+	 */
+
+	function create() {
+	  var out = new ArrayCtor(6);
+	  identity(out);
+	  return out;
+	}
+	/**
+	 * 设置矩阵为单位矩阵
+	 * @param {Float32Array|Array.<number>} out
+	 */
+
+
+	function identity(out) {
+	  out[0] = 1;
+	  out[1] = 0;
+	  out[2] = 0;
+	  out[3] = 1;
+	  out[4] = 0;
+	  out[5] = 0;
+	  return out;
+	}
+	/**
+	 * 复制矩阵
+	 * @param {Float32Array|Array.<number>} out
+	 * @param {Float32Array|Array.<number>} m
+	 */
+
+
+	function copy(out, m) {
+	  out[0] = m[0];
+	  out[1] = m[1];
+	  out[2] = m[2];
+	  out[3] = m[3];
+	  out[4] = m[4];
+	  out[5] = m[5];
+	  return out;
+	}
+	/**
+	 * 矩阵相乘
+	 * @param {Float32Array|Array.<number>} out
+	 * @param {Float32Array|Array.<number>} m1
+	 * @param {Float32Array|Array.<number>} m2
+	 */
+
+
+	function mul(out, m1, m2) {
+	  // Consider matrix.mul(m, m2, m);
+	  // where out is the same as m2.
+	  // So use temp variable to escape error.
+	  var out0 = m1[0] * m2[0] + m1[2] * m2[1];
+	  var out1 = m1[1] * m2[0] + m1[3] * m2[1];
+	  var out2 = m1[0] * m2[2] + m1[2] * m2[3];
+	  var out3 = m1[1] * m2[2] + m1[3] * m2[3];
+	  var out4 = m1[0] * m2[4] + m1[2] * m2[5] + m1[4];
+	  var out5 = m1[1] * m2[4] + m1[3] * m2[5] + m1[5];
+	  out[0] = out0;
+	  out[1] = out1;
+	  out[2] = out2;
+	  out[3] = out3;
+	  out[4] = out4;
+	  out[5] = out5;
+	  return out;
+	}
+	/**
+	 * 平移变换
+	 * @param {Float32Array|Array.<number>} out
+	 * @param {Float32Array|Array.<number>} a
+	 * @param {Float32Array|Array.<number>} v
+	 */
+
+
+	function translate(out, a, v) {
+	  out[0] = a[0];
+	  out[1] = a[1];
+	  out[2] = a[2];
+	  out[3] = a[3];
+	  out[4] = a[4] + v[0];
+	  out[5] = a[5] + v[1];
+	  return out;
+	}
+	/**
+	 * 旋转变换
+	 * @param {Float32Array|Array.<number>} out
+	 * @param {Float32Array|Array.<number>} a
+	 * @param {number} rad
+	 */
+
+
+	function rotate(out, a, rad) {
+	  var aa = a[0];
+	  var ac = a[2];
+	  var atx = a[4];
+	  var ab = a[1];
+	  var ad = a[3];
+	  var aty = a[5];
+	  var st = Math.sin(rad);
+	  var ct = Math.cos(rad);
+	  out[0] = aa * ct + ab * st;
+	  out[1] = -aa * st + ab * ct;
+	  out[2] = ac * ct + ad * st;
+	  out[3] = -ac * st + ct * ad;
+	  out[4] = ct * atx + st * aty;
+	  out[5] = ct * aty - st * atx;
+	  return out;
+	}
+	/**
+	 * 缩放变换
+	 * @param {Float32Array|Array.<number>} out
+	 * @param {Float32Array|Array.<number>} a
+	 * @param {Float32Array|Array.<number>} v
+	 */
+
+
+	function scale(out, a, v) {
+	  var vx = v[0];
+	  var vy = v[1];
+	  out[0] = a[0] * vx;
+	  out[1] = a[1] * vy;
+	  out[2] = a[2] * vx;
+	  out[3] = a[3] * vy;
+	  out[4] = a[4] * vx;
+	  out[5] = a[5] * vy;
+	  return out;
+	}
+	/**
+	 * 求逆矩阵
+	 * @param {Float32Array|Array.<number>} out
+	 * @param {Float32Array|Array.<number>} a
+	 */
+
+
+	function invert(out, a) {
+	  var aa = a[0];
+	  var ac = a[2];
+	  var atx = a[4];
+	  var ab = a[1];
+	  var ad = a[3];
+	  var aty = a[5];
+	  var det = aa * ad - ab * ac;
+
+	  if (!det) {
+	    return null;
+	  }
+
+	  det = 1.0 / det;
+	  out[0] = ad * det;
+	  out[1] = -ab * det;
+	  out[2] = -ac * det;
+	  out[3] = aa * det;
+	  out[4] = (ac * aty - ad * atx) * det;
+	  out[5] = (ab * atx - aa * aty) * det;
+	  return out;
+	}
+	/**
+	 * Clone a new matrix.
+	 * @param {Float32Array|Array.<number>} a
+	 */
+
+
+	function clone(a) {
+	  var b = create();
+	  copy(b, a);
+	  return b;
+	}
+
+	exports.create = create;
+	exports.identity = identity;
+	exports.copy = copy;
+	exports.mul = mul;
+	exports.translate = translate;
+	exports.rotate = rotate;
+	exports.scale = scale;
+	exports.invert = invert;
+	exports.clone = clone;
+
+/***/ },
+/* 27 */
+/***/ function(module, exports) {
+
+	var ArrayCtor = typeof Float32Array === 'undefined' ? Array : Float32Array;
+	/**
+	 * 创建一个向量
+	 * @param {number} [x=0]
+	 * @param {number} [y=0]
+	 * @return {Vector2}
+	 */
+
+	function create(x, y) {
+	  var out = new ArrayCtor(2);
+
+	  if (x == null) {
+	    x = 0;
+	  }
+
+	  if (y == null) {
+	    y = 0;
+	  }
+
+	  out[0] = x;
+	  out[1] = y;
+	  return out;
+	}
+	/**
+	 * 复制向量数据
+	 * @param {Vector2} out
+	 * @param {Vector2} v
+	 * @return {Vector2}
+	 */
+
+
+	function copy(out, v) {
+	  out[0] = v[0];
+	  out[1] = v[1];
+	  return out;
+	}
+	/**
+	 * 克隆一个向量
+	 * @param {Vector2} v
+	 * @return {Vector2}
+	 */
+
+
+	function clone(v) {
+	  var out = new ArrayCtor(2);
+	  out[0] = v[0];
+	  out[1] = v[1];
+	  return out;
+	}
+	/**
+	 * 设置向量的两个项
+	 * @param {Vector2} out
+	 * @param {number} a
+	 * @param {number} b
+	 * @return {Vector2} 结果
+	 */
+
+
+	function set(out, a, b) {
+	  out[0] = a;
+	  out[1] = b;
+	  return out;
+	}
+	/**
+	 * 向量相加
+	 * @param {Vector2} out
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 */
+
+
+	function add(out, v1, v2) {
+	  out[0] = v1[0] + v2[0];
+	  out[1] = v1[1] + v2[1];
+	  return out;
+	}
+	/**
+	 * 向量缩放后相加
+	 * @param {Vector2} out
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 * @param {number} a
+	 */
+
+
+	function scaleAndAdd(out, v1, v2, a) {
+	  out[0] = v1[0] + v2[0] * a;
+	  out[1] = v1[1] + v2[1] * a;
+	  return out;
+	}
+	/**
+	 * 向量相减
+	 * @param {Vector2} out
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 */
+
+
+	function sub(out, v1, v2) {
+	  out[0] = v1[0] - v2[0];
+	  out[1] = v1[1] - v2[1];
+	  return out;
+	}
+	/**
+	 * 向量长度
+	 * @param {Vector2} v
+	 * @return {number}
+	 */
+
+
+	function len(v) {
+	  return Math.sqrt(lenSquare(v));
+	}
+
+	var length = len; // jshint ignore:line
+
+	/**
+	 * 向量长度平方
+	 * @param {Vector2} v
+	 * @return {number}
+	 */
+
+	function lenSquare(v) {
+	  return v[0] * v[0] + v[1] * v[1];
+	}
+
+	var lengthSquare = lenSquare;
+	/**
+	 * 向量乘法
+	 * @param {Vector2} out
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 */
+
+	function mul(out, v1, v2) {
+	  out[0] = v1[0] * v2[0];
+	  out[1] = v1[1] * v2[1];
+	  return out;
+	}
+	/**
+	 * 向量除法
+	 * @param {Vector2} out
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 */
+
+
+	function div(out, v1, v2) {
+	  out[0] = v1[0] / v2[0];
+	  out[1] = v1[1] / v2[1];
+	  return out;
+	}
+	/**
+	 * 向量点乘
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 * @return {number}
+	 */
+
+
+	function dot(v1, v2) {
+	  return v1[0] * v2[0] + v1[1] * v2[1];
+	}
+	/**
+	 * 向量缩放
+	 * @param {Vector2} out
+	 * @param {Vector2} v
+	 * @param {number} s
+	 */
+
+
+	function scale(out, v, s) {
+	  out[0] = v[0] * s;
+	  out[1] = v[1] * s;
+	  return out;
+	}
+	/**
+	 * 向量归一化
+	 * @param {Vector2} out
+	 * @param {Vector2} v
+	 */
+
+
+	function normalize(out, v) {
+	  var d = len(v);
+
+	  if (d === 0) {
+	    out[0] = 0;
+	    out[1] = 0;
+	  } else {
+	    out[0] = v[0] / d;
+	    out[1] = v[1] / d;
+	  }
+
+	  return out;
+	}
+	/**
+	 * 计算向量间距离
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 * @return {number}
+	 */
+
+
+	function distance(v1, v2) {
+	  return Math.sqrt((v1[0] - v2[0]) * (v1[0] - v2[0]) + (v1[1] - v2[1]) * (v1[1] - v2[1]));
+	}
+
+	var dist = distance;
+	/**
+	 * 向量距离平方
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 * @return {number}
+	 */
+
+	function distanceSquare(v1, v2) {
+	  return (v1[0] - v2[0]) * (v1[0] - v2[0]) + (v1[1] - v2[1]) * (v1[1] - v2[1]);
+	}
+
+	var distSquare = distanceSquare;
+	/**
+	 * 求负向量
+	 * @param {Vector2} out
+	 * @param {Vector2} v
+	 */
+
+	function negate(out, v) {
+	  out[0] = -v[0];
+	  out[1] = -v[1];
+	  return out;
+	}
+	/**
+	 * 插值两个点
+	 * @param {Vector2} out
+	 * @param {Vector2} v1
+	 * @param {Vector2} v2
+	 * @param {number} t
+	 */
+
+
+	function lerp(out, v1, v2, t) {
+	  out[0] = v1[0] + t * (v2[0] - v1[0]);
+	  out[1] = v1[1] + t * (v2[1] - v1[1]);
+	  return out;
+	}
+	/**
+	 * 矩阵左乘向量
+	 * @param {Vector2} out
+	 * @param {Vector2} v
+	 * @param {Vector2} m
+	 */
+
+
+	function applyTransform(out, v, m) {
+	  var x = v[0];
+	  var y = v[1];
+	  out[0] = m[0] * x + m[2] * y + m[4];
+	  out[1] = m[1] * x + m[3] * y + m[5];
+	  return out;
+	}
+	/**
+	 * 求两个向量最小值
+	 * @param  {Vector2} out
+	 * @param  {Vector2} v1
+	 * @param  {Vector2} v2
+	 */
+
+
+	function min(out, v1, v2) {
+	  out[0] = Math.min(v1[0], v2[0]);
+	  out[1] = Math.min(v1[1], v2[1]);
+	  return out;
+	}
+	/**
+	 * 求两个向量最大值
+	 * @param  {Vector2} out
+	 * @param  {Vector2} v1
+	 * @param  {Vector2} v2
+	 */
+
+
+	function max(out, v1, v2) {
+	  out[0] = Math.max(v1[0], v2[0]);
+	  out[1] = Math.max(v1[1], v2[1]);
+	  return out;
+	}
+
+	exports.create = create;
+	exports.copy = copy;
+	exports.clone = clone;
+	exports.set = set;
+	exports.add = add;
+	exports.scaleAndAdd = scaleAndAdd;
+	exports.sub = sub;
+	exports.len = len;
+	exports.length = length;
+	exports.lenSquare = lenSquare;
+	exports.lengthSquare = lengthSquare;
+	exports.mul = mul;
+	exports.div = div;
+	exports.dot = dot;
+	exports.scale = scale;
+	exports.normalize = normalize;
+	exports.distance = distance;
+	exports.dist = dist;
+	exports.distanceSquare = distanceSquare;
+	exports.distSquare = distSquare;
+	exports.negate = negate;
+	exports.lerp = lerp;
+	exports.applyTransform = applyTransform;
+	exports.min = min;
+	exports.max = max;
+
+/***/ },
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Animator = __webpack_require__(32);
+	var Animator = __webpack_require__(29);
 
-	var log = __webpack_require__(36);
+	var log = __webpack_require__(34);
 
 	var _util = __webpack_require__(5);
 
@@ -8482,12 +7870,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 32 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Clip = __webpack_require__(33);
+	var Clip = __webpack_require__(30);
 
-	var color = __webpack_require__(35);
+	var color = __webpack_require__(32);
 
 	var _util = __webpack_require__(5);
 
@@ -9131,10 +8519,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 33 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var easingFuncs = __webpack_require__(34);
+	var easingFuncs = __webpack_require__(31);
 
 	/**
 	 * 动画主控制器
@@ -9237,7 +8625,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 34 */
+/* 31 */
 /***/ function(module, exports) {
 
 	/**
@@ -9620,10 +9008,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 35 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LRU = __webpack_require__(13);
+	var LRU = __webpack_require__(33);
 
 	var kCSSColorTable = {
 	  'transparent': [0, 0, 0, 0],
@@ -10246,10 +9634,217 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.stringify = stringify;
 
 /***/ },
-/* 36 */
+/* 33 */
+/***/ function(module, exports) {
+
+	// Simple LRU cache use doubly linked list
+	// @module zrender/core/LRU
+
+	/**
+	 * Simple double linked list. Compared with array, it has O(1) remove operation.
+	 * @constructor
+	 */
+	var LinkedList = function () {
+	  /**
+	   * @type {module:zrender/core/LRU~Entry}
+	   */
+	  this.head = null;
+	  /**
+	   * @type {module:zrender/core/LRU~Entry}
+	   */
+
+	  this.tail = null;
+	  this._len = 0;
+	};
+
+	var linkedListProto = LinkedList.prototype;
+	/**
+	 * Insert a new value at the tail
+	 * @param  {} val
+	 * @return {module:zrender/core/LRU~Entry}
+	 */
+
+	linkedListProto.insert = function (val) {
+	  var entry = new Entry(val);
+	  this.insertEntry(entry);
+	  return entry;
+	};
+	/**
+	 * Insert an entry at the tail
+	 * @param  {module:zrender/core/LRU~Entry} entry
+	 */
+
+
+	linkedListProto.insertEntry = function (entry) {
+	  if (!this.head) {
+	    this.head = this.tail = entry;
+	  } else {
+	    this.tail.next = entry;
+	    entry.prev = this.tail;
+	    entry.next = null;
+	    this.tail = entry;
+	  }
+
+	  this._len++;
+	};
+	/**
+	 * Remove entry.
+	 * @param  {module:zrender/core/LRU~Entry} entry
+	 */
+
+
+	linkedListProto.remove = function (entry) {
+	  var prev = entry.prev;
+	  var next = entry.next;
+
+	  if (prev) {
+	    prev.next = next;
+	  } else {
+	    // Is head
+	    this.head = next;
+	  }
+
+	  if (next) {
+	    next.prev = prev;
+	  } else {
+	    // Is tail
+	    this.tail = prev;
+	  }
+
+	  entry.next = entry.prev = null;
+	  this._len--;
+	};
+	/**
+	 * @return {number}
+	 */
+
+
+	linkedListProto.len = function () {
+	  return this._len;
+	};
+	/**
+	 * Clear list
+	 */
+
+
+	linkedListProto.clear = function () {
+	  this.head = this.tail = null;
+	  this._len = 0;
+	};
+	/**
+	 * @constructor
+	 * @param {} val
+	 */
+
+
+	var Entry = function (val) {
+	  /**
+	   * @type {}
+	   */
+	  this.value = val;
+	  /**
+	   * @type {module:zrender/core/LRU~Entry}
+	   */
+
+	  this.next;
+	  /**
+	   * @type {module:zrender/core/LRU~Entry}
+	   */
+
+	  this.prev;
+	};
+	/**
+	 * LRU Cache
+	 * @constructor
+	 * @alias module:zrender/core/LRU
+	 */
+
+
+	var LRU = function (maxSize) {
+	  this._list = new LinkedList();
+	  this._map = {};
+	  this._maxSize = maxSize || 10;
+	  this._lastRemovedEntry = null;
+	};
+
+	var LRUProto = LRU.prototype;
+	/**
+	 * @param  {string} key
+	 * @param  {} value
+	 * @return {} Removed value
+	 */
+
+	LRUProto.put = function (key, value) {
+	  var list = this._list;
+	  var map = this._map;
+	  var removed = null;
+
+	  if (map[key] == null) {
+	    var len = list.len(); // Reuse last removed entry
+
+	    var entry = this._lastRemovedEntry;
+
+	    if (len >= this._maxSize && len > 0) {
+	      // Remove the least recently used
+	      var leastUsedEntry = list.head;
+	      list.remove(leastUsedEntry);
+	      delete map[leastUsedEntry.key];
+	      removed = leastUsedEntry.value;
+	      this._lastRemovedEntry = leastUsedEntry;
+	    }
+
+	    if (entry) {
+	      entry.value = value;
+	    } else {
+	      entry = new Entry(value);
+	    }
+
+	    entry.key = key;
+	    list.insertEntry(entry);
+	    map[key] = entry;
+	  }
+
+	  return removed;
+	};
+	/**
+	 * @param  {string} key
+	 * @return {}
+	 */
+
+
+	LRUProto.get = function (key) {
+	  var entry = this._map[key];
+	  var list = this._list;
+
+	  if (entry != null) {
+	    // Put the latest used entry in the tail
+	    if (entry !== list.tail) {
+	      list.remove(entry);
+	      list.insertEntry(entry);
+	    }
+
+	    return entry.value;
+	  }
+	};
+	/**
+	 * Clear the cache
+	 */
+
+
+	LRUProto.clear = function () {
+	  this._list.clear();
+
+	  this._map = {};
+	};
+
+	var _default = LRU;
+	module.exports = _default;
+
+/***/ },
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _config = __webpack_require__(37);
+	var _config = __webpack_require__(35);
 
 	var debugMode = _config.debugMode;
 
@@ -10273,7 +9868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 37 */
+/* 35 */
 /***/ function(module, exports) {
 
 	var dpr = 1; // If in browser environment
@@ -10302,12 +9897,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.devicePixelRatio = devicePixelRatio;
 
 /***/ },
-/* 38 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var textHelper = __webpack_require__(39);
+	var textHelper = __webpack_require__(37);
 
-	var BoundingRect = __webpack_require__(9);
+	var BoundingRect = __webpack_require__(39);
 
 	/**
 	 * Mixin for drawing text in a element bounding rect
@@ -10362,7 +9957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 39 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _util = __webpack_require__(5);
@@ -10374,11 +9969,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var isString = _util.isString;
 	var isObject = _util.isObject;
 
-	var textContain = __webpack_require__(8);
+	var textContain = __webpack_require__(38);
 
-	var roundRectHelper = __webpack_require__(40);
+	var roundRectHelper = __webpack_require__(41);
 
-	var imageHelper = __webpack_require__(12);
+	var imageHelper = __webpack_require__(40);
+
+	var fixShadow = __webpack_require__(21);
 
 	// TODO: Have not support 'start', 'end' yet.
 	var VALID_TEXT_ALIGN = {
@@ -10745,11 +10342,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function setCtx(ctx, prop, value) {
-	  // FIXME ??? performance try
-	  // if (ctx.__currentValues[prop] !== value) {
-	  // ctx[prop] = ctx.__currentValues[prop] = value;
-	  ctx[prop] = value; // }
-
+	  ctx[prop] = fixShadow(ctx, prop, value);
 	  return ctx[prop];
 	}
 	/**
@@ -10802,7 +10395,982 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.needDrawText = needDrawText;
 
 /***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BoundingRect = __webpack_require__(39);
+
+	var imageHelper = __webpack_require__(40);
+
+	var _util = __webpack_require__(5);
+
+	var getContext = _util.getContext;
+	var extend = _util.extend;
+	var retrieve2 = _util.retrieve2;
+	var retrieve3 = _util.retrieve3;
+	var trim = _util.trim;
+	var textWidthCache = {};
+	var textWidthCacheCounter = 0;
+	var TEXT_CACHE_MAX = 5000;
+	var STYLE_REG = /\{([a-zA-Z0-9_]+)\|([^}]*)\}/g;
+	var DEFAULT_FONT = '12px sans-serif'; // Avoid assign to an exported variable, for transforming to cjs.
+
+	var methods = {};
+
+	function $override(name, fn) {
+	  methods[name] = fn;
+	}
+	/**
+	 * @public
+	 * @param {string} text
+	 * @param {string} font
+	 * @return {number} width
+	 */
+
+
+	function getWidth(text, font) {
+	  font = font || DEFAULT_FONT;
+	  var key = text + ':' + font;
+
+	  if (textWidthCache[key]) {
+	    return textWidthCache[key];
+	  }
+
+	  var textLines = (text + '').split('\n');
+	  var width = 0;
+
+	  for (var i = 0, l = textLines.length; i < l; i++) {
+	    // textContain.measureText may be overrided in SVG or VML
+	    width = Math.max(measureText(textLines[i], font).width, width);
+	  }
+
+	  if (textWidthCacheCounter > TEXT_CACHE_MAX) {
+	    textWidthCacheCounter = 0;
+	    textWidthCache = {};
+	  }
+
+	  textWidthCacheCounter++;
+	  textWidthCache[key] = width;
+	  return width;
+	}
+	/**
+	 * @public
+	 * @param {string} text
+	 * @param {string} font
+	 * @param {string} [textAlign='left']
+	 * @param {string} [textVerticalAlign='top']
+	 * @param {Array.<number>} [textPadding]
+	 * @param {Object} [rich]
+	 * @param {Object} [truncate]
+	 * @return {Object} {x, y, width, height, lineHeight}
+	 */
+
+
+	function getBoundingRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) {
+	  return rich ? getRichTextRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) : getPlainTextRect(text, font, textAlign, textVerticalAlign, textPadding, truncate);
+	}
+
+	function getPlainTextRect(text, font, textAlign, textVerticalAlign, textPadding, truncate) {
+	  var contentBlock = parsePlainText(text, font, textPadding, truncate);
+	  var outerWidth = getWidth(text, font);
+
+	  if (textPadding) {
+	    outerWidth += textPadding[1] + textPadding[3];
+	  }
+
+	  var outerHeight = contentBlock.outerHeight;
+	  var x = adjustTextX(0, outerWidth, textAlign);
+	  var y = adjustTextY(0, outerHeight, textVerticalAlign);
+	  var rect = new BoundingRect(x, y, outerWidth, outerHeight);
+	  rect.lineHeight = contentBlock.lineHeight;
+	  return rect;
+	}
+
+	function getRichTextRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) {
+	  var contentBlock = parseRichText(text, {
+	    rich: rich,
+	    truncate: truncate,
+	    font: font,
+	    textAlign: textAlign,
+	    textPadding: textPadding
+	  });
+	  var outerWidth = contentBlock.outerWidth;
+	  var outerHeight = contentBlock.outerHeight;
+	  var x = adjustTextX(0, outerWidth, textAlign);
+	  var y = adjustTextY(0, outerHeight, textVerticalAlign);
+	  return new BoundingRect(x, y, outerWidth, outerHeight);
+	}
+	/**
+	 * @public
+	 * @param {number} x
+	 * @param {number} width
+	 * @param {string} [textAlign='left']
+	 * @return {number} Adjusted x.
+	 */
+
+
+	function adjustTextX(x, width, textAlign) {
+	  // FIXME Right to left language
+	  if (textAlign === 'right') {
+	    x -= width;
+	  } else if (textAlign === 'center') {
+	    x -= width / 2;
+	  }
+
+	  return x;
+	}
+	/**
+	 * @public
+	 * @param {number} y
+	 * @param {number} height
+	 * @param {string} [textVerticalAlign='top']
+	 * @return {number} Adjusted y.
+	 */
+
+
+	function adjustTextY(y, height, textVerticalAlign) {
+	  if (textVerticalAlign === 'middle') {
+	    y -= height / 2;
+	  } else if (textVerticalAlign === 'bottom') {
+	    y -= height;
+	  }
+
+	  return y;
+	}
+	/**
+	 * @public
+	 * @param {stirng} textPosition
+	 * @param {Object} rect {x, y, width, height}
+	 * @param {number} distance
+	 * @return {Object} {x, y, textAlign, textVerticalAlign}
+	 */
+
+
+	function adjustTextPositionOnRect(textPosition, rect, distance) {
+	  var x = rect.x;
+	  var y = rect.y;
+	  var height = rect.height;
+	  var width = rect.width;
+	  var halfHeight = height / 2;
+	  var textAlign = 'left';
+	  var textVerticalAlign = 'top';
+
+	  switch (textPosition) {
+	    case 'left':
+	      x -= distance;
+	      y += halfHeight;
+	      textAlign = 'right';
+	      textVerticalAlign = 'middle';
+	      break;
+
+	    case 'right':
+	      x += distance + width;
+	      y += halfHeight;
+	      textVerticalAlign = 'middle';
+	      break;
+
+	    case 'top':
+	      x += width / 2;
+	      y -= distance;
+	      textAlign = 'center';
+	      textVerticalAlign = 'bottom';
+	      break;
+
+	    case 'bottom':
+	      x += width / 2;
+	      y += height + distance;
+	      textAlign = 'center';
+	      break;
+
+	    case 'inside':
+	      x += width / 2;
+	      y += halfHeight;
+	      textAlign = 'center';
+	      textVerticalAlign = 'middle';
+	      break;
+
+	    case 'insideLeft':
+	      x += distance;
+	      y += halfHeight;
+	      textVerticalAlign = 'middle';
+	      break;
+
+	    case 'insideRight':
+	      x += width - distance;
+	      y += halfHeight;
+	      textAlign = 'right';
+	      textVerticalAlign = 'middle';
+	      break;
+
+	    case 'insideTop':
+	      x += width / 2;
+	      y += distance;
+	      textAlign = 'center';
+	      break;
+
+	    case 'insideBottom':
+	      x += width / 2;
+	      y += height - distance;
+	      textAlign = 'center';
+	      textVerticalAlign = 'bottom';
+	      break;
+
+	    case 'insideTopLeft':
+	      x += distance;
+	      y += distance;
+	      break;
+
+	    case 'insideTopRight':
+	      x += width - distance;
+	      y += distance;
+	      textAlign = 'right';
+	      break;
+
+	    case 'insideBottomLeft':
+	      x += distance;
+	      y += height - distance;
+	      textVerticalAlign = 'bottom';
+	      break;
+
+	    case 'insideBottomRight':
+	      x += width - distance;
+	      y += height - distance;
+	      textAlign = 'right';
+	      textVerticalAlign = 'bottom';
+	      break;
+	  }
+
+	  return {
+	    x: x,
+	    y: y,
+	    textAlign: textAlign,
+	    textVerticalAlign: textVerticalAlign
+	  };
+	}
+	/**
+	 * Show ellipsis if overflow.
+	 *
+	 * @public
+	 * @param  {string} text
+	 * @param  {string} containerWidth
+	 * @param  {string} font
+	 * @param  {number} [ellipsis='...']
+	 * @param  {Object} [options]
+	 * @param  {number} [options.maxIterations=3]
+	 * @param  {number} [options.minChar=0] If truncate result are less
+	 *                  then minChar, ellipsis will not show, which is
+	 *                  better for user hint in some cases.
+	 * @param  {number} [options.placeholder=''] When all truncated, use the placeholder.
+	 * @return {string}
+	 */
+
+
+	function truncateText(text, containerWidth, font, ellipsis, options) {
+	  if (!containerWidth) {
+	    return '';
+	  }
+
+	  var textLines = (text + '').split('\n');
+	  options = prepareTruncateOptions(containerWidth, font, ellipsis, options); // FIXME
+	  // It is not appropriate that every line has '...' when truncate multiple lines.
+
+	  for (var i = 0, len = textLines.length; i < len; i++) {
+	    textLines[i] = truncateSingleLine(textLines[i], options);
+	  }
+
+	  return textLines.join('\n');
+	}
+
+	function prepareTruncateOptions(containerWidth, font, ellipsis, options) {
+	  options = extend({}, options);
+	  options.font = font;
+	  var ellipsis = retrieve2(ellipsis, '...');
+	  options.maxIterations = retrieve2(options.maxIterations, 2);
+	  var minChar = options.minChar = retrieve2(options.minChar, 0); // FIXME
+	  // Other languages?
+
+	  options.cnCharWidth = getWidth('国', font); // FIXME
+	  // Consider proportional font?
+
+	  var ascCharWidth = options.ascCharWidth = getWidth('a', font);
+	  options.placeholder = retrieve2(options.placeholder, ''); // Example 1: minChar: 3, text: 'asdfzxcv', truncate result: 'asdf', but not: 'a...'.
+	  // Example 2: minChar: 3, text: '维度', truncate result: '维', but not: '...'.
+
+	  var contentWidth = containerWidth = Math.max(0, containerWidth - 1); // Reserve some gap.
+
+	  for (var i = 0; i < minChar && contentWidth >= ascCharWidth; i++) {
+	    contentWidth -= ascCharWidth;
+	  }
+
+	  var ellipsisWidth = getWidth(ellipsis);
+
+	  if (ellipsisWidth > contentWidth) {
+	    ellipsis = '';
+	    ellipsisWidth = 0;
+	  }
+
+	  contentWidth = containerWidth - ellipsisWidth;
+	  options.ellipsis = ellipsis;
+	  options.ellipsisWidth = ellipsisWidth;
+	  options.contentWidth = contentWidth;
+	  options.containerWidth = containerWidth;
+	  return options;
+	}
+
+	function truncateSingleLine(textLine, options) {
+	  var containerWidth = options.containerWidth;
+	  var font = options.font;
+	  var contentWidth = options.contentWidth;
+
+	  if (!containerWidth) {
+	    return '';
+	  }
+
+	  var lineWidth = getWidth(textLine, font);
+
+	  if (lineWidth <= containerWidth) {
+	    return textLine;
+	  }
+
+	  for (var j = 0;; j++) {
+	    if (lineWidth <= contentWidth || j >= options.maxIterations) {
+	      textLine += options.ellipsis;
+	      break;
+	    }
+
+	    var subLength = j === 0 ? estimateLength(textLine, contentWidth, options.ascCharWidth, options.cnCharWidth) : lineWidth > 0 ? Math.floor(textLine.length * contentWidth / lineWidth) : 0;
+	    textLine = textLine.substr(0, subLength);
+	    lineWidth = getWidth(textLine, font);
+	  }
+
+	  if (textLine === '') {
+	    textLine = options.placeholder;
+	  }
+
+	  return textLine;
+	}
+
+	function estimateLength(text, contentWidth, ascCharWidth, cnCharWidth) {
+	  var width = 0;
+	  var i = 0;
+
+	  for (var len = text.length; i < len && width < contentWidth; i++) {
+	    var charCode = text.charCodeAt(i);
+	    width += 0 <= charCode && charCode <= 127 ? ascCharWidth : cnCharWidth;
+	  }
+
+	  return i;
+	}
+	/**
+	 * @public
+	 * @param {string} font
+	 * @return {number} line height
+	 */
+
+
+	function getLineHeight(font) {
+	  // FIXME A rough approach.
+	  return getWidth('国', font);
+	}
+	/**
+	 * @public
+	 * @param {string} text
+	 * @param {string} font
+	 * @return {Object} width
+	 */
+
+
+	function measureText(text, font) {
+	  return methods.measureText(text, font);
+	} // Avoid assign to an exported variable, for transforming to cjs.
+
+
+	methods.measureText = function (text, font) {
+	  var ctx = getContext();
+	  ctx.font = font || DEFAULT_FONT;
+	  return ctx.measureText(text);
+	};
+	/**
+	 * @public
+	 * @param {string} text
+	 * @param {string} font
+	 * @param {Object} [truncate]
+	 * @return {Object} block: {lineHeight, lines, height, outerHeight}
+	 *  Notice: for performance, do not calculate outerWidth util needed.
+	 */
+
+
+	function parsePlainText(text, font, padding, truncate) {
+	  text != null && (text += '');
+	  var lineHeight = getLineHeight(font);
+	  var lines = text ? text.split('\n') : [];
+	  var height = lines.length * lineHeight;
+	  var outerHeight = height;
+
+	  if (padding) {
+	    outerHeight += padding[0] + padding[2];
+	  }
+
+	  if (text && truncate) {
+	    var truncOuterHeight = truncate.outerHeight;
+	    var truncOuterWidth = truncate.outerWidth;
+
+	    if (truncOuterHeight != null && outerHeight > truncOuterHeight) {
+	      text = '';
+	      lines = [];
+	    } else if (truncOuterWidth != null) {
+	      var options = prepareTruncateOptions(truncOuterWidth - (padding ? padding[1] + padding[3] : 0), font, truncate.ellipsis, {
+	        minChar: truncate.minChar,
+	        placeholder: truncate.placeholder
+	      }); // FIXME
+	      // It is not appropriate that every line has '...' when truncate multiple lines.
+
+	      for (var i = 0, len = lines.length; i < len; i++) {
+	        lines[i] = truncateSingleLine(lines[i], options);
+	      }
+	    }
+	  }
+
+	  return {
+	    lines: lines,
+	    height: height,
+	    outerHeight: outerHeight,
+	    lineHeight: lineHeight
+	  };
+	}
+	/**
+	 * For example: 'some text {a|some text}other text{b|some text}xxx{c|}xxx'
+	 * Also consider 'bbbb{a|xxx\nzzz}xxxx\naaaa'.
+	 *
+	 * @public
+	 * @param {string} text
+	 * @param {Object} style
+	 * @return {Object} block
+	 * {
+	 *      width,
+	 *      height,
+	 *      lines: [{
+	 *          lineHeight,
+	 *          width,
+	 *          tokens: [[{
+	 *              styleName,
+	 *              text,
+	 *              width,      // include textPadding
+	 *              height,     // include textPadding
+	 *              textWidth, // pure text width
+	 *              textHeight, // pure text height
+	 *              lineHeihgt,
+	 *              font,
+	 *              textAlign,
+	 *              textVerticalAlign
+	 *          }], [...], ...]
+	 *      }, ...]
+	 * }
+	 * If styleName is undefined, it is plain text.
+	 */
+
+
+	function parseRichText(text, style) {
+	  var contentBlock = {
+	    lines: [],
+	    width: 0,
+	    height: 0
+	  };
+	  text != null && (text += '');
+
+	  if (!text) {
+	    return contentBlock;
+	  }
+
+	  var lastIndex = STYLE_REG.lastIndex = 0;
+	  var result;
+
+	  while ((result = STYLE_REG.exec(text)) != null) {
+	    var matchedIndex = result.index;
+
+	    if (matchedIndex > lastIndex) {
+	      pushTokens(contentBlock, text.substring(lastIndex, matchedIndex));
+	    }
+
+	    pushTokens(contentBlock, result[2], result[1]);
+	    lastIndex = STYLE_REG.lastIndex;
+	  }
+
+	  if (lastIndex < text.length) {
+	    pushTokens(contentBlock, text.substring(lastIndex, text.length));
+	  }
+
+	  var lines = contentBlock.lines;
+	  var contentHeight = 0;
+	  var contentWidth = 0; // For `textWidth: 100%`
+
+	  var pendingList = [];
+	  var stlPadding = style.textPadding;
+	  var truncate = style.truncate;
+	  var truncateWidth = truncate && truncate.outerWidth;
+	  var truncateHeight = truncate && truncate.outerHeight;
+
+	  if (stlPadding) {
+	    truncateWidth != null && (truncateWidth -= stlPadding[1] + stlPadding[3]);
+	    truncateHeight != null && (truncateHeight -= stlPadding[0] + stlPadding[2]);
+	  } // Calculate layout info of tokens.
+
+
+	  for (var i = 0; i < lines.length; i++) {
+	    var line = lines[i];
+	    var lineHeight = 0;
+	    var lineWidth = 0;
+
+	    for (var j = 0; j < line.tokens.length; j++) {
+	      var token = line.tokens[j];
+	      var tokenStyle = token.styleName && style.rich[token.styleName] || {}; // textPadding should not inherit from style.
+
+	      var textPadding = token.textPadding = tokenStyle.textPadding; // textFont has been asigned to font by `normalizeStyle`.
+
+	      var font = token.font = tokenStyle.font || style.font; // textHeight can be used when textVerticalAlign is specified in token.
+
+	      var tokenHeight = token.textHeight = retrieve2( // textHeight should not be inherited, consider it can be specified
+	      // as box height of the block.
+	      tokenStyle.textHeight, getLineHeight(font));
+	      textPadding && (tokenHeight += textPadding[0] + textPadding[2]);
+	      token.height = tokenHeight;
+	      token.lineHeight = retrieve3(tokenStyle.textLineHeight, style.textLineHeight, tokenHeight);
+	      token.textAlign = tokenStyle && tokenStyle.textAlign || style.textAlign;
+	      token.textVerticalAlign = tokenStyle && tokenStyle.textVerticalAlign || 'middle';
+
+	      if (truncateHeight != null && contentHeight + token.lineHeight > truncateHeight) {
+	        return {
+	          lines: [],
+	          width: 0,
+	          height: 0
+	        };
+	      }
+
+	      token.textWidth = getWidth(token.text, font);
+	      var tokenWidth = tokenStyle.textWidth;
+	      var tokenWidthNotSpecified = tokenWidth == null || tokenWidth === 'auto'; // Percent width, can be `100%`, can be used in drawing separate
+	      // line when box width is needed to be auto.
+
+	      if (typeof tokenWidth === 'string' && tokenWidth.charAt(tokenWidth.length - 1) === '%') {
+	        token.percentWidth = tokenWidth;
+	        pendingList.push(token);
+	        tokenWidth = 0; // Do not truncate in this case, because there is no user case
+	        // and it is too complicated.
+	      } else {
+	        if (tokenWidthNotSpecified) {
+	          tokenWidth = token.textWidth; // FIXME: If image is not loaded and textWidth is not specified, calling
+	          // `getBoundingRect()` will not get correct result.
+
+	          var textBackgroundColor = tokenStyle.textBackgroundColor;
+	          var bgImg = textBackgroundColor && textBackgroundColor.image; // Use cases:
+	          // (1) If image is not loaded, it will be loaded at render phase and call
+	          // `dirty()` and `textBackgroundColor.image` will be replaced with the loaded
+	          // image, and then the right size will be calculated here at the next tick.
+	          // See `graphic/helper/text.js`.
+	          // (2) If image loaded, and `textBackgroundColor.image` is image src string,
+	          // use `imageHelper.findExistImage` to find cached image.
+	          // `imageHelper.findExistImage` will always be called here before
+	          // `imageHelper.createOrUpdateImage` in `graphic/helper/text.js#renderRichText`
+	          // which ensures that image will not be rendered before correct size calcualted.
+
+	          if (bgImg) {
+	            bgImg = imageHelper.findExistImage(bgImg);
+
+	            if (imageHelper.isImageReady(bgImg)) {
+	              tokenWidth = Math.max(tokenWidth, bgImg.width * tokenHeight / bgImg.height);
+	            }
+	          }
+	        }
+
+	        var paddingW = textPadding ? textPadding[1] + textPadding[3] : 0;
+	        tokenWidth += paddingW;
+	        var remianTruncWidth = truncateWidth != null ? truncateWidth - lineWidth : null;
+
+	        if (remianTruncWidth != null && remianTruncWidth < tokenWidth) {
+	          if (!tokenWidthNotSpecified || remianTruncWidth < paddingW) {
+	            token.text = '';
+	            token.textWidth = tokenWidth = 0;
+	          } else {
+	            token.text = truncateText(token.text, remianTruncWidth - paddingW, font, truncate.ellipsis, {
+	              minChar: truncate.minChar
+	            });
+	            token.textWidth = getWidth(token.text, font);
+	            tokenWidth = token.textWidth + paddingW;
+	          }
+	        }
+	      }
+
+	      lineWidth += token.width = tokenWidth;
+	      tokenStyle && (lineHeight = Math.max(lineHeight, token.lineHeight));
+	    }
+
+	    line.width = lineWidth;
+	    line.lineHeight = lineHeight;
+	    contentHeight += lineHeight;
+	    contentWidth = Math.max(contentWidth, lineWidth);
+	  }
+
+	  contentBlock.outerWidth = contentBlock.width = retrieve2(style.textWidth, contentWidth);
+	  contentBlock.outerHeight = contentBlock.height = retrieve2(style.textHeight, contentHeight);
+
+	  if (stlPadding) {
+	    contentBlock.outerWidth += stlPadding[1] + stlPadding[3];
+	    contentBlock.outerHeight += stlPadding[0] + stlPadding[2];
+	  }
+
+	  for (var i = 0; i < pendingList.length; i++) {
+	    var token = pendingList[i];
+	    var percentWidth = token.percentWidth; // Should not base on outerWidth, because token can not be placed out of padding.
+
+	    token.width = parseInt(percentWidth, 10) / 100 * contentWidth;
+	  }
+
+	  return contentBlock;
+	}
+
+	function pushTokens(block, str, styleName) {
+	  var isEmptyStr = str === '';
+	  var strs = str.split('\n');
+	  var lines = block.lines;
+
+	  for (var i = 0; i < strs.length; i++) {
+	    var text = strs[i];
+	    var token = {
+	      styleName: styleName,
+	      text: text,
+	      isLineHolder: !text && !isEmptyStr
+	    }; // The first token should be appended to the last line.
+
+	    if (!i) {
+	      var tokens = (lines[lines.length - 1] || (lines[0] = {
+	        tokens: []
+	      })).tokens; // Consider cases:
+	      // (1) ''.split('\n') => ['', '\n', ''], the '' at the first item
+	      // (which is a placeholder) should be replaced by new token.
+	      // (2) A image backage, where token likes {a|}.
+	      // (3) A redundant '' will affect textAlign in line.
+	      // (4) tokens with the same tplName should not be merged, because
+	      // they should be displayed in different box (with border and padding).
+
+	      var tokensLen = tokens.length;
+	      tokensLen === 1 && tokens[0].isLineHolder ? tokens[0] = token : // Consider text is '', only insert when it is the "lineHolder" or
+	      // "emptyStr". Otherwise a redundant '' will affect textAlign in line.
+	      (text || !tokensLen || isEmptyStr) && tokens.push(token);
+	    } // Other tokens always start a new line.
+	    else {
+	        // If there is '', insert it as a placeholder.
+	        lines.push({
+	          tokens: [token]
+	        });
+	      }
+	  }
+	}
+
+	function makeFont(style) {
+	  // FIXME in node-canvas fontWeight is before fontStyle
+	  // Use `fontSize` `fontFamily` to check whether font properties are defined.
+	  var font = (style.fontSize || style.fontFamily) && [style.fontStyle, style.fontWeight, (style.fontSize || 12) + 'px', // If font properties are defined, `fontFamily` should not be ignored.
+	  style.fontFamily || 'sans-serif'].join(' ');
+	  return font && trim(font) || style.textFont || style.font;
+	}
+
+	exports.DEFAULT_FONT = DEFAULT_FONT;
+	exports.$override = $override;
+	exports.getWidth = getWidth;
+	exports.getBoundingRect = getBoundingRect;
+	exports.adjustTextX = adjustTextX;
+	exports.adjustTextY = adjustTextY;
+	exports.adjustTextPositionOnRect = adjustTextPositionOnRect;
+	exports.truncateText = truncateText;
+	exports.getLineHeight = getLineHeight;
+	exports.measureText = measureText;
+	exports.parsePlainText = parsePlainText;
+	exports.parseRichText = parseRichText;
+	exports.makeFont = makeFont;
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var vec2 = __webpack_require__(27);
+
+	var matrix = __webpack_require__(26);
+
+	/**
+	 * @module echarts/core/BoundingRect
+	 */
+	var v2ApplyTransform = vec2.applyTransform;
+	var mathMin = Math.min;
+	var mathMax = Math.max;
+	/**
+	 * @alias module:echarts/core/BoundingRect
+	 */
+
+	function BoundingRect(x, y, width, height) {
+	  if (width < 0) {
+	    x = x + width;
+	    width = -width;
+	  }
+
+	  if (height < 0) {
+	    y = y + height;
+	    height = -height;
+	  }
+	  /**
+	   * @type {number}
+	   */
+
+
+	  this.x = x;
+	  /**
+	   * @type {number}
+	   */
+
+	  this.y = y;
+	  /**
+	   * @type {number}
+	   */
+
+	  this.width = width;
+	  /**
+	   * @type {number}
+	   */
+
+	  this.height = height;
+	}
+
+	BoundingRect.prototype = {
+	  constructor: BoundingRect,
+
+	  /**
+	   * @param {module:echarts/core/BoundingRect} other
+	   */
+	  union: function (other) {
+	    var x = mathMin(other.x, this.x);
+	    var y = mathMin(other.y, this.y);
+	    this.width = mathMax(other.x + other.width, this.x + this.width) - x;
+	    this.height = mathMax(other.y + other.height, this.y + this.height) - y;
+	    this.x = x;
+	    this.y = y;
+	  },
+
+	  /**
+	   * @param {Array.<number>} m
+	   * @methods
+	   */
+	  applyTransform: function () {
+	    var lt = [];
+	    var rb = [];
+	    var lb = [];
+	    var rt = [];
+	    return function (m) {
+	      // In case usage like this
+	      // el.getBoundingRect().applyTransform(el.transform)
+	      // And element has no transform
+	      if (!m) {
+	        return;
+	      }
+
+	      lt[0] = lb[0] = this.x;
+	      lt[1] = rt[1] = this.y;
+	      rb[0] = rt[0] = this.x + this.width;
+	      rb[1] = lb[1] = this.y + this.height;
+	      v2ApplyTransform(lt, lt, m);
+	      v2ApplyTransform(rb, rb, m);
+	      v2ApplyTransform(lb, lb, m);
+	      v2ApplyTransform(rt, rt, m);
+	      this.x = mathMin(lt[0], rb[0], lb[0], rt[0]);
+	      this.y = mathMin(lt[1], rb[1], lb[1], rt[1]);
+	      var maxX = mathMax(lt[0], rb[0], lb[0], rt[0]);
+	      var maxY = mathMax(lt[1], rb[1], lb[1], rt[1]);
+	      this.width = maxX - this.x;
+	      this.height = maxY - this.y;
+	    };
+	  }(),
+
+	  /**
+	   * Calculate matrix of transforming from self to target rect
+	   * @param  {module:zrender/core/BoundingRect} b
+	   * @return {Array.<number>}
+	   */
+	  calculateTransform: function (b) {
+	    var a = this;
+	    var sx = b.width / a.width;
+	    var sy = b.height / a.height;
+	    var m = matrix.create(); // 矩阵右乘
+
+	    matrix.translate(m, m, [-a.x, -a.y]);
+	    matrix.scale(m, m, [sx, sy]);
+	    matrix.translate(m, m, [b.x, b.y]);
+	    return m;
+	  },
+
+	  /**
+	   * @param {(module:echarts/core/BoundingRect|Object)} b
+	   * @return {boolean}
+	   */
+	  intersect: function (b) {
+	    if (!b) {
+	      return false;
+	    }
+
+	    if (!(b instanceof BoundingRect)) {
+	      // Normalize negative width/height.
+	      b = BoundingRect.create(b);
+	    }
+
+	    var a = this;
+	    var ax0 = a.x;
+	    var ax1 = a.x + a.width;
+	    var ay0 = a.y;
+	    var ay1 = a.y + a.height;
+	    var bx0 = b.x;
+	    var bx1 = b.x + b.width;
+	    var by0 = b.y;
+	    var by1 = b.y + b.height;
+	    return !(ax1 < bx0 || bx1 < ax0 || ay1 < by0 || by1 < ay0);
+	  },
+	  contain: function (x, y) {
+	    var rect = this;
+	    return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
+	  },
+
+	  /**
+	   * @return {module:echarts/core/BoundingRect}
+	   */
+	  clone: function () {
+	    return new BoundingRect(this.x, this.y, this.width, this.height);
+	  },
+
+	  /**
+	   * Copy from another rect
+	   */
+	  copy: function (other) {
+	    this.x = other.x;
+	    this.y = other.y;
+	    this.width = other.width;
+	    this.height = other.height;
+	  },
+	  plain: function () {
+	    return {
+	      x: this.x,
+	      y: this.y,
+	      width: this.width,
+	      height: this.height
+	    };
+	  }
+	};
+	/**
+	 * @param {Object|module:zrender/core/BoundingRect} rect
+	 * @param {number} rect.x
+	 * @param {number} rect.y
+	 * @param {number} rect.width
+	 * @param {number} rect.height
+	 * @return {module:zrender/core/BoundingRect}
+	 */
+
+	BoundingRect.create = function (rect) {
+	  return new BoundingRect(rect.x, rect.y, rect.width, rect.height);
+	};
+
+	var _default = BoundingRect;
+	module.exports = _default;
+
+/***/ },
 /* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var LRU = __webpack_require__(33);
+
+	var globalImageCache = new LRU(50);
+	/**
+	 * @param {string|HTMLImageElement|HTMLCanvasElement|Canvas} newImageOrSrc
+	 * @return {HTMLImageElement|HTMLCanvasElement|Canvas} image
+	 */
+
+	function findExistImage(newImageOrSrc) {
+	  if (typeof newImageOrSrc === 'string') {
+	    var cachedImgObj = globalImageCache.get(newImageOrSrc);
+	    return cachedImgObj && cachedImgObj.image;
+	  } else {
+	    return newImageOrSrc;
+	  }
+	}
+	/**
+	 * Caution: User should cache loaded images, but not just count on LRU.
+	 * Consider if required images more than LRU size, will dead loop occur?
+	 *
+	 * @param {string|HTMLImageElement|HTMLCanvasElement|Canvas} newImageOrSrc
+	 * @param {HTMLImageElement|HTMLCanvasElement|Canvas} image Existent image.
+	 * @param {module:zrender/Element} [hostEl] For calling `dirty`.
+	 * @param {Function} [cb] params: (image, cbPayload)
+	 * @param {Object} [cbPayload] Payload on cb calling.
+	 * @return {HTMLImageElement|HTMLCanvasElement|Canvas} image
+	 */
+
+
+	function createOrUpdateImage(newImageOrSrc, image, hostEl, cb, cbPayload) {
+	  if (!newImageOrSrc) {
+	    return image;
+	  } else if (typeof newImageOrSrc === 'string') {
+	    // Image should not be loaded repeatly.
+	    if (image && image.__zrImageSrc === newImageOrSrc || !hostEl) {
+	      return image;
+	    } // Only when there is no existent image or existent image src
+	    // is different, this method is responsible for load.
+
+
+	    var cachedImgObj = globalImageCache.get(newImageOrSrc);
+	    var pendingWrap = {
+	      hostEl: hostEl,
+	      cb: cb,
+	      cbPayload: cbPayload
+	    };
+
+	    if (cachedImgObj) {
+	      image = cachedImgObj.image;
+	      !isImageReady(image) && cachedImgObj.pending.push(pendingWrap);
+	    } else {
+	      !image && (image = new Image());
+	      image.onload = imageOnLoad;
+	      globalImageCache.put(newImageOrSrc, image.__cachedImgObj = {
+	        image: image,
+	        pending: [pendingWrap]
+	      });
+	      image.src = image.__zrImageSrc = newImageOrSrc;
+	    }
+
+	    return image;
+	  } // newImageOrSrc is an HTMLImageElement or HTMLCanvasElement or Canvas
+	  else {
+	      return newImageOrSrc;
+	    }
+	}
+
+	function imageOnLoad() {
+	  var cachedImgObj = this.__cachedImgObj;
+	  this.onload = this.__cachedImgObj = null;
+
+	  for (var i = 0; i < cachedImgObj.pending.length; i++) {
+	    var pendingWrap = cachedImgObj.pending[i];
+	    var cb = pendingWrap.cb;
+	    cb && cb(this, pendingWrap.cbPayload);
+	    pendingWrap.hostEl.dirty();
+	  }
+
+	  cachedImgObj.pending.length = 0;
+	}
+
+	function isImageReady(image) {
+	  return image && image.width && image.height;
+	}
+
+	exports.findExistImage = findExistImage;
+	exports.createOrUpdateImage = createOrUpdateImage;
+	exports.isImageReady = isImageReady;
+
+/***/ },
+/* 41 */
 /***/ function(module, exports) {
 
 	function buildPath(ctx, shape) {
@@ -10888,18 +11456,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.buildPath = buildPath;
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var curve = __webpack_require__(42);
+	var curve = __webpack_require__(43);
 
-	var vec2 = __webpack_require__(10);
+	var vec2 = __webpack_require__(27);
 
-	var bbox = __webpack_require__(43);
+	var bbox = __webpack_require__(44);
 
-	var BoundingRect = __webpack_require__(9);
+	var BoundingRect = __webpack_require__(39);
 
-	var _config = __webpack_require__(37);
+	var _config = __webpack_require__(35);
 
 	var dpr = _config.devicePixelRatio;
 
@@ -11656,10 +12224,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _vector = __webpack_require__(10);
+	var _vector = __webpack_require__(27);
 
 	var v2Create = _vector.create;
 	var v2DistSquare = _vector.distSquare;
@@ -12193,12 +12761,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.quadraticProjectPoint = quadraticProjectPoint;
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var vec2 = __webpack_require__(10);
+	var vec2 = __webpack_require__(27);
 
-	var curve = __webpack_require__(42);
+	var curve = __webpack_require__(43);
 
 	/**
 	 * @author Yi Shen(https://github.com/pissang)
@@ -12419,26 +12987,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.fromArc = fromArc;
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var PathProxy = __webpack_require__(41);
+	var PathProxy = __webpack_require__(42);
 
-	var line = __webpack_require__(45);
+	var line = __webpack_require__(46);
 
-	var cubic = __webpack_require__(46);
+	var cubic = __webpack_require__(47);
 
-	var quadratic = __webpack_require__(47);
+	var quadratic = __webpack_require__(48);
 
-	var arc = __webpack_require__(48);
+	var arc = __webpack_require__(49);
 
-	var _util = __webpack_require__(49);
+	var _util = __webpack_require__(50);
 
 	var normalizeRadian = _util.normalizeRadian;
 
-	var curve = __webpack_require__(42);
+	var curve = __webpack_require__(43);
 
-	var windingLine = __webpack_require__(50);
+	var windingLine = __webpack_require__(51);
 
 	var CMD = PathProxy.CMD;
 	var PI2 = Math.PI * 2;
@@ -12819,7 +13387,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.containStroke = containStroke;
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports) {
 
 	/**
@@ -12863,10 +13431,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.containStroke = containStroke;
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var curve = __webpack_require__(42);
+	var curve = __webpack_require__(43);
 
 	/**
 	 * 三次贝塞尔曲线描边包含判断
@@ -12901,10 +13469,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.containStroke = containStroke;
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _curve = __webpack_require__(42);
+	var _curve = __webpack_require__(43);
 
 	var quadraticProjectPoint = _curve.quadraticProjectPoint;
 
@@ -12939,10 +13507,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.containStroke = containStroke;
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(49);
+	var _util = __webpack_require__(50);
 
 	var normalizeRadian = _util.normalizeRadian;
 	var PI2 = Math.PI * 2;
@@ -13004,7 +13572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.containStroke = containStroke;
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports) {
 
 	var PI2 = Math.PI * 2;
@@ -13022,7 +13590,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.normalizeRadian = normalizeRadian;
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports) {
 
 	function windingLine(x0, y0, x1, y1, x, y) {
@@ -13049,7 +13617,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = windingLine;
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports) {
 
 	var Pattern = function (image, repeat) {
@@ -13069,12 +13637,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var PathProxy = __webpack_require__(41);
+	var PathProxy = __webpack_require__(42);
 
-	var _vector = __webpack_require__(10);
+	var _vector = __webpack_require__(27);
 
 	var v2ApplyTransform = _vector.applyTransform;
 	var CMD = PathProxy.CMD;
@@ -13174,16 +13742,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Displayable = __webpack_require__(25);
+	var Displayable = __webpack_require__(19);
 
-	var BoundingRect = __webpack_require__(9);
+	var BoundingRect = __webpack_require__(39);
 
 	var zrUtil = __webpack_require__(5);
 
-	var imageHelper = __webpack_require__(12);
+	var imageHelper = __webpack_require__(40);
 
 	/**
 	 * @alias zrender/graphic/Image
@@ -13247,11 +13815,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      ctx.drawImage(image, sx, sy, sWidth, sHeight, x, y, width, height);
 	    } else {
 	      ctx.drawImage(image, x, y, width, height);
-	    }
+	    } // Draw rect text
 
-	    this.restoreTransform(ctx); // Draw rect text
 
 	    if (style.text != null) {
+	      // Only restore transform when needs draw text.
+	      this.restoreTransform(ctx);
 	      this.drawRectText(ctx, this.getBoundingRect());
 	    }
 	  },
@@ -13270,14 +13839,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 54 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var zrUtil = __webpack_require__(5);
 
-	var Element = __webpack_require__(27);
+	var Element = __webpack_require__(22);
 
-	var BoundingRect = __webpack_require__(9);
+	var BoundingRect = __webpack_require__(39);
 
 	/**
 	 * Group是一个容器，可以插入子节点，Group的变换也会被应用到子节点上
@@ -13587,16 +14156,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 55 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Displayable = __webpack_require__(25);
+	var Displayable = __webpack_require__(19);
 
 	var zrUtil = __webpack_require__(5);
 
-	var textContain = __webpack_require__(8);
+	var textContain = __webpack_require__(38);
 
-	var textHelper = __webpack_require__(39);
+	var textHelper = __webpack_require__(37);
 
 	/**
 	 * @alias zrender/graphic/Text
@@ -13663,10 +14232,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 56 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
 	/**
 	 * 圆形
@@ -13700,12 +14269,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 57 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
-	var fixClipWithShadow = __webpack_require__(58);
+	var fixClipWithShadow = __webpack_require__(59);
 
 	/**
 	 * 扇形
@@ -13749,10 +14318,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 58 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var env = __webpack_require__(16);
+	var env = __webpack_require__(60);
 
 	// Fix weird bug in some version of IE11 (like 11.0.9600.178**),
 	// where exception "unexpected call to method or property access"
@@ -13810,10 +14379,159 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 59 */
+/* 60 */
+/***/ function(module, exports) {
+
+	/**
+	 * echarts设备环境识别
+	 *
+	 * @desc echarts基于Canvas，纯Javascript图表库，提供直观，生动，可交互，可个性化定制的数据统计图表。
+	 * @author firede[firede@firede.us]
+	 * @desc thanks zepto.
+	 */
+	var env = {};
+
+	if (typeof wx !== 'undefined') {
+	  // In Weixin Application
+	  env = {
+	    browser: {},
+	    os: {},
+	    node: false,
+	    wxa: true,
+	    // Weixin Application
+	    canvasSupported: true,
+	    svgSupported: false,
+	    touchEventsSupported: true
+	  };
+	} else if (typeof document === 'undefined' && typeof self !== 'undefined') {
+	  // In worker
+	  env = {
+	    browser: {},
+	    os: {},
+	    node: false,
+	    worker: true,
+	    canvasSupported: true
+	  };
+	} else if (typeof navigator === 'undefined') {
+	  // In node
+	  env = {
+	    browser: {},
+	    os: {},
+	    node: true,
+	    worker: false,
+	    // Assume canvas is supported
+	    canvasSupported: true,
+	    svgSupported: true
+	  };
+	} else {
+	  env = detect(navigator.userAgent);
+	}
+
+	var _default = env; // Zepto.js
+	// (c) 2010-2013 Thomas Fuchs
+	// Zepto.js may be freely distributed under the MIT license.
+
+	function detect(ua) {
+	  var os = {};
+	  var browser = {}; // var webkit = ua.match(/Web[kK]it[\/]{0,1}([\d.]+)/);
+	  // var android = ua.match(/(Android);?[\s\/]+([\d.]+)?/);
+	  // var ipad = ua.match(/(iPad).*OS\s([\d_]+)/);
+	  // var ipod = ua.match(/(iPod)(.*OS\s([\d_]+))?/);
+	  // var iphone = !ipad && ua.match(/(iPhone\sOS)\s([\d_]+)/);
+	  // var webos = ua.match(/(webOS|hpwOS)[\s\/]([\d.]+)/);
+	  // var touchpad = webos && ua.match(/TouchPad/);
+	  // var kindle = ua.match(/Kindle\/([\d.]+)/);
+	  // var silk = ua.match(/Silk\/([\d._]+)/);
+	  // var blackberry = ua.match(/(BlackBerry).*Version\/([\d.]+)/);
+	  // var bb10 = ua.match(/(BB10).*Version\/([\d.]+)/);
+	  // var rimtabletos = ua.match(/(RIM\sTablet\sOS)\s([\d.]+)/);
+	  // var playbook = ua.match(/PlayBook/);
+	  // var chrome = ua.match(/Chrome\/([\d.]+)/) || ua.match(/CriOS\/([\d.]+)/);
+
+	  var firefox = ua.match(/Firefox\/([\d.]+)/); // var safari = webkit && ua.match(/Mobile\//) && !chrome;
+	  // var webview = ua.match(/(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/) && !chrome;
+
+	  var ie = ua.match(/MSIE\s([\d.]+)/) // IE 11 Trident/7.0; rv:11.0
+	  || ua.match(/Trident\/.+?rv:(([\d.]+))/);
+	  var edge = ua.match(/Edge\/([\d.]+)/); // IE 12 and 12+
+
+	  var weChat = /micromessenger/i.test(ua); // Todo: clean this up with a better OS/browser seperation:
+	  // - discern (more) between multiple browsers on android
+	  // - decide if kindle fire in silk mode is android or not
+	  // - Firefox on Android doesn't specify the Android version
+	  // - possibly devide in os, device and browser hashes
+	  // if (browser.webkit = !!webkit) browser.version = webkit[1];
+	  // if (android) os.android = true, os.version = android[2];
+	  // if (iphone && !ipod) os.ios = os.iphone = true, os.version = iphone[2].replace(/_/g, '.');
+	  // if (ipad) os.ios = os.ipad = true, os.version = ipad[2].replace(/_/g, '.');
+	  // if (ipod) os.ios = os.ipod = true, os.version = ipod[3] ? ipod[3].replace(/_/g, '.') : null;
+	  // if (webos) os.webos = true, os.version = webos[2];
+	  // if (touchpad) os.touchpad = true;
+	  // if (blackberry) os.blackberry = true, os.version = blackberry[2];
+	  // if (bb10) os.bb10 = true, os.version = bb10[2];
+	  // if (rimtabletos) os.rimtabletos = true, os.version = rimtabletos[2];
+	  // if (playbook) browser.playbook = true;
+	  // if (kindle) os.kindle = true, os.version = kindle[1];
+	  // if (silk) browser.silk = true, browser.version = silk[1];
+	  // if (!silk && os.android && ua.match(/Kindle Fire/)) browser.silk = true;
+	  // if (chrome) browser.chrome = true, browser.version = chrome[1];
+
+	  if (firefox) {
+	    browser.firefox = true;
+	    browser.version = firefox[1];
+	  } // if (safari && (ua.match(/Safari/) || !!os.ios)) browser.safari = true;
+	  // if (webview) browser.webview = true;
+
+
+	  if (ie) {
+	    browser.ie = true;
+	    browser.version = ie[1];
+	  }
+
+	  if (edge) {
+	    browser.edge = true;
+	    browser.version = edge[1];
+	  } // It is difficult to detect WeChat in Win Phone precisely, because ua can
+	  // not be set on win phone. So we do not consider Win Phone.
+
+
+	  if (weChat) {
+	    browser.weChat = true;
+	  } // os.tablet = !!(ipad || playbook || (android && !ua.match(/Mobile/)) ||
+	  //     (firefox && ua.match(/Tablet/)) || (ie && !ua.match(/Phone/) && ua.match(/Touch/)));
+	  // os.phone  = !!(!os.tablet && !os.ipod && (android || iphone || webos ||
+	  //     (chrome && ua.match(/Android/)) || (chrome && ua.match(/CriOS\/([\d.]+)/)) ||
+	  //     (firefox && ua.match(/Mobile/)) || (ie && ua.match(/Touch/))));
+
+
+	  return {
+	    browser: browser,
+	    os: os,
+	    node: false,
+	    // 原生canvas支持，改极端点了
+	    // canvasSupported : !(browser.ie && parseFloat(browser.version) < 9)
+	    canvasSupported: !!document.createElement('canvas').getContext,
+	    svgSupported: typeof SVGRect !== 'undefined',
+	    // works on most browsers
+	    // IE10/11 does not support touch event, and MS Edge supports them but not by
+	    // default, so we dont check navigator.maxTouchPoints for them here.
+	    touchEventsSupported: 'ontouchstart' in window && !browser.ie && !browser.edge,
+	    // <http://caniuse.com/#search=pointer%20event>.
+	    pointerEventsSupported: 'onpointerdown' in window // Firefox supports pointer but not by default, only MS browsers are reliable on pointer
+	    // events currently. So we dont use that on other browsers unless tested sufficiently.
+	    // Although IE 10 supports pointer event, it use old style and is different from the
+	    // standard. So we exclude that. (IE 10 is hardly used on touch device)
+	    && (browser.edge || browser.ie && browser.version >= 11)
+	  };
+	}
+
+	module.exports = _default;
+
+/***/ },
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
 	/**
 	 * 圆环
@@ -13841,12 +14559,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 60 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
-	var polyHelper = __webpack_require__(61);
+	var polyHelper = __webpack_require__(63);
 
 	/**
 	 * 多边形
@@ -13867,12 +14585,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 61 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var smoothSpline = __webpack_require__(62);
+	var smoothSpline = __webpack_require__(64);
 
-	var smoothBezier = __webpack_require__(63);
+	var smoothBezier = __webpack_require__(65);
 
 	function buildPath(ctx, shape, closePath) {
 	  var points = shape.points;
@@ -13909,10 +14627,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.buildPath = buildPath;
 
 /***/ },
-/* 62 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _vector = __webpack_require__(10);
+	var _vector = __webpack_require__(27);
 
 	var v2Distance = _vector.distance;
 
@@ -13982,10 +14700,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 63 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _vector = __webpack_require__(10);
+	var _vector = __webpack_require__(27);
 
 	var v2Min = _vector.min;
 	var v2Max = _vector.max;
@@ -14091,12 +14809,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 64 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
-	var polyHelper = __webpack_require__(61);
+	var polyHelper = __webpack_require__(63);
 
 	/**
 	 * @module zrender/graphic/shape/Polyline
@@ -14120,12 +14838,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 65 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
-	var roundRectHelper = __webpack_require__(40);
+	var roundRectHelper = __webpack_require__(41);
 
 	/**
 	 * 矩形
@@ -14165,10 +14883,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 66 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
 	/**
 	 * 直线
@@ -14224,14 +14942,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 67 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
-	var vec2 = __webpack_require__(10);
+	var vec2 = __webpack_require__(27);
 
-	var _curve = __webpack_require__(42);
+	var _curve = __webpack_require__(43);
 
 	var quadraticSubdivide = _curve.quadraticSubdivide;
 	var cubicSubdivide = _curve.cubicSubdivide;
@@ -14342,10 +15060,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 68 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
 	/**
 	 * 圆弧
@@ -14382,10 +15100,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 69 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(24);
+	var Path = __webpack_require__(18);
 
 	// CompoundPath to improve performance
 	var _default = Path.extend({
@@ -14443,12 +15161,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 70 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var zrUtil = __webpack_require__(5);
 
-	var Gradient = __webpack_require__(71);
+	var Gradient = __webpack_require__(73);
 
 	/**
 	 * x, y, x2, y2 are all percent from 0 to 1
@@ -14482,7 +15200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 71 */
+/* 73 */
 /***/ function(module, exports) {
 
 	/**
@@ -14505,12 +15223,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 72 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var zrUtil = __webpack_require__(5);
 
-	var Gradient = __webpack_require__(71);
+	var Gradient = __webpack_require__(73);
 
 	/**
 	 * x, y, r are all percent from 0 to 1
@@ -14542,777 +15260,156 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = _default;
 
 /***/ },
-/* 73 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var makeStyleMapper = __webpack_require__(19);
-
-	var getItemStyle = makeStyleMapper([['fill', 'color'], ['stroke', 'borderColor'], ['lineWidth', 'borderWidth'], ['opacity'], ['shadowBlur'], ['shadowOffsetX'], ['shadowOffsetY'], ['shadowColor'], ['textPosition'], ['textAlign']]);
-	var _default = {
-	  getItemStyle: function (excludes, includes) {
-	    var style = getItemStyle(this, excludes, includes);
-	    var lineDash = this.getBorderLineDash();
-	    lineDash && (style.lineDash = lineDash);
-	    return style;
-	  },
-	  getBorderLineDash: function () {
-	    var lineType = this.get('borderType');
-	    return lineType === 'solid' || lineType == null ? null : lineType === 'dashed' ? [5, 5] : [1, 1];
-	  }
-	};
-	module.exports = _default;
-
-/***/ },
-/* 74 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var echarts = __webpack_require__(2);
-	var numberUtil = echarts.number;
-	var symbolUtil = __webpack_require__(75);
-	var parsePercent = numberUtil.parsePercent;
-
-	var LiquidLayout = __webpack_require__(76);
-
-	function getShallow(model, path) {
-	    return model && model.getShallow(path);
-	}
-
-	echarts.extendChartView({
-
-	    type: 'liquidFill',
-
-	    render: function (seriesModel, ecModel, api) {
-	        var group = this.group;
-	        group.removeAll();
-
-	        var data = seriesModel.getData();
-
-	        var itemModel = data.getItemModel(0);
-
-	        var center = itemModel.get('center');
-	        var radius = itemModel.get('radius');
-
-	        var width = api.getWidth();
-	        var height = api.getHeight();
-	        var size = Math.min(width, height);
-	        // itemStyle
-	        var outlineDistance = 0;
-	        var outlineBorderWidth = 0;
-	        var showOutline = seriesModel.get('outline.show');
-
-	        if (showOutline) {
-	            outlineDistance = seriesModel.get('outline.borderDistance');
-	            outlineBorderWidth = parsePercent(
-	                seriesModel.get('outline.itemStyle.borderWidth'), size
-	            );
-	        }
-
-	        var cx = parsePercent(center[0], width);
-	        var cy = parsePercent(center[1], height);
-
-	        var outterRadius;
-	        var innerRadius;
-	        var paddingRadius;
-
-	        var isFillContainer = false;
-
-	        var symbol = seriesModel.get('shape');
-	        if (symbol === 'container') {
-	            // a shape that fully fills the container
-	            isFillContainer = true;
-
-	            outterRadius = [
-	                width / 2,
-	                height / 2
-	            ];
-	            innerRadius = [
-	                outterRadius[0] - outlineBorderWidth / 2,
-	                outterRadius[1] - outlineBorderWidth / 2
-	            ];
-	            paddingRadius = [
-	                parsePercent(outlineDistance, width),
-	                parsePercent(outlineDistance, height)
-	            ];
-
-	            radius = [
-	                innerRadius[0] - paddingRadius[0],
-	                innerRadius[1] - paddingRadius[1]
-	            ];
-	        }
-	        else {
-	            outterRadius = parsePercent(radius, size) / 2;
-	            innerRadius = outterRadius - outlineBorderWidth / 2;
-	            paddingRadius = parsePercent(outlineDistance, size);
-
-	            radius = innerRadius - paddingRadius;
-	        }
-
-	        if (showOutline) {
-	            var outline = getOutline();
-	            outline.style.lineWidth = outlineBorderWidth;
-	            group.add(getOutline());
-	        }
-
-	        var left = isFillContainer ? 0 : cx - radius;
-	        var top = isFillContainer ? 0 : cy - radius;
-
-	        var wavePath = null;
-
-	        group.add(getBackground());
-
-	        // each data item for a wave
-	        var oldData = this._data;
-	        var waves = [];
-	        data.diff(oldData)
-	            .add(function (idx) {
-	                var wave = getWave(idx, false);
-
-	                var waterLevel = wave.shape.waterLevel;
-	                wave.shape.waterLevel = isFillContainer ? radius[1] : radius;
-	                echarts.graphic.initProps(wave, {
-	                    shape: {
-	                        waterLevel: waterLevel
-	                    }
-	                }, seriesModel);
-
-	                wave.z2 = 2;
-	                setWaveAnimation(idx, wave, null);
-
-	                group.add(wave);
-	                data.setItemGraphicEl(idx, wave);
-	                waves.push(wave);
-	            })
-	            .update(function (newIdx, oldIdx) {
-	                var waveElement = oldData.getItemGraphicEl(oldIdx);
-
-	                // new wave is used to calculate position, but not added
-	                var newWave = getWave(newIdx, false, waveElement);
-
-	                // Shallow copy shape and style to avoid comparing style.host
-	                // when animating
-	                var shape = Object.assign({}, newWave.shape);
-	                var style = Object.assign({}, newWave.style);
-	                style.host = null;
-
-	                // update old wave with parameters of new wave
-	                echarts.graphic.updateProps(waveElement, {
-	                    shape: shape,
-	                    style: style
-	                }, seriesModel);
-	                waveElement.position = newWave.position;
-	                waveElement.setClipPath(newWave.clipPath);
-
-	                setWaveAnimation(newIdx, waveElement, waveElement);
-	                group.add(waveElement);
-	                data.setItemGraphicEl(newIdx, waveElement);
-	                waves.push(waveElement);
-	            })
-	            .remove(function (idx) {
-	                var wave = oldData.getItemGraphicEl(idx);
-	                group.remove(wave);
-	            })
-	            .execute();
-
-	        group.add(getText(waves));
-
-	        this._data = data;
-
-	        /**
-	         * Get path for outline, background and clipping
-	         *
-	         * @param {number} r outter radius of shape
-	         * @param {boolean|undefined} isForClipping if the shape is used
-	         *                                          for clipping
-	         */
-	        function getPath(r, isForClipping) {
-	            if (symbol) {
-	                // customed symbol path
-	                if (symbol.indexOf('path://') === 0) {
-	                    var path = echarts.graphic.makePath(symbol.slice(7), {});
-	                    var bouding = path.getBoundingRect();
-	                    var w = bouding.width;
-	                    var h = bouding.height;
-	                    if (w > h) {
-	                        h = r * 2 / w * h;
-	                        w = r * 2;
-	                    }
-	                    else {
-	                        w = r * 2 / h * w;
-	                        h = r * 2;
-	                    }
-
-	                    var left = isForClipping ? 0 : cx - w / 2;
-	                    var top = isForClipping ? 0 : cy - h / 2;
-	                    path = echarts.graphic.makePath(
-	                        symbol.slice(7),
-	                        {},
-	                        new echarts.graphic.BoundingRect(left, top, w, h)
-	                    );
-	                    if (isForClipping) {
-	                        path.position = [-w / 2, -h / 2];
-	                    }
-	                    return path;
-	                }
-	                else if (isFillContainer) {
-	                    // fully fill the container
-	                    var x = isForClipping ? -r[0] : cx - r[0];
-	                    var y = isForClipping ? -r[1] : cy - r[1];
-	                    return symbolUtil.createSymbol(
-	                        'rect', x, y, r[0] * 2, r[1] * 2
-	                    );
-	                }
-	                else {
-	                    var x = isForClipping ? -r : cx - r;
-	                    var y = isForClipping ? -r : cy - r;
-	                    if (symbol === 'pin') {
-	                        y += r;
-	                    }
-	                    else if (symbol === 'arrow') {
-	                        y -= r;
-	                    }
-	                    return symbolUtil.createSymbol(symbol, x, y, r * 2, r * 2);
-	                }
-	            }
-
-	            return new echarts.graphic.Circle({
-	                shape: {
-	                    cx: isForClipping ? 0 : cx,
-	                    cy: isForClipping ? 0 : cy,
-	                    r: r
-	                }
-	            });
-	        }
-	        /**
-	         * Create outline
-	         */
-	        function getOutline() {
-	            var outlinePath = getPath(outterRadius);
-	            outlinePath.style.fill = null;
-
-	            outlinePath.setStyle(seriesModel.getModel('outline.itemStyle')
-	                .getItemStyle());
-
-	            return outlinePath;
-	        }
-
-	        /**
-	         * Create background
-	         */
-	        function getBackground() {
-	            // Seperate stroke and fill, so we can use stroke to cover the alias of clipping.
-	            var strokePath = getPath(radius);
-	            strokePath.setStyle(seriesModel.getModel('backgroundStyle')
-	                .getItemStyle());
-	            strokePath.style.fill = null;
-
-	            // Stroke is front of wave
-	            strokePath.z2 = 5;
-
-	            var fillPath = getPath(radius);
-	            fillPath.setStyle(seriesModel.getModel('backgroundStyle')
-	                .getItemStyle());
-	            fillPath.style.stroke = null;
-
-	            var group = new echarts.graphic.Group();
-	            group.add(strokePath);
-	            group.add(fillPath);
-
-	            return group;
-	        }
-
-	        /**
-	         * wave shape
-	         */
-	        function getWave(idx, isInverse, oldWave) {
-	            var radiusX = isFillContainer ? radius[0] : radius;
-	            var radiusY = isFillContainer ? radius[1] : radius;
-
-	            var itemModel = data.getItemModel(idx);
-	            var itemStyleModel = itemModel.getModel('itemStyle');
-	            var phase = itemModel.get('phase');
-	            var amplitude = parsePercent(itemModel.get('amplitude'),
-	                radiusY * 2);
-	            var waveLength = parsePercent(itemModel.get('waveLength'),
-	                radiusX * 2);
-
-	            var value = data.get('value', idx);
-	            var waterLevel = radiusY - value * radiusY * 2;
-	            phase = oldWave ? oldWave.shape.phase
-	                : (phase === 'auto' ? idx * Math.PI / 4 : phase);
-	            var normalStyle = itemStyleModel.getModel('normal').getItemStyle();
-	            normalStyle.fill = data.getItemVisual(idx, 'color');
-
-	            var x = radiusX * 2;
-	            var wave = new LiquidLayout({
-	                shape: {
-	                    waveLength: waveLength,
-	                    radius: radiusX,
-	                    cx: x,
-	                    cy: 0,
-	                    waterLevel: waterLevel,
-	                    amplitude: amplitude,
-	                    phase: phase,
-	                    inverse: isInverse
-	                },
-	                style: normalStyle,
-	                position: [cx, cy]
-	            });
-	            wave.shape._waterLevel = waterLevel;
-
-	            var hoverStyle = itemStyleModel.getModel('emphasis').getItemStyle();
-	            hoverStyle.lineWidth = 0;
-	            echarts.graphic.setHoverStyle(wave, hoverStyle);
-
-	            // clip out the part outside the circle
-	            var clip = getPath(radius, true);
-	            // set fill for clipPath, otherwise it will not trigger hover event
-	            clip.setStyle({
-	                fill: 'white'
-	            });
-	            wave.setClipPath(clip);
-
-	            return wave;
-	        }
-
-	        function setWaveAnimation(idx, wave, oldWave) {
-	            var itemModel = data.getItemModel(idx);
-
-	            var maxSpeed = itemModel.get('period');
-	            var direction = itemModel.get('direction');
-
-	            var value = data.get('value', idx);
-
-	            var phase = itemModel.get('phase');
-	            phase = oldWave ? oldWave.shape.phase
-	                : (phase === 'auto' ? idx * Math.PI / 4 : phase);
-
-	            var defaultSpeed = function (maxSpeed) {
-	                var cnt = data.count();
-	                return cnt === 0 ? maxSpeed : maxSpeed *
-	                    (0.2 + (cnt - idx) / cnt * 0.8);
-	            };
-	            var speed = 0;
-	            if (maxSpeed === 'auto') {
-	                speed = defaultSpeed(5000);
-	            }
-	            else {
-	                speed = typeof maxSpeed === 'function'
-	                    ? maxSpeed(value, idx) : maxSpeed;
-	            }
-
-	            // phase for moving left/right
-	            var phaseOffset = 0;
-	            if (direction === 'right' || direction == null) {
-	                phaseOffset = Math.PI;
-	            }
-	            else if (direction === 'left') {
-	                phaseOffset = -Math.PI;
-	            }
-	            else if (direction === 'none') {
-	                phaseOffset = 0;
-	            }
-	            else {
-	                console.error('Illegal direction value for liquid fill.');
-	            }
-
-	            // wave animation of moving left/right
-	            if (direction !== 'none' && itemModel.get('waveAnimation')) {
-	                wave
-	                    .animate('shape', true)
-	                    .when(0, {
-	                        phase: phase
-	                    })
-	                    .when(speed / 2, {
-	                        phase: phaseOffset + phase
-	                    })
-	                    .when(speed, {
-	                        phase: phaseOffset * 2 + phase
-	                    })
-	                    .during(function () {
-	                        if (wavePath) {
-	                            wavePath.dirty(true);
-	                        }
-	                    })
-	                    .start();
-	            }
-	        }
-
-	        /**
-	         * text on wave
-	         */
-	        function getText(waves) {
-	            var labelModel = itemModel.getModel('label.normal');
-	            var textStyle = labelModel.getModel('textStyle');
-
-	            function formatLabel() {
-	                var formatted = seriesModel.getFormattedLabel(0, 'normal');
-	                var defaultVal = (data.get('value', 0) * 100);
-	                var defaultLabel = data.getName(0) || seriesModel.name;
-	                if (!isNaN(defaultVal)) {
-	                    defaultLabel = defaultVal.toFixed(0) + '%';
-	                }
-	                return formatted == null ? defaultLabel : formatted;
-	            }
-
-	            var textOption = {
-	                z2: 10,
-	                shape: {
-	                    x: left,
-	                    y: top,
-	                    width: (isFillContainer ? radius[0] : radius) * 2,
-	                    height: (isFillContainer ? radius[1] : radius) * 2
-	                },
-	                style: {
-	                    fill: 'transparent',
-	                    text: formatLabel(),
-	                    textAlign: textStyle.get('align'),
-	                    textVerticalAlign: textStyle.get('baseline')
-	                },
-	                silent: true
-	            };
-
-	            var outsideTextRect = new echarts.graphic.Rect(textOption);
-	            var color = labelModel.get('color') || textStyle.get('color');
-	            echarts.graphic.setText(outsideTextRect.style, labelModel, color);
-
-	            var insideTextRect = new echarts.graphic.Rect(textOption);
-	            var insColor = textStyle.get('insideColor')
-	                || labelModel.get('insideColor');
-	            echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
-	            insideTextRect.style.textFill = insColor;
-
-	            var group = new echarts.graphic.Group();
-	            group.add(outsideTextRect);
-	            group.add(insideTextRect);
-
-	            // clip out waves for insideText
-	            var boundingCircle = getPath(radius, true);
-
-	            wavePath = new echarts.graphic.CompoundPath({
-	                shape: {
-	                    paths: waves
-	                },
-	                position: [cx, cy]
-	            });
-
-	            wavePath.setClipPath(boundingCircle);
-	            insideTextRect.setClipPath(wavePath);
-
-	            return group;
-	        }
-	    },
-
-	    dispose: function () {
-	        // dispose nothing here
-	    }
-	});
-
-
-/***/ },
 /* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
+	var _util = __webpack_require__(5);
 
-	var graphic = __webpack_require__(22);
+	var inherits = _util.inherits;
 
-	var BoundingRect = __webpack_require__(9);
+	var Displayble = __webpack_require__(19);
 
-	// Symbol factory
+	var BoundingRect = __webpack_require__(39);
 
 	/**
-	 * Triangle shape
-	 * @inner
+	 * Displayable for incremental rendering. It will be rendered in a separate layer
+	 * IncrementalDisplay have too main methods. `clearDisplayables` and `addDisplayables`
+	 * addDisplayables will render the added displayables incremetally.
+	 *
+	 * It use a not clearFlag to tell the painter don't clear the layer if it's the first element.
 	 */
-	var Triangle = graphic.extendShape({
-	  type: 'triangle',
-	  shape: {
-	    cx: 0,
-	    cy: 0,
-	    width: 0,
-	    height: 0
-	  },
-	  buildPath: function (path, shape) {
-	    var cx = shape.cx;
-	    var cy = shape.cy;
-	    var width = shape.width / 2;
-	    var height = shape.height / 2;
-	    path.moveTo(cx, cy - height);
-	    path.lineTo(cx + width, cy + height);
-	    path.lineTo(cx - width, cy + height);
-	    path.closePath();
-	  }
-	});
-	/**
-	 * Diamond shape
-	 * @inner
-	 */
-
-	var Diamond = graphic.extendShape({
-	  type: 'diamond',
-	  shape: {
-	    cx: 0,
-	    cy: 0,
-	    width: 0,
-	    height: 0
-	  },
-	  buildPath: function (path, shape) {
-	    var cx = shape.cx;
-	    var cy = shape.cy;
-	    var width = shape.width / 2;
-	    var height = shape.height / 2;
-	    path.moveTo(cx, cy - height);
-	    path.lineTo(cx + width, cy);
-	    path.lineTo(cx, cy + height);
-	    path.lineTo(cx - width, cy);
-	    path.closePath();
-	  }
-	});
-	/**
-	 * Pin shape
-	 * @inner
-	 */
-
-	var Pin = graphic.extendShape({
-	  type: 'pin',
-	  shape: {
-	    // x, y on the cusp
-	    x: 0,
-	    y: 0,
-	    width: 0,
-	    height: 0
-	  },
-	  buildPath: function (path, shape) {
-	    var x = shape.x;
-	    var y = shape.y;
-	    var w = shape.width / 5 * 3; // Height must be larger than width
-
-	    var h = Math.max(w, shape.height);
-	    var r = w / 2; // Dist on y with tangent point and circle center
-
-	    var dy = r * r / (h - r);
-	    var cy = y - h + r + dy;
-	    var angle = Math.asin(dy / r); // Dist on x with tangent point and circle center
-
-	    var dx = Math.cos(angle) * r;
-	    var tanX = Math.sin(angle);
-	    var tanY = Math.cos(angle);
-	    var cpLen = r * 0.6;
-	    var cpLen2 = r * 0.7;
-	    path.moveTo(x - dx, cy + dy);
-	    path.arc(x, cy, r, Math.PI - angle, Math.PI * 2 + angle);
-	    path.bezierCurveTo(x + dx - tanX * cpLen, cy + dy + tanY * cpLen, x, y - cpLen2, x, y);
-	    path.bezierCurveTo(x, y - cpLen2, x - dx + tanX * cpLen, cy + dy + tanY * cpLen, x - dx, cy + dy);
-	    path.closePath();
-	  }
-	});
-	/**
-	 * Arrow shape
-	 * @inner
-	 */
-
-	var Arrow = graphic.extendShape({
-	  type: 'arrow',
-	  shape: {
-	    x: 0,
-	    y: 0,
-	    width: 0,
-	    height: 0
-	  },
-	  buildPath: function (ctx, shape) {
-	    var height = shape.height;
-	    var width = shape.width;
-	    var x = shape.x;
-	    var y = shape.y;
-	    var dx = width / 3 * 2;
-	    ctx.moveTo(x, y);
-	    ctx.lineTo(x + dx, y + height);
-	    ctx.lineTo(x, y + height / 4 * 3);
-	    ctx.lineTo(x - dx, y + height);
-	    ctx.lineTo(x, y);
-	    ctx.closePath();
-	  }
-	});
-	/**
-	 * Map of path contructors
-	 * @type {Object.<string, module:zrender/graphic/Path>}
-	 */
-
-	var symbolCtors = {
-	  line: graphic.Line,
-	  rect: graphic.Rect,
-	  roundRect: graphic.Rect,
-	  square: graphic.Rect,
-	  circle: graphic.Circle,
-	  diamond: Diamond,
-	  pin: Pin,
-	  arrow: Arrow,
-	  triangle: Triangle
-	};
-	var symbolShapeMakers = {
-	  line: function (x, y, w, h, shape) {
-	    // FIXME
-	    shape.x1 = x;
-	    shape.y1 = y + h / 2;
-	    shape.x2 = x + w;
-	    shape.y2 = y + h / 2;
-	  },
-	  rect: function (x, y, w, h, shape) {
-	    shape.x = x;
-	    shape.y = y;
-	    shape.width = w;
-	    shape.height = h;
-	  },
-	  roundRect: function (x, y, w, h, shape) {
-	    shape.x = x;
-	    shape.y = y;
-	    shape.width = w;
-	    shape.height = h;
-	    shape.r = Math.min(w, h) / 4;
-	  },
-	  square: function (x, y, w, h, shape) {
-	    var size = Math.min(w, h);
-	    shape.x = x;
-	    shape.y = y;
-	    shape.width = size;
-	    shape.height = size;
-	  },
-	  circle: function (x, y, w, h, shape) {
-	    // Put circle in the center of square
-	    shape.cx = x + w / 2;
-	    shape.cy = y + h / 2;
-	    shape.r = Math.min(w, h) / 2;
-	  },
-	  diamond: function (x, y, w, h, shape) {
-	    shape.cx = x + w / 2;
-	    shape.cy = y + h / 2;
-	    shape.width = w;
-	    shape.height = h;
-	  },
-	  pin: function (x, y, w, h, shape) {
-	    shape.x = x + w / 2;
-	    shape.y = y + h / 2;
-	    shape.width = w;
-	    shape.height = h;
-	  },
-	  arrow: function (x, y, w, h, shape) {
-	    shape.x = x + w / 2;
-	    shape.y = y + h / 2;
-	    shape.width = w;
-	    shape.height = h;
-	  },
-	  triangle: function (x, y, w, h, shape) {
-	    shape.cx = x + w / 2;
-	    shape.cy = y + h / 2;
-	    shape.width = w;
-	    shape.height = h;
-	  }
-	};
-	var symbolBuildProxies = {};
-	zrUtil.each(symbolCtors, function (Ctor, name) {
-	  symbolBuildProxies[name] = new Ctor();
-	});
-	var SymbolClz = graphic.extendShape({
-	  type: 'symbol',
-	  shape: {
-	    symbolType: '',
-	    x: 0,
-	    y: 0,
-	    width: 0,
-	    height: 0
-	  },
-	  beforeBrush: function () {
-	    var style = this.style;
-	    var shape = this.shape; // FIXME
-
-	    if (shape.symbolType === 'pin' && style.textPosition === 'inside') {
-	      style.textPosition = ['50%', '40%'];
-	      style.textAlign = 'center';
-	      style.textVerticalAlign = 'middle';
-	    }
-	  },
-	  buildPath: function (ctx, shape, inBundle) {
-	    var symbolType = shape.symbolType;
-	    var proxySymbol = symbolBuildProxies[symbolType];
-
-	    if (shape.symbolType !== 'none') {
-	      if (!proxySymbol) {
-	        // Default rect
-	        symbolType = 'rect';
-	        proxySymbol = symbolBuildProxies[symbolType];
-	      }
-
-	      symbolShapeMakers[symbolType](shape.x, shape.y, shape.width, shape.height, proxySymbol.shape);
-	      proxySymbol.buildPath(ctx, proxySymbol.shape, inBundle);
-	    }
-	  }
-	}); // Provide setColor helper method to avoid determine if set the fill or stroke outside
-
-	function symbolPathSetColor(color, innerColor) {
-	  if (this.type !== 'image') {
-	    var symbolStyle = this.style;
-	    var symbolShape = this.shape;
-
-	    if (symbolShape && symbolShape.symbolType === 'line') {
-	      symbolStyle.stroke = color;
-	    } else if (this.__isEmptyBrush) {
-	      symbolStyle.stroke = color;
-	      symbolStyle.fill = innerColor || '#fff';
-	    } else {
-	      // FIXME 判断图形默认是填充还是描边，使用 onlyStroke ?
-	      symbolStyle.fill && (symbolStyle.fill = color);
-	      symbolStyle.stroke && (symbolStyle.stroke = color);
-	    }
-
-	    this.dirty(false);
-	  }
+	// TODO Style override ?
+	function IncrementalDisplayble(opts) {
+	  Displayble.call(this, opts);
+	  this._displayables = [];
+	  this._temporaryDisplayables = [];
+	  this._cursor = 0;
+	  this.notClear = true;
 	}
-	/**
-	 * Create a symbol element with given symbol configuration: shape, x, y, width, height, color
-	 * @param {string} symbolType
-	 * @param {number} x
-	 * @param {number} y
-	 * @param {number} w
-	 * @param {number} h
-	 * @param {string} color
-	 * @param {boolean} [keepAspect=false] whether to keep the ratio of w/h,
-	 *                            for path and image only.
-	 */
 
+	IncrementalDisplayble.prototype.incremental = true;
 
-	function createSymbol(symbolType, x, y, w, h, color, keepAspect) {
-	  // TODO Support image object, DynamicImage.
-	  var isEmpty = symbolType.indexOf('empty') === 0;
+	IncrementalDisplayble.prototype.clearDisplaybles = function () {
+	  this._displayables = [];
+	  this._temporaryDisplayables = [];
+	  this._cursor = 0;
+	  this.dirty();
+	  this.notClear = false;
+	};
 
-	  if (isEmpty) {
-	    symbolType = symbolType.substr(5, 1).toLowerCase() + symbolType.substr(6);
-	  }
-
-	  var symbolPath;
-
-	  if (symbolType.indexOf('image://') === 0) {
-	    symbolPath = graphic.makeImage(symbolType.slice(8), new BoundingRect(x, y, w, h), keepAspect ? 'center' : 'cover');
-	  } else if (symbolType.indexOf('path://') === 0) {
-	    symbolPath = graphic.makePath(symbolType.slice(7), {}, new BoundingRect(x, y, w, h), keepAspect ? 'center' : 'cover');
+	IncrementalDisplayble.prototype.addDisplayable = function (displayable, notPersistent) {
+	  if (notPersistent) {
+	    this._temporaryDisplayables.push(displayable);
 	  } else {
-	    symbolPath = new SymbolClz({
-	      shape: {
-	        symbolType: symbolType,
-	        x: x,
-	        y: y,
-	        width: w,
-	        height: h
-	      }
-	    });
+	    this._displayables.push(displayable);
 	  }
 
-	  symbolPath.__isEmptyBrush = isEmpty;
-	  symbolPath.setColor = symbolPathSetColor;
-	  symbolPath.setColor(color);
-	  return symbolPath;
-	}
+	  this.dirty();
+	};
 
-	exports.createSymbol = createSymbol;
+	IncrementalDisplayble.prototype.addDisplayables = function (displayables, notPersistent) {
+	  notPersistent = notPersistent || false;
+
+	  for (var i = 0; i < displayables.length; i++) {
+	    this.addDisplayable(displayables[i], notPersistent);
+	  }
+	};
+
+	IncrementalDisplayble.prototype.eachPendingDisplayable = function (cb) {
+	  for (var i = this._cursor; i < this._displayables.length; i++) {
+	    cb && cb(this._displayables[i]);
+	  }
+
+	  for (var i = 0; i < this._temporaryDisplayables.length; i++) {
+	    cb && cb(this._temporaryDisplayables[i]);
+	  }
+	};
+
+	IncrementalDisplayble.prototype.update = function () {
+	  this.updateTransform();
+
+	  for (var i = this._cursor; i < this._displayables.length; i++) {
+	    var displayable = this._displayables[i]; // PENDING
+
+	    displayable.parent = this;
+	    displayable.update();
+	    displayable.parent = null;
+	  }
+
+	  for (var i = 0; i < this._temporaryDisplayables.length; i++) {
+	    var displayable = this._temporaryDisplayables[i]; // PENDING
+
+	    displayable.parent = this;
+	    displayable.update();
+	    displayable.parent = null;
+	  }
+	};
+
+	IncrementalDisplayble.prototype.brush = function (ctx, prevEl) {
+	  // Render persistant displayables.
+	  for (var i = this._cursor; i < this._displayables.length; i++) {
+	    var displayable = this._temporaryDisplayables[i];
+	    displayable.beforeBrush && displayable.beforeBrush(ctx);
+	    displayable.brush(ctx, i === this._cursor ? null : this._displayables[i - 1]);
+	    displayable.afterBrush && displayable.afterBrush(ctx);
+	  }
+
+	  this._cursor = i; // Render temporary displayables.
+
+	  for (var i = 0; i < this._temporaryDisplayables.length; i++) {
+	    var displayable = this._temporaryDisplayables[i];
+	    displayable.beforeBrush && displayable.beforeBrush(ctx);
+	    displayable.brush(ctx, i === 0 ? null : this._temporaryDisplayables[i - 1]);
+	    displayable.afterBrush && displayable.afterBrush(ctx);
+	  }
+
+	  this._temporaryDisplayables = [];
+	  this.notClear = true;
+	};
+
+	var m = [];
+
+	IncrementalDisplayble.prototype.getBoundingRect = function () {
+	  if (!this._rect) {
+	    var rect = new BoundingRect(Infinity, Infinity, -Infinity, -Infinity);
+
+	    for (var i = 0; i < this._displayables.length; i++) {
+	      var displayable = this._displayables[i];
+	      var childRect = displayable.getBoundingRect().clone();
+
+	      if (displayable.needLocalTransform()) {
+	        childRect.applyTransform(displayable.getLocalTransform(m));
+	      }
+
+	      rect.union(childRect);
+	    }
+
+	    this._rect = rect;
+	  }
+
+	  return this._rect;
+	};
+
+	IncrementalDisplayble.prototype.contain = function (x, y) {
+	  var localPos = this.transformCoordToLocal(x, y);
+	  var rect = this.getBoundingRect();
+
+	  if (rect.contain(localPos[0], localPos[1])) {
+	    for (var i = 0; i < this._displayables.length; i++) {
+	      var displayable = this._displayables[i];
+
+	      if (displayable.contain(x, y)) {
+	        return true;
+	      }
+	    }
+	  }
+
+	  return false;
+	};
+
+	inherits(IncrementalDisplayble, Displayble);
+	var _default = IncrementalDisplayble;
+	module.exports = _default;
 
 /***/ },
 /* 76 */
@@ -15332,10 +15429,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        amplitude: 0,
 	        phase: 0,
 	        inverse: false
-	    },
-
-	    style: {
-	        fill: '#0f0'
 	    },
 
 	    buildPath: function (ctx, shape) {
@@ -15484,19 +15577,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 77 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
+
+	var _util = __webpack_require__(5);
+
+	var createHashMap = _util.createHashMap;
 
 	// Pick color from palette for each data item.
 	// Applicable for charts that require applying color palette
 	// in data level (like pie, funnel, chord).
-	function _default(seriesType, ecModel) {
-	  // Pie and funnel may use diferrent scope
-	  var paletteScope = {};
-	  ecModel.eachRawSeriesByType(seriesType, function (seriesModel) {
-	    var dataAll = seriesModel.getRawData();
-	    var idxMap = {};
-
-	    if (!ecModel.isSeriesFiltered(seriesModel)) {
+	function _default(seriesType) {
+	  return {
+	    getTargetSeries: function (ecModel) {
+	      // Pie and funnel may use diferrent scope
+	      var paletteScope = {};
+	      var seiresModelMap = createHashMap();
+	      ecModel.eachSeriesByType(seriesType, function (seriesModel) {
+	        seriesModel.__paletteScope = paletteScope;
+	        seiresModelMap.set(seriesModel.uid, seriesModel);
+	      });
+	      return seiresModelMap;
+	    },
+	    reset: function (seriesModel, ecModel) {
+	      var dataAll = seriesModel.getRawData();
+	      var idxMap = {};
 	      var data = seriesModel.getData();
 	      data.each(function (idx) {
 	        var rawIdx = data.getRawIndex(idx);
@@ -15510,7 +15614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!singleDataColor) {
 	          // FIXME Performance
 	          var itemModel = dataAll.getItemModel(rawIdx);
-	          var color = itemModel.get('itemStyle.normal.color') || seriesModel.getColorFromPalette(dataAll.getName(rawIdx), paletteScope); // Legend may use the visual info in data before processed
+	          var color = itemModel.get('itemStyle.color') || seriesModel.getColorFromPalette(dataAll.getName(rawIdx), seriesModel.__paletteScope, dataAll.count()); // Legend may use the visual info in data before processed
 
 	          dataAll.setItemVisual(rawIdx, 'color', color); // Data is not filtered
 
@@ -15523,7 +15627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      });
 	    }
-	  });
+	  };
 	}
 
 	module.exports = _default;

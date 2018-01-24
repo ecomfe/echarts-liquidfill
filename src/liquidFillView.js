@@ -145,7 +145,9 @@ echarts.extendChartView({
             })
             .execute();
 
-        group.add(getText(waves));
+        if (itemModel.get('label.show')) {
+            group.add(getText(waves));
+        }
 
         this._data = data;
 

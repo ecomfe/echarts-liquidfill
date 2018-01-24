@@ -14,10 +14,6 @@ module.exports = echarts.graphic.extendShape({
         inverse: false
     },
 
-    style: {
-        fill: '#0f0'
-    },
-
     buildPath: function (ctx, shape) {
         /**
          * We define a sine wave having 4 waves, and make sure at least 8 curves

@@ -271,8 +271,12 @@ echarts.extendChartView({
             var waterLevel = radiusY - value * radiusY * 2;
             phase = oldWave ? oldWave.shape.phase
                 : (phase === 'auto' ? idx * Math.PI / 4 : phase);
-            var normalStyle = itemStyleModel.getModel('normal').getItemStyle();
-            normalStyle.fill = data.getItemVisual(idx, 'color');
+            var normalStyle = itemStyleModel.getItemStyle();
+            if (!normalStyle.fill) {
+                var seriesColor = seriesModel.get('color');
+                var id = idx % seriesColor.length;
+                normalStyle.fill = seriesColor[id];
+            }
 
             var x = radiusX * 2;
             var wave = new LiquidLayout({
@@ -291,7 +295,8 @@ echarts.extendChartView({
             });
             wave.shape._waterLevel = waterLevel;
 
-            var hoverStyle = itemStyleModel.getModel('emphasis').getItemStyle();
+            var hoverStyle = itemModel.getModel('emphasis.itemStyle')
+                .getItemStyle();
             hoverStyle.lineWidth = 0;
             echarts.graphic.setHoverStyle(wave, hoverStyle);
 
@@ -373,8 +378,7 @@ echarts.extendChartView({
          * text on wave
          */
         function getText(waves) {
-            var labelModel = itemModel.getModel('label.normal');
-            var textStyle = labelModel.getModel('textStyle');
+            var labelModel = itemModel.getModel('label');
 
             function formatLabel() {
                 var formatted = seriesModel.getFormattedLabel(0, 'normal');
@@ -397,19 +401,18 @@ echarts.extendChartView({
                 style: {
                     fill: 'transparent',
                     text: formatLabel(),
-                    textAlign: textStyle.get('align'),
-                    textVerticalAlign: textStyle.get('baseline')
+                    textAlign: labelModel.get('align'),
+                    textVerticalAlign: labelModel.get('baseline')
                 },
                 silent: true
             };
 
             var outsideTextRect = new echarts.graphic.Rect(textOption);
-            var color = labelModel.get('color') || textStyle.get('color');
+            var color = labelModel.get('color');
             echarts.graphic.setText(outsideTextRect.style, labelModel, color);
 
             var insideTextRect = new echarts.graphic.Rect(textOption);
-            var insColor = textStyle.get('insideColor')
-                || labelModel.get('insideColor');
+            var insColor = labelModel.get('insideColor');
             echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
             insideTextRect.style.textFill = insColor;
 

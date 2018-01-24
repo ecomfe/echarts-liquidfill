@@ -53,27 +53,26 @@ echarts.extendSeriesModel({
         },
 
         itemStyle: {
-            normal: {
-                opacity: 0.95,
-                shadowBlur: 50,
-                shadowColor: 'rgba(0, 0, 0, 0.4)'
-            },
-            emphasis: {
-                opacity: 0.8
-            }
+            opacity: 0.95,
+            shadowBlur: 50,
+            shadowColor: 'rgba(0, 0, 0, 0.4)'
         },
 
         label: {
-            normal: {
-                show: true,
-                color: '#294D99',
-                insideColor: '#fff',
-                fontSize: 50,
-                fontWeight: 'bold',
+            show: true,
+            color: '#294D99',
+            insideColor: '#fff',
+            fontSize: 50,
+            fontWeight: 'bold',
 
-                align: 'center',
-                baseline: 'middle',
-                position: 'inside'
+            align: 'center',
+            baseline: 'middle',
+            position: 'inside'
+        },
+
+        emphasis: {
+            itemStyle: {
+                opacity: 0.8
             }
         }
     }

@@ -11,100 +11,112 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/*!******************!*\
+  !*** ./index.js ***!
+  \******************/
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(1);
+	module.exports = __webpack_require__(/*! ./src/liquidFill */ 1);
 
 
 /***/ },
 /* 1 */
+/*!***************************!*\
+  !*** ./src/liquidFill.js ***!
+  \***************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var echarts = __webpack_require__(2);
-
-	__webpack_require__(3);
-	__webpack_require__(14);
-
-
+	var echarts = __webpack_require__(/*! echarts/lib/echarts */ 2);
+	
+	__webpack_require__(/*! ./liquidFillSeries */ 3);
+	__webpack_require__(/*! ./liquidFillView */ 14);
+	
+	
 	echarts.registerVisual(
 	    echarts.util.curry(
-	        __webpack_require__(77), 'liquidFill'
+	        __webpack_require__(/*! echarts/lib/visual/dataColor */ 77), 'liquidFill'
 	    )
 	);
 
 
 /***/ },
 /* 2 */
+/*!**************************!*\
+  !*** external "echarts" ***!
+  \**************************/
 /***/ function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 
 /***/ },
 /* 3 */
+/*!*********************************!*\
+  !*** ./src/liquidFillSeries.js ***!
+  \*********************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var completeDimensions = __webpack_require__(4);
-	var echarts = __webpack_require__(2);
-
+	var completeDimensions = __webpack_require__(/*! echarts/lib/data/helper/completeDimensions */ 4);
+	var echarts = __webpack_require__(/*! echarts/lib/echarts */ 2);
+	
 	echarts.extendSeriesModel({
-
+	
 	    type: 'series.liquidFill',
-
+	
 	    visualColorAccessPath: 'textStyle.normal.color',
-
+	
 	    optionUpdated: function () {
 	        var option = this.option;
 	        option.gridSize = Math.max(Math.floor(option.gridSize), 4);
 	    },
-
+	
 	    getInitialData: function (option, ecModel) {
 	        var dimensions = completeDimensions(['value'], option.data);
 	        var list = new echarts.List(dimensions, this);
 	        list.initData(option.data);
 	        return list;
 	    },
-
+	
 	    defaultOption: {
 	        color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
 	        center: ['50%', '50%'],
@@ -115,13 +127,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        period: 'auto',
 	        direction: 'right',
 	        shape: 'circle',
-
+	
 	        waveAnimation: true,
 	        animationEasing: 'linear',
 	        animationEasingUpdate: 'linear',
 	        animationDuration: 2000,
 	        animationDurationUpdate: 1000,
-
+	
 	        outline: {
 	            show: true,
 	            borderDistance: 8,
@@ -133,29 +145,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	                shadowColor: 'rgba(0, 0, 0, 0.25)'
 	            }
 	        },
-
+	
 	        backgroundStyle: {
 	            color: '#E3F7FF'
 	        },
-
+	
 	        itemStyle: {
 	            opacity: 0.95,
 	            shadowBlur: 50,
 	            shadowColor: 'rgba(0, 0, 0, 0.4)'
 	        },
-
+	
 	        label: {
 	            show: true,
 	            color: '#294D99',
 	            insideColor: '#fff',
 	            fontSize: 50,
 	            fontWeight: 'bold',
-
+	
 	            align: 'center',
 	            baseline: 'middle',
 	            position: 'inside'
 	        },
-
+	
 	        emphasis: {
 	            itemStyle: {
 	                opacity: 0.8
@@ -167,10 +179,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
+/*!*********************************************************!*\
+  !*** ./~/echarts/lib/data/helper/completeDimensions.js ***!
+  \*********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(5);
-
+	var _util = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
 	var createHashMap = _util.createHashMap;
 	var each = _util.each;
 	var isString = _util.isString;
@@ -178,26 +193,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	var extend = _util.extend;
 	var isObject = _util.isObject;
 	var clone = _util.clone;
-
-	var _model = __webpack_require__(6);
-
+	
+	var _model = __webpack_require__(/*! ../../util/model */ 6);
+	
 	var normalizeToArray = _model.normalizeToArray;
-
-	var _sourceHelper = __webpack_require__(7);
-
+	
+	var _sourceHelper = __webpack_require__(/*! ./sourceHelper */ 7);
+	
 	var guessOrdinal = _sourceHelper.guessOrdinal;
-
-	var Source = __webpack_require__(10);
-
-	var _dimensionHelper = __webpack_require__(13);
-
+	
+	var Source = __webpack_require__(/*! ../Source */ 10);
+	
+	var _dimensionHelper = __webpack_require__(/*! ./dimensionHelper */ 13);
+	
 	var OTHER_DIMENSIONS = _dimensionHelper.OTHER_DIMENSIONS;
-
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
+	
 	/**
 	 * @deprecated
 	 * Use `echarts/data/helper/createDimensions` instead.
 	 */
-
+	
 	/**
 	 * @see {module:echarts/test/ut/spec/data/completeDimensions}
 	 *
@@ -210,18 +244,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *      provides not only dim template, but also default order.
 	 *      properties: 'name', 'type', 'displayName'.
 	 *      `name` of each item provides default coord name.
-	 *      [{dimsDef: [string...]}, ...] can be specified to give names.
+	 *      [{dimsDef: [string|Object, ...]}, ...] dimsDef of sysDim item provides default dim name, and
+	 *                                    provide dims count that the sysDim required.
 	 *      [{ordinalMeta}] can be specified.
 	 * @param {module:echarts/data/Source|Array|Object} source or data (for compatibal with pervious)
 	 * @param {Object} [opt]
 	 * @param {Array.<Object|string>} [opt.dimsDef] option.series.dimensions User defined dimensions
 	 *      For example: ['asdf', {name, type}, ...].
 	 * @param {Object|HashMap} [opt.encodeDef] option.series.encode {x: 2, y: [3, 1], tooltip: [1, 2], label: 3}
-	 * @param {string} [opt.extraPrefix] Prefix of name when filling the left dimensions.
-	 * @param {string} [opt.extraFromZero] If specified, extra dim names will be:
-	 *                      extraPrefix + 0, extraPrefix + extraBaseIndex + 1 ...
-	 *                      If not specified, extra dim names will be:
-	 *                      extraPrefix, extraPrefix + 0, extraPrefix + 1 ...
+	 * @param {string} [opt.generateCoord] Generate coord dim with the given name.
+	 *                 If not specified, extra dim names will be:
+	 *                 'value', 'value0', 'value1', ...
+	 * @param {number} [opt.generateCoordCount] By default, the generated dim name is `generateCoord`.
+	 *                 If `generateCoordCount` specified, the generated dim names will be:
+	 *                 `generateCoord` + 0, `generateCoord` + 1, ...
+	 *                 can be Infinity, indicate that use all of the remain columns.
 	 * @param {number} [opt.dimCount] If not specified, guess by the first data item.
 	 * @param {number} [opt.encodeDefaulter] If not specified, auto find the next available data dim.
 	 * @return {Array.<Object>} [{
@@ -229,7 +266,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *      displayName: string, the origin name in dimsDef, see source helper.
 	 *                 If displayName given, the tooltip will displayed vertically.
 	 *      coordDim: string mandatory,
-	 *      isSysCoord: boolean True if the coord is from sys dimension.
 	 *      coordDimIndex: number mandatory,
 	 *      type: string optional,
 	 *      otherDims: { never null/undefined
@@ -238,7 +274,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *          itemName: number optional,
 	 *          seriesName: number optional,
 	 *      },
-	 *      isExtraCoord: boolean true or undefined.
+	 *      isExtraCoord: boolean true if coord is generated
+	 *          (not specified in encode and not series specified)
 	 *      other props ...
 	 * }]
 	 */
@@ -246,17 +283,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!Source.isInstance(source)) {
 	    source = Source.seriesDataToSource(source);
 	  }
-
+	
 	  opt = opt || {};
 	  sysDims = (sysDims || []).slice();
 	  var dimsDef = (opt.dimsDef || []).slice();
 	  var encodeDef = createHashMap(opt.encodeDef);
 	  var dataDimNameMap = createHashMap();
 	  var coordDimNameMap = createHashMap(); // var valueCandidate;
-
+	
 	  var result = [];
 	  var dimCount = getDimCount(source, sysDims, dimsDef, opt.dimCount); // Apply user defined dims (`name` and `type`) and init result.
-
+	
 	  for (var i = 0; i < dimCount; i++) {
 	    var dimDefItem = dimsDef[i] = extend({}, isObject(dimsDef[i]) ? dimsDef[i] : {
 	      name: dimsDef[i]
@@ -265,7 +302,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var resultItem = result[i] = {
 	      otherDims: {}
 	    }; // Name will be applied later for avoiding duplication.
-
+	
 	    if (userDimName != null && dataDimNameMap.get(userDimName) == null) {
 	      // Only if `series.dimensions` is defined in option
 	      // displayName, will be set, and dimension will be diplayed vertically in
@@ -273,33 +310,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	      resultItem.name = resultItem.displayName = userDimName;
 	      dataDimNameMap.set(userDimName, i);
 	    }
-
+	
 	    dimDefItem.type != null && (resultItem.type = dimDefItem.type);
 	    dimDefItem.displayName != null && (resultItem.displayName = dimDefItem.displayName);
 	  } // Set `coordDim` and `coordDimIndex` by `encodeDef` and normalize `encodeDef`.
-
-
+	
+	
 	  encodeDef.each(function (dataDims, coordDim) {
 	    dataDims = normalizeToArray(dataDims).slice();
 	    var validDataDims = encodeDef.set(coordDim, []);
 	    each(dataDims, function (resultDimIdx, idx) {
 	      // The input resultDimIdx can be dim name or index.
 	      isString(resultDimIdx) && (resultDimIdx = dataDimNameMap.get(resultDimIdx));
-
+	
 	      if (resultDimIdx != null && resultDimIdx < dimCount) {
 	        validDataDims[idx] = resultDimIdx;
 	        applyDim(result[resultDimIdx], coordDim, idx);
 	      }
 	    });
 	  }); // Apply templetes and default order from `sysDims`.
-
+	
 	  var availDimIdx = 0;
 	  each(sysDims, function (sysDimItem, sysDimIndex) {
 	    var coordDim;
 	    var sysDimItem;
 	    var sysDimItemDimsDef;
 	    var sysDimItemOtherDims;
-
+	
 	    if (isString(sysDimItem)) {
 	      coordDim = sysDimItem;
 	      sysDimItem = {};
@@ -309,39 +346,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	      sysDimItem.ordinalMeta = null;
 	      sysDimItem = clone(sysDimItem);
 	      sysDimItem.ordinalMeta = ordinalMeta; // `coordDimIndex` should not be set directly.
-
+	
 	      sysDimItemDimsDef = sysDimItem.dimsDef;
 	      sysDimItemOtherDims = sysDimItem.otherDims;
 	      sysDimItem.name = sysDimItem.coordDim = sysDimItem.coordDimIndex = sysDimItem.dimsDef = sysDimItem.otherDims = null;
 	    }
-
+	
 	    var dataDims = normalizeToArray(encodeDef.get(coordDim)); // dimensions provides default dim sequences.
-
+	
 	    if (!dataDims.length) {
 	      for (var i = 0; i < (sysDimItemDimsDef && sysDimItemDimsDef.length || 1); i++) {
 	        while (availDimIdx < result.length && result[availDimIdx].coordDim != null) {
 	          availDimIdx++;
 	        }
-
+	
 	        availDimIdx < result.length && dataDims.push(availDimIdx++);
 	      }
 	    } // Apply templates.
-
-
+	
+	
 	    each(dataDims, function (resultDimIdx, coordDimIndex) {
 	      var resultItem = result[resultDimIdx];
 	      applyDim(defaults(resultItem, sysDimItem), coordDim, coordDimIndex);
-
+	
 	      if (resultItem.name == null && sysDimItemDimsDef) {
-	        resultItem.name = resultItem.displayName = sysDimItemDimsDef[coordDimIndex];
-	      }
-
-	      resultItem.isSysCoord = true; // FIXME refactor, currently only used in case: {otherDims: {tooltip: false}}
-
+	        var sysDimItemDimsDefItem = sysDimItemDimsDef[coordDimIndex];
+	        !isObject(sysDimItemDimsDefItem) && (sysDimItemDimsDefItem = {
+	          name: sysDimItemDimsDefItem
+	        });
+	        resultItem.name = resultItem.displayName = sysDimItemDimsDefItem.name;
+	        resultItem.defaultTooltip = sysDimItemDimsDefItem.defaultTooltip;
+	      } // FIXME refactor, currently only used in case: {otherDims: {tooltip: false}}
+	
+	
 	      sysDimItemOtherDims && defaults(resultItem.otherDims, sysDimItemOtherDims);
 	    });
 	  });
-
+	
 	  function applyDim(resultItem, coordDim, coordDimIndex) {
 	    if (OTHER_DIMENSIONS.get(coordDim) != null) {
 	      resultItem.otherDims[coordDim] = coordDimIndex;
@@ -351,21 +392,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	      coordDimNameMap.set(coordDim, true);
 	    }
 	  } // Make sure the first extra dim is 'value'.
-
-
-	  var extra = opt.extraPrefix || 'value'; // Set dim `name` and other `coordDim` and other props.
-
+	
+	
+	  var generateCoord = opt.generateCoord;
+	  var generateCoordCount = opt.generateCoordCount;
+	  var fromZero = generateCoordCount != null;
+	  generateCoordCount = generateCoord ? generateCoordCount || 1 : 0;
+	  var extra = generateCoord || 'value'; // Set dim `name` and other `coordDim` and other props.
+	
 	  for (var resultDimIdx = 0; resultDimIdx < dimCount; resultDimIdx++) {
 	    var resultItem = result[resultDimIdx] = result[resultDimIdx] || {};
 	    var coordDim = resultItem.coordDim;
-	    coordDim == null && (resultItem.coordDim = genName(extra, coordDimNameMap, opt.extraFromZero), resultItem.coordDimIndex = 0, resultItem.isExtraCoord = true);
+	
+	    if (coordDim == null) {
+	      resultItem.coordDim = genName(extra, coordDimNameMap, fromZero);
+	      resultItem.coordDimIndex = 0;
+	
+	      if (!generateCoord || generateCoordCount <= 0) {
+	        resultItem.isExtraCoord = true;
+	      }
+	
+	      generateCoordCount--;
+	    }
+	
 	    resultItem.name == null && (resultItem.name = genName(resultItem.coordDim, dataDimNameMap));
-
+	
 	    if (resultItem.type == null && guessOrdinal(source, resultDimIdx, resultItem.name)) {
 	      resultItem.type = 'ordinal';
 	    }
 	  }
-
+	
 	  return result;
 	} // ??? TODO
 	// Originally detect dimCount by data[0]. Should we
@@ -376,40 +432,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	// may be visited.
 	// (2) sometimes user need to calcualte bubble size or use visualMap
 	// on other dimensions besides coordSys needed.
-
-
-	function getDimCount(source, sysDims, dimsDef, dimCount) {
-	  if (dimCount == null) {
-	    dimCount = Math.max(source.dimensionsDetectCount || 1, sysDims.length, dimsDef.length);
-	    each(sysDims, function (sysDimItem) {
-	      var sysDimItemDimsDef = sysDimItem.dimsDef;
-	      sysDimItemDimsDef && (dimCount = Math.max(dimCount, sysDimItemDimsDef.length));
-	    });
-	  }
-
+	// So, dims that is not used by system, should be shared in storage?
+	
+	
+	function getDimCount(source, sysDims, dimsDef, optDimCount) {
+	  // Note that the result dimCount should not small than columns count
+	  // of data, otherwise `dataDimNameMap` checking will be incorrect.
+	  var dimCount = Math.max(source.dimensionsDetectCount || 1, sysDims.length, dimsDef.length, optDimCount || 0);
+	  each(sysDims, function (sysDimItem) {
+	    var sysDimItemDimsDef = sysDimItem.dimsDef;
+	    sysDimItemDimsDef && (dimCount = Math.max(dimCount, sysDimItemDimsDef.length));
+	  });
 	  return dimCount;
 	}
-
+	
 	function genName(name, map, fromZero) {
 	  if (fromZero || map.get(name) != null) {
 	    var i = 0;
-
+	
 	    while (map.get(name + i) != null) {
 	      i++;
 	    }
-
+	
 	    name += i;
 	  }
-
+	
 	  map.set(name, true);
 	  return name;
 	}
-
+	
 	var _default = completeDimensions;
 	module.exports = _default;
 
 /***/ },
 /* 5 */
+/*!**********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/util.js ***!
+  \**********************************************/
 /***/ function(module, exports) {
 
 	/**
@@ -445,15 +504,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var nativeSlice = arrayProto.slice;
 	var nativeMap = arrayProto.map;
 	var nativeReduce = arrayProto.reduce; // Avoid assign to an exported variable, for transforming to cjs.
-
+	
 	var methods = {};
-
+	
 	function $override(name, fn) {
 	  // Clear ctx instance for different environment
 	  if (name === 'createCanvas') {
 	    _ctx = null;
 	  }
-
+	
 	  methods[name] = fn;
 	}
 	/**
@@ -472,20 +531,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} source
 	 * @return {*} new
 	 */
-
-
+	
+	
 	function clone(source) {
 	  if (source == null || typeof source != 'object') {
 	    return source;
 	  }
-
+	
 	  var result = source;
 	  var typeStr = objToString.call(source);
-
+	
 	  if (typeStr === '[object Array]') {
 	    if (!isPrimitive(source)) {
 	      result = [];
-
+	
 	      for (var i = 0, len = source.length; i < len; i++) {
 	        result[i] = clone(source[i]);
 	      }
@@ -493,12 +552,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else if (TYPED_ARRAY[typeStr]) {
 	    if (!isPrimitive(source)) {
 	      var Ctor = source.constructor;
-
+	
 	      if (source.constructor.from) {
 	        result = Ctor.from(source);
 	      } else {
 	        result = new Ctor(source.length);
-
+	
 	        for (var i = 0, len = source.length; i < len; i++) {
 	          result[i] = clone(source[i]);
 	        }
@@ -506,14 +565,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  } else if (!BUILTIN_OBJECT[typeStr] && !isPrimitive(source) && !isDom(source)) {
 	    result = {};
-
+	
 	    for (var key in source) {
 	      if (source.hasOwnProperty(key)) {
 	        result[key] = clone(source[key]);
 	      }
 	    }
 	  }
-
+	
 	  return result;
 	}
 	/**
@@ -522,20 +581,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} source
 	 * @param {boolean} [overwrite=false]
 	 */
-
-
+	
+	
 	function merge(target, source, overwrite) {
 	  // We should escapse that source is string
 	  // and enter for ... in ...
 	  if (!isObject(source) || !isObject(target)) {
 	    return overwrite ? clone(source) : target;
 	  }
-
+	
 	  for (var key in source) {
 	    if (source.hasOwnProperty(key)) {
 	      var targetProp = target[key];
 	      var sourceProp = source[key];
-
+	
 	      if (isObject(sourceProp) && isObject(targetProp) && !isArray(sourceProp) && !isArray(targetProp) && !isDom(sourceProp) && !isDom(targetProp) && !isBuiltInObject(sourceProp) && !isBuiltInObject(targetProp) && !isPrimitive(sourceProp) && !isPrimitive(targetProp)) {
 	        // 如果需要递归覆盖，就递归调用merge
 	        merge(targetProp, sourceProp, overwrite);
@@ -546,7 +605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }
-
+	
 	  return target;
 	}
 	/**
@@ -554,15 +613,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean} [overwrite=false]
 	 * @return {*} target
 	 */
-
-
+	
+	
 	function mergeAll(targetAndSources, overwrite) {
 	  var result = targetAndSources[0];
-
+	
 	  for (var i = 1, len = targetAndSources.length; i < len; i++) {
 	    result = merge(result, targetAndSources[i], overwrite);
 	  }
-
+	
 	  return result;
 	}
 	/**
@@ -570,15 +629,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} source
 	 * @memberOf module:zrender/core/util
 	 */
-
-
+	
+	
 	function extend(target, source) {
 	  for (var key in source) {
 	    if (source.hasOwnProperty(key)) {
 	      target[key] = source[key];
 	    }
 	  }
-
+	
 	  return target;
 	}
 	/**
@@ -587,57 +646,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean} [overlay=false]
 	 * @memberOf module:zrender/core/util
 	 */
-
-
+	
+	
 	function defaults(target, source, overlay) {
 	  for (var key in source) {
 	    if (source.hasOwnProperty(key) && (overlay ? source[key] != null : target[key] == null)) {
 	      target[key] = source[key];
 	    }
 	  }
-
+	
 	  return target;
 	}
-
+	
 	var createCanvas = function () {
 	  return methods.createCanvas();
 	};
-
+	
 	methods.createCanvas = function () {
 	  return document.createElement('canvas');
 	}; // FIXME
-
-
+	
+	
 	var _ctx;
-
+	
 	function getContext() {
 	  if (!_ctx) {
 	    // Use util.createCanvas instead of createCanvas
 	    // because createCanvas may be overwritten in different environment
 	    _ctx = createCanvas().getContext('2d');
 	  }
-
+	
 	  return _ctx;
 	}
 	/**
 	 * 查询数组中元素的index
 	 * @memberOf module:zrender/core/util
 	 */
-
-
+	
+	
 	function indexOf(array, value) {
 	  if (array) {
 	    if (array.indexOf) {
 	      return array.indexOf(value);
 	    }
-
+	
 	    for (var i = 0, len = array.length; i < len; i++) {
 	      if (array[i] === value) {
 	        return i;
 	      }
 	    }
 	  }
-
+	
 	  return -1;
 	}
 	/**
@@ -647,20 +706,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Function} clazz 源类
 	 * @param {Function} baseClazz 基类
 	 */
-
-
+	
+	
 	function inherits(clazz, baseClazz) {
 	  var clazzPrototype = clazz.prototype;
-
+	
 	  function F() {}
-
+	
 	  F.prototype = baseClazz.prototype;
 	  clazz.prototype = new F();
-
+	
 	  for (var prop in clazzPrototype) {
 	    clazz.prototype[prop] = clazzPrototype[prop];
 	  }
-
+	
 	  clazz.prototype.constructor = clazz;
 	  clazz.superClass = baseClazz;
 	}
@@ -670,8 +729,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object|Function} sorce
 	 * @param {boolean} overlay
 	 */
-
-
+	
+	
 	function mixin(target, source, overlay) {
 	  target = 'prototype' in target ? target.prototype : target;
 	  source = 'prototype' in source ? source.prototype : source;
@@ -681,17 +740,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Consider typed array.
 	 * @param {Array|TypedArray} data
 	 */
-
-
+	
+	
 	function isArrayLike(data) {
 	  if (!data) {
 	    return;
 	  }
-
+	
 	  if (typeof data == 'string') {
 	    return false;
 	  }
-
+	
 	  return typeof data.length == 'number';
 	}
 	/**
@@ -701,13 +760,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Function} cb
 	 * @param {*} [context]
 	 */
-
-
+	
+	
 	function each(obj, cb, context) {
 	  if (!(obj && cb)) {
 	    return;
 	  }
-
+	
 	  if (obj.forEach && obj.forEach === nativeForEach) {
 	    obj.forEach(cb, context);
 	  } else if (obj.length === +obj.length) {
@@ -730,22 +789,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} [context]
 	 * @return {Array}
 	 */
-
-
+	
+	
 	function map(obj, cb, context) {
 	  if (!(obj && cb)) {
 	    return;
 	  }
-
+	
 	  if (obj.map && obj.map === nativeMap) {
 	    return obj.map(cb, context);
 	  } else {
 	    var result = [];
-
+	
 	    for (var i = 0, len = obj.length; i < len; i++) {
 	      result.push(cb.call(context, obj[i], i, obj));
 	    }
-
+	
 	    return result;
 	  }
 	}
@@ -757,20 +816,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} [context]
 	 * @return {Array}
 	 */
-
-
+	
+	
 	function reduce(obj, cb, memo, context) {
 	  if (!(obj && cb)) {
 	    return;
 	  }
-
+	
 	  if (obj.reduce && obj.reduce === nativeReduce) {
 	    return obj.reduce(cb, memo, context);
 	  } else {
 	    for (var i = 0, len = obj.length; i < len; i++) {
 	      memo = cb.call(context, memo, obj[i], i, obj);
 	    }
-
+	
 	    return memo;
 	  }
 	}
@@ -782,24 +841,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} [context]
 	 * @return {Array}
 	 */
-
-
+	
+	
 	function filter(obj, cb, context) {
 	  if (!(obj && cb)) {
 	    return;
 	  }
-
+	
 	  if (obj.filter && obj.filter === nativeFilter) {
 	    return obj.filter(cb, context);
 	  } else {
 	    var result = [];
-
+	
 	    for (var i = 0, len = obj.length; i < len; i++) {
 	      if (cb.call(context, obj[i], i, obj)) {
 	        result.push(obj[i]);
 	      }
 	    }
-
+	
 	    return result;
 	  }
 	}
@@ -811,13 +870,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} [context]
 	 * @return {*}
 	 */
-
-
+	
+	
 	function find(obj, cb, context) {
 	  if (!(obj && cb)) {
 	    return;
 	  }
-
+	
 	  for (var i = 0, len = obj.length; i < len; i++) {
 	    if (cb.call(context, obj[i], i, obj)) {
 	      return obj[i];
@@ -830,8 +889,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} context
 	 * @return {Function}
 	 */
-
-
+	
+	
 	function bind(func, context) {
 	  var args = nativeSlice.call(arguments, 2);
 	  return function () {
@@ -843,8 +902,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Function} func
 	 * @return {Function}
 	 */
-
-
+	
+	
 	function curry(func) {
 	  var args = nativeSlice.call(arguments, 1);
 	  return function () {
@@ -856,8 +915,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isArray(value) {
 	  return objToString.call(value) === '[object Array]';
 	}
@@ -866,8 +925,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isFunction(value) {
 	  return typeof value === 'function';
 	}
@@ -876,8 +935,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isString(value) {
 	  return objToString.call(value) === '[object String]';
 	}
@@ -886,8 +945,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isObject(value) {
 	  // Avoid a V8 JIT bug in Chrome 19-20.
 	  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
@@ -899,8 +958,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isBuiltInObject(value) {
 	  return !!BUILTIN_OBJECT[objToString.call(value)];
 	}
@@ -909,8 +968,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isTypedArray(value) {
 	  return !!TYPED_ARRAY[objToString.call(value)];
 	}
@@ -919,8 +978,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isDom(value) {
 	  return typeof value === 'object' && typeof value.nodeType === 'number' && typeof value.ownerDocument === 'object';
 	}
@@ -929,8 +988,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function eqNaN(value) {
 	  return value !== value;
 	}
@@ -940,8 +999,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @memberOf module:zrender/core/util
 	 * @return {*} Final value
 	 */
-
-
+	
+	
 	function retrieve(values) {
 	  for (var i = 0, len = arguments.length; i < len; i++) {
 	    if (arguments[i] != null) {
@@ -949,11 +1008,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
-
+	
 	function retrieve2(value0, value1) {
 	  return value0 != null ? value0 : value1;
 	}
-
+	
 	function retrieve3(value0, value1, value2) {
 	  return value0 != null ? value0 : value1 != null ? value1 : value2;
 	}
@@ -964,8 +1023,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} endIndex
 	 * @return {Array}
 	 */
-
-
+	
+	
 	function slice() {
 	  return Function.call.apply(nativeSlice, arguments);
 	}
@@ -978,15 +1037,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number|Array.<number>} val
 	 * @return {Array.<number>}
 	 */
-
-
+	
+	
 	function normalizeCssArray(val) {
 	  if (typeof val === 'number') {
 	    return [val, val, val, val];
 	  }
-
+	
 	  var len = val.length;
-
+	
 	  if (len === 2) {
 	    // vertical | horizontal
 	    return [val[0], val[1], val[0], val[1]];
@@ -994,7 +1053,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // top | horizontal | bottom
 	    return [val[0], val[1], val[2], val[1]];
 	  }
-
+	
 	  return val;
 	}
 	/**
@@ -1002,8 +1061,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean} condition
 	 * @param {string} message
 	 */
-
-
+	
+	
 	function assert(condition, message) {
 	  if (!condition) {
 	    throw new Error(message);
@@ -1014,8 +1073,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} str string to be trimed
 	 * @return {string} trimed string
 	 */
-
-
+	
+	
 	function trim(str) {
 	  if (str == null) {
 	    return null;
@@ -1025,16 +1084,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
 	  }
 	}
-
+	
 	var primitiveKey = '__ec_primitive__';
 	/**
 	 * Set an object as primitive to be ignored traversing children in clone or merge
 	 */
-
+	
 	function setAsPrimitive(obj) {
 	  obj[primitiveKey] = true;
 	}
-
+	
 	function isPrimitive(obj) {
 	  return obj[primitiveKey];
 	}
@@ -1042,19 +1101,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @constructor
 	 * @param {Object} obj Only apply `ownProperty`.
 	 */
-
-
+	
+	
 	function HashMap(obj) {
 	  var isArr = isArray(obj);
 	  var thisMap = this;
 	  obj instanceof HashMap ? obj.each(visit) : obj && each(obj, visit);
-
+	
 	  function visit(value, key) {
 	    isArr ? thisMap.set(value, key) : thisMap.set(key, value);
 	  }
 	} // Add prefix to avoid conflict with Object.prototype.
-
-
+	
+	
 	HashMap.prototype = {
 	  constructor: HashMap,
 	  // Do not provide `has` method to avoid defining what is `has`.
@@ -1072,7 +1131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // should not use the exposed keys, who are prefixed.
 	  each: function (cb, context) {
 	    context !== void 0 && (cb = bind(cb, context));
-
+	
 	    for (var key in this) {
 	      this.hasOwnProperty(key) && cb(this[key], key);
 	    }
@@ -1082,29 +1141,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    delete this[key];
 	  }
 	};
-
+	
 	function createHashMap(obj) {
 	  return new HashMap(obj);
 	}
-
+	
 	function concatArray(a, b) {
 	  var newArray = new a.constructor(a.length + b.length);
-
+	
 	  for (var i = 0; i < a.length; i++) {
 	    newArray[i] = a[i];
 	  }
-
+	
 	  var offset = a.length;
-
+	
 	  for (i = 0; i < b.length; i++) {
 	    newArray[i + offset] = b[i];
 	  }
-
+	
 	  return newArray;
 	}
-
+	
 	function noop() {}
-
+	
 	exports.$override = $override;
 	exports.clone = clone;
 	exports.merge = merge;
@@ -1147,26 +1206,47 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 6 */
+/*!*************************************!*\
+  !*** ./~/echarts/lib/util/model.js ***!
+  \*************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
-
+	var zrUtil = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
 	var each = zrUtil.each;
 	var isObject = zrUtil.isObject;
 	var isArray = zrUtil.isArray;
 	/**
-	 * name may be displayed on screen, so use '-'.
-	 * But we should make sure it is not duplicated
-	 * with user specified name, so use '\0';
+	 * Make the name displayable. But we should
+	 * make sure it is not duplicated with user
+	 * specified name, so use '\0';
 	 */
-
-	var DEFAULT_COMPONENT_NAME = '\0-';
+	
+	var DUMMY_COMPONENT_NAME_PREFIX = 'series\0';
 	/**
 	 * If value is not array, then translate it to array.
 	 * @param  {*} value
 	 * @return {Array} [value] or value
 	 */
-
+	
 	function normalizeToArray(value) {
 	  return value instanceof Array ? value : value == null ? [] : [value];
 	}
@@ -1185,31 +1265,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} key
 	 * @param {Array.<string>} subOpts
 	 */
-
-
+	
+	
 	function defaultEmphasis(opt, key, subOpts) {
+	  // Caution: performance sensitive.
 	  if (opt) {
 	    opt[key] = opt[key] || {};
 	    opt.emphasis = opt.emphasis || {};
 	    opt.emphasis[key] = opt.emphasis[key] || {}; // Default emphasis option from normal
-
+	
 	    for (var i = 0, len = subOpts.length; i < len; i++) {
 	      var subOptName = subOpts[i];
-
+	
 	      if (!opt.emphasis[key].hasOwnProperty(subOptName) && opt[key].hasOwnProperty(subOptName)) {
 	        opt.emphasis[key][subOptName] = opt[key][subOptName];
 	      }
 	    }
 	  }
 	}
-
+	
 	var TEXT_STYLE_OPTIONS = ['fontStyle', 'fontWeight', 'fontSize', 'fontFamily', 'rich', 'tag', 'color', 'textBorderColor', 'textBorderWidth', 'width', 'height', 'lineHeight', 'align', 'verticalAlign', 'baseline', 'shadowColor', 'shadowBlur', 'shadowOffsetX', 'shadowOffsetY', 'textShadowColor', 'textShadowBlur', 'textShadowOffsetX', 'textShadowOffsetY', 'backgroundColor', 'borderColor', 'borderWidth', 'borderRadius', 'padding']; // modelUtil.LABEL_OPTIONS = modelUtil.TEXT_STYLE_OPTIONS.concat([
 	//     'position', 'offset', 'rotate', 'origin', 'show', 'distance', 'formatter',
 	//     'fontStyle', 'fontWeight', 'fontSize', 'fontFamily',
 	//     // FIXME: deprecated, check and remove it.
 	//     'textStyle'
 	// ]);
-
+	
 	/**
 	 * The method do not ensure performance.
 	 * data could be [12, 2323, {value: 223}, [1221, 23], {value: [2, 23]}]
@@ -1217,7 +1298,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string|number|Date|Array|Object} dataItem
 	 * @return {number|string|Date|Array.<number|string|Date>}
 	 */
-
+	
 	function getDataItemValue(dataItem) {
 	  return isObject(dataItem) && !isArray(dataItem) && !(dataItem instanceof Date) ? dataItem.value : dataItem;
 	}
@@ -1226,8 +1307,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * This helper method determine if dataItem has extra option besides value
 	 * @param {string|number|Date|Array|Object} dataItem
 	 */
-
-
+	
+	
 	function isDataItemOption(dataItem) {
 	  return isObject(dataItem) && !(dataItem instanceof Array); // // markLine data can be array
 	  // && !(dataItem[0] && isObject(dataItem[0]) && !(dataItem[0] instanceof Array));
@@ -1241,8 +1322,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Array.<Object>} Result, like [{exist: ..., option: ...}, {}],
 	 *                          index of which is the same as exists.
 	 */
-
-
+	
+	
 	function mappingToExists(exists, newCptOptions) {
 	  // Mapping by the order by original option (but not order of
 	  // new option) in merge mode. Because we should ensure
@@ -1256,13 +1337,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      exist: obj
 	    };
 	  }); // Mapping by id or name if specified.
-
+	
 	  each(newCptOptions, function (cptOption, index) {
 	    if (!isObject(cptOption)) {
 	      return;
 	    } // id has highest priority.
-
-
+	
+	
 	    for (var i = 0; i < result.length; i++) {
 	      if (!result[i].option // Consider name: two map to one.
 	      && cptOption.id != null && result[i].exist.id === cptOption.id + '') {
@@ -1271,10 +1352,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 	    }
-
+	
 	    for (var i = 0; i < result.length; i++) {
 	      var exist = result[i].exist;
-
+	
 	      if (!result[i].option // Consider name: two map to one.
 	      // Can not match when both ids exist but different.
 	      && (exist.id == null || cptOption.id == null) && cptOption.name != null && !isIdInner(cptOption) && !isIdInner(exist) && exist.name === cptOption.name + '') {
@@ -1284,17 +1365,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }); // Otherwise mapping by index.
-
+	
 	  each(newCptOptions, function (cptOption, index) {
 	    if (!isObject(cptOption)) {
 	      return;
 	    }
-
+	
 	    var i = 0;
-
+	
 	    for (; i < result.length; i++) {
 	      var exist = result[i].exist;
-
+	
 	      if (!result[i].option // Existing model that already has id should be able to
 	      // mapped to (because after mapping performed model may
 	      // be assigned with a id, whish should not affect next
@@ -1309,7 +1390,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        break;
 	      }
 	    }
-
+	
 	    if (i >= result.length) {
 	      result.push({
 	        option: cptOption
@@ -1327,8 +1408,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                          which order is the same as exists.
 	 * @return {Array.<Object>} The input.
 	 */
-
-
+	
+	
 	function makeIdAndName(mapResult) {
 	  // We use this id to hash component models and view instances
 	  // in echarts. id can be specified by user, or auto generated.
@@ -1350,22 +1431,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    opt && opt.id != null && idMap.set(opt.id, item);
 	    !item.keyInfo && (item.keyInfo = {});
 	  }); // Make name and id.
-
+	
 	  each(mapResult, function (item, index) {
 	    var existCpt = item.exist;
 	    var opt = item.option;
 	    var keyInfo = item.keyInfo;
-
+	
 	    if (!isObject(opt)) {
 	      return;
 	    } // name can be overwitten. Consider case: axis.name = '20km'.
 	    // But id generated by name will not be changed, which affect
 	    // only in that case: setOption with 'not merge mode' and view
 	    // instance will be recreated, which can be accepted.
-
-
-	    keyInfo.name = opt.name != null ? opt.name + '' : existCpt ? existCpt.name : DEFAULT_COMPONENT_NAME;
-
+	
+	
+	    keyInfo.name = opt.name != null ? opt.name + '' : existCpt ? existCpt.name // Avoid diffferent series has the same name,
+	    // because name may be used like in color pallet.
+	    : DUMMY_COMPONENT_NAME_PREFIX + index;
+	
 	    if (existCpt) {
 	      keyInfo.id = existCpt.id;
 	    } else if (opt.id != null) {
@@ -1377,22 +1460,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // Series with the same name between optionA and optionB
 	      // should be mapped.
 	      var idNum = 0;
-
+	
 	      do {
 	        keyInfo.id = '\0' + keyInfo.name + '\0' + idNum++;
 	      } while (idMap.get(keyInfo.id));
 	    }
-
+	
 	    idMap.set(keyInfo.id, item);
 	  });
+	}
+	
+	function isNameSpecified(componentModel) {
+	  var name = componentModel.name; // Is specified when `indexOf` get -1 or > 0.
+	
+	  return !!(name && name.indexOf(DUMMY_COMPONENT_NAME_PREFIX));
 	}
 	/**
 	 * @public
 	 * @param {Object} cptOption
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isIdInner(cptOption) {
 	  return isObject(cptOption) && cptOption.id && (cptOption.id + '').indexOf('\0_ec_\0') === 0;
 	}
@@ -1404,24 +1493,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<Object>} batchB Like: [{seriesId: 2, dataIndex: [32, 4, 5]}, ...]
 	 * @return {Array.<Array.<Object>, Array.<Object>>} result: [resultBatchA, resultBatchB]
 	 */
-
-
+	
+	
 	function compressBatches(batchA, batchB) {
 	  var mapA = {};
 	  var mapB = {};
 	  makeMap(batchA || [], mapA);
 	  makeMap(batchB || [], mapB, mapA);
 	  return [mapToArray(mapA), mapToArray(mapB)];
-
+	
 	  function makeMap(sourceBatch, map, otherMap) {
 	    for (var i = 0, len = sourceBatch.length; i < len; i++) {
 	      var seriesId = sourceBatch[i].seriesId;
 	      var dataIndices = normalizeToArray(sourceBatch[i].dataIndex);
 	      var otherDataIndices = otherMap && otherMap[seriesId];
-
+	
 	      for (var j = 0, lenj = dataIndices.length; j < lenj; j++) {
 	        var dataIndex = dataIndices[j];
-
+	
 	        if (otherDataIndices && otherDataIndices[dataIndex]) {
 	          otherDataIndices[dataIndex] = null;
 	        } else {
@@ -1430,10 +1519,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }
-
+	
 	  function mapToArray(map, isData) {
 	    var result = [];
-
+	
 	    for (var i in map) {
 	      if (map.hasOwnProperty(i) && map[i] != null) {
 	        if (isData) {
@@ -1447,7 +1536,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    }
-
+	
 	    return result;
 	  }
 	}
@@ -1457,8 +1546,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                         each of which can be Array or primary type.
 	 * @return {number|Array.<number>} dataIndex If not found, return undefined/null.
 	 */
-
-
+	
+	
 	function queryDataIndex(data, payload) {
 	  if (payload.dataIndexInside != null) {
 	    return payload.dataIndexInside;
@@ -1492,8 +1581,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @return {Function}
 	 */
-
-
+	
+	
 	function makeInner() {
 	  // Consider different scope by es module import.
 	  var key = '__\0ec_inner_' + innerUniqueIndex++ + '_' + Math.random().toFixed(5);
@@ -1501,7 +1590,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return hostObj[key] || (hostObj[key] = {});
 	  };
 	}
-
+	
 	var innerUniqueIndex = 0;
 	/**
 	 * @param {module:echarts/model/Global} ecModel
@@ -1538,65 +1627,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *            ...
 	 *        }
 	 */
-
+	
 	function parseFinder(ecModel, finder, opt) {
 	  if (zrUtil.isString(finder)) {
 	    var obj = {};
 	    obj[finder + 'Index'] = 0;
 	    finder = obj;
 	  }
-
+	
 	  var defaultMainType = opt && opt.defaultMainType;
-
+	
 	  if (defaultMainType && !has(finder, defaultMainType + 'Index') && !has(finder, defaultMainType + 'Id') && !has(finder, defaultMainType + 'Name')) {
 	    finder[defaultMainType + 'Index'] = 0;
 	  }
-
+	
 	  var result = {};
 	  each(finder, function (value, key) {
 	    var value = finder[key]; // Exclude 'dataIndex' and other illgal keys.
-
+	
 	    if (key === 'dataIndex' || key === 'dataIndexInside') {
 	      result[key] = value;
 	      return;
 	    }
-
+	
 	    var parsedKey = key.match(/^(\w+)(Index|Id|Name)$/) || [];
 	    var mainType = parsedKey[1];
 	    var queryType = (parsedKey[2] || '').toLowerCase();
-
+	
 	    if (!mainType || !queryType || value == null || queryType === 'index' && value === 'none' || opt && opt.includeMainTypes && zrUtil.indexOf(opt.includeMainTypes, mainType) < 0) {
 	      return;
 	    }
-
+	
 	    var queryParam = {
 	      mainType: mainType
 	    };
-
+	
 	    if (queryType !== 'index' || value !== 'all') {
 	      queryParam[queryType] = value;
 	    }
-
+	
 	    var models = ecModel.queryComponents(queryParam);
 	    result[mainType + 'Models'] = models;
 	    result[mainType + 'Model'] = models[0];
 	  });
 	  return result;
 	}
-
+	
 	function has(obj, prop) {
 	  return obj && obj.hasOwnProperty(prop);
 	}
-
+	
 	function setAttribute(dom, key, value) {
 	  dom.setAttribute ? dom.setAttribute(key, value) : dom[key] = value;
 	}
-
+	
 	function getAttribute(dom, key) {
 	  return dom.getAttribute ? dom.getAttribute(key) : dom[key];
 	}
-
-	exports.DEFAULT_COMPONENT_NAME = DEFAULT_COMPONENT_NAME;
+	
 	exports.normalizeToArray = normalizeToArray;
 	exports.defaultEmphasis = defaultEmphasis;
 	exports.TEXT_STYLE_OPTIONS = TEXT_STYLE_OPTIONS;
@@ -1604,6 +1692,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isDataItemOption = isDataItemOption;
 	exports.mappingToExists = mappingToExists;
 	exports.makeIdAndName = makeIdAndName;
+	exports.isNameSpecified = isNameSpecified;
 	exports.isIdInner = isIdInner;
 	exports.compressBatches = compressBatches;
 	exports.queryDataIndex = queryDataIndex;
@@ -1614,23 +1703,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 7 */
+/*!***************************************************!*\
+  !*** ./~/echarts/lib/data/helper/sourceHelper.js ***!
+  \***************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _config = __webpack_require__(8);
-
+	var _config = __webpack_require__(/*! ../../config */ 8);
+	
 	var __DEV__ = _config.__DEV__;
-
-	var _model = __webpack_require__(6);
-
+	
+	var _model = __webpack_require__(/*! ../../util/model */ 6);
+	
 	var makeInner = _model.makeInner;
 	var getDataItemValue = _model.getDataItemValue;
-
-	var _referHelper = __webpack_require__(9);
-
+	
+	var _referHelper = __webpack_require__(/*! ../../model/referHelper */ 9);
+	
 	var getCoordSysDefineBySeries = _referHelper.getCoordSysDefineBySeries;
-
-	var _util = __webpack_require__(5);
-
+	
+	var _util = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
 	var createHashMap = _util.createHashMap;
 	var each = _util.each;
 	var map = _util.map;
@@ -1641,11 +1733,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var isArrayLike = _util.isArrayLike;
 	var extend = _util.extend;
 	var assert = _util.assert;
-
-	var Source = __webpack_require__(10);
-
-	var _sourceType = __webpack_require__(12);
-
+	
+	var Source = __webpack_require__(/*! ../Source */ 10);
+	
+	var _sourceType = __webpack_require__(/*! ./sourceType */ 12);
+	
 	var SOURCE_FORMAT_ORIGINAL = _sourceType.SOURCE_FORMAT_ORIGINAL;
 	var SOURCE_FORMAT_ARRAY_ROWS = _sourceType.SOURCE_FORMAT_ARRAY_ROWS;
 	var SOURCE_FORMAT_OBJECT_ROWS = _sourceType.SOURCE_FORMAT_OBJECT_ROWS;
@@ -1653,24 +1745,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	var SOURCE_FORMAT_UNKNOWN = _sourceType.SOURCE_FORMAT_UNKNOWN;
 	var SOURCE_FORMAT_TYPED_ARRAY = _sourceType.SOURCE_FORMAT_TYPED_ARRAY;
 	var SERIES_LAYOUT_BY_ROW = _sourceType.SERIES_LAYOUT_BY_ROW;
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
 	var inner = makeInner();
 	/**
 	 * @see {module:echarts/data/Source}
 	 * @param {module:echarts/component/dataset/DatasetModel} datasetModel
 	 * @return {string} sourceFormat
 	 */
-
+	
 	function detectSourceFormat(datasetModel) {
 	  var data = datasetModel.option.source;
 	  var sourceFormat = SOURCE_FORMAT_UNKNOWN;
-
+	
 	  if (isTypedArray(data)) {
 	    sourceFormat = SOURCE_FORMAT_TYPED_ARRAY;
 	  } else if (isArray(data)) {
 	    // FIXME Whether tolerate null in top level array?
 	    for (var i = 0, len = data.length; i < len; i++) {
 	      var item = data[i];
-
+	
 	      if (item == null) {
 	        continue;
 	      } else if (isArray(item)) {
@@ -1691,7 +1802,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else if (data != null) {
 	    throw new Error('Invalid data');
 	  }
-
+	
 	  inner(datasetModel).sourceFormat = sourceFormat;
 	}
 	/**
@@ -1717,8 +1828,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Get data from series itself or datset.
 	 * @return {module:echarts/data/Source} source
 	 */
-
-
+	
+	
 	function getSource(seriesModel) {
 	  return inner(seriesModel).source;
 	}
@@ -1726,8 +1837,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * MUST be called before mergeOption of all series.
 	 * @param {module:echarts/model/Global} ecModel
 	 */
-
-
+	
+	
 	function resetSourceDefaulter(ecModel) {
 	  // `datasetMap` is used to make default encode.
 	  inner(ecModel).datasetMap = createHashMap();
@@ -1748,8 +1859,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {module:echarts/model/Series} seriesModel
 	 */
-
-
+	
+	
 	function prepareSource(seriesModel) {
 	  var seriesOption = seriesModel.option;
 	  var data = seriesOption.data;
@@ -1759,26 +1870,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var sourceHeader = seriesOption.sourceHeader;
 	  var dimensionsDefine = seriesOption.dimensions;
 	  var datasetModel = getDatasetModel(seriesModel);
-
+	
 	  if (datasetModel) {
 	    var datasetOption = datasetModel.option;
 	    data = datasetOption.source;
 	    sourceFormat = inner(datasetModel).sourceFormat;
 	    fromDataset = true; // These settings from series has higher priority.
-
+	
 	    seriesLayoutBy = seriesLayoutBy || datasetOption.seriesLayoutBy;
 	    sourceHeader == null && (sourceHeader = datasetOption.sourceHeader);
 	    dimensionsDefine = dimensionsDefine || datasetOption.dimensions;
 	  }
-
+	
 	  var completeResult = completeBySourceData(data, sourceFormat, seriesLayoutBy, sourceHeader, dimensionsDefine); // Note: dataset option does not have `encode`.
-
+	
 	  var encodeDefine = seriesOption.encode;
-
+	
 	  if (!encodeDefine && datasetModel) {
 	    encodeDefine = makeDefaultEncode(seriesModel, datasetModel, data, sourceFormat, seriesLayoutBy, completeResult);
 	  }
-
+	
 	  inner(seriesModel).source = new Source({
 	    data: data,
 	    fromDataset: fromDataset,
@@ -1790,19 +1901,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    encodeDefine: encodeDefine
 	  });
 	} // return {startIndex, dimensionsDefine, dimensionsCount}
-
-
+	
+	
 	function completeBySourceData(data, sourceFormat, seriesLayoutBy, sourceHeader, dimensionsDefine) {
 	  if (!data) {
 	    return {
 	      dimensionsDefine: normalizeDimensionsDefine(dimensionsDefine)
 	    };
 	  }
-
+	
 	  var dimensionsDetectCount;
 	  var startIndex;
 	  var findPotentialName;
-
+	
 	  if (sourceFormat === SOURCE_FORMAT_ARRAY_ROWS) {
 	    // Rule: Most of the first line are string: it is header.
 	    // Caution: consider a line with 5 string and 1 number,
@@ -1818,19 +1929,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            startIndex = 0;
 	          }
 	        } // 10 is an experience number, avoid long loop.
-
+	
 	      }, seriesLayoutBy, data, 10);
 	    } else {
 	      startIndex = sourceHeader ? 1 : 0;
 	    }
-
+	
 	    if (!dimensionsDefine && startIndex === 1) {
 	      dimensionsDefine = [];
 	      arrayRowsTravelFirst(function (val, index) {
 	        dimensionsDefine[index] = val != null ? val : '';
 	      }, seriesLayoutBy, data);
 	    }
-
+	
 	    dimensionsDetectCount = dimensionsDefine ? dimensionsDefine.length : seriesLayoutBy === SERIES_LAYOUT_BY_ROW ? data.length : data[0] ? data[0].length : null;
 	  } else if (sourceFormat === SOURCE_FORMAT_OBJECT_ROWS) {
 	    if (!dimensionsDefine) {
@@ -1849,9 +1960,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var value0 = getDataItemValue(data[0]);
 	    dimensionsDetectCount = isArray(value0) && value0.length || 1;
 	  } else if (sourceFormat === SOURCE_FORMAT_TYPED_ARRAY) {}
-
+	
 	  var potentialNameDimIndex;
-
+	
 	  if (findPotentialName) {
 	    each(dimensionsDefine, function (dim, idx) {
 	      if ((isObject(dim) ? dim.name : dim) === 'name') {
@@ -1859,25 +1970,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    });
 	  }
-
+	
 	  return {
 	    startIndex: startIndex,
 	    dimensionsDefine: normalizeDimensionsDefine(dimensionsDefine),
 	    dimensionsDetectCount: dimensionsDetectCount,
 	    potentialNameDimIndex: potentialNameDimIndex // TODO: potentialIdDimIdx
-
+	
 	  };
 	} // Consider dimensions defined like ['A', 'price', 'B', 'price', 'C', 'price'],
 	// which is reasonable. But dimension name is duplicated.
 	// Returns undefined or an array contains only object without null/undefiend or string.
-
-
+	
+	
 	function normalizeDimensionsDefine(dimensionsDefine) {
 	  if (!dimensionsDefine) {
 	    // The meaning of null/undefined is different from empty array.
 	    return;
 	  }
-
+	
 	  var nameMap = createHashMap();
 	  return map(dimensionsDefine, function (item, index) {
 	    item = extend({}, isObject(item) ? item : {
@@ -1885,24 +1996,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }); // User can set null in dimensions.
 	    // We dont auto specify name, othewise a given name may
 	    // cause it be refered unexpectedly.
-
+	
 	    if (item.name == null) {
 	      return item;
 	    } // Also consider number form like 2012.
-
-
+	
+	
 	    item.name += ''; // User may also specify displayName.
 	    // displayName will always exists except user not
 	    // specified or dim name is not specified or detected.
 	    // (A auto generated dim name will not be used as
 	    // displayName).
-
+	
 	    if (item.displayName == null) {
 	      item.displayName = item.name;
 	    }
-
+	
 	    var exist = nameMap.get(item.name);
-
+	
 	    if (!exist) {
 	      nameMap.set(item.name, {
 	        count: 1
@@ -1910,34 +2021,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      item.name += '-' + exist.count++;
 	    }
-
+	
 	    return item;
 	  });
 	}
-
+	
 	function arrayRowsTravelFirst(cb, seriesLayoutBy, data, maxLoop) {
 	  maxLoop == null && (maxLoop = Infinity);
-
+	
 	  if (seriesLayoutBy === SERIES_LAYOUT_BY_ROW) {
 	    for (var i = 0; i < data.length && i < maxLoop; i++) {
 	      cb(data[i] ? data[i][0] : null, i);
 	    }
 	  } else {
 	    var value0 = data[0] || [];
-
+	
 	    for (var i = 0; i < value0.length && i < maxLoop; i++) {
 	      cb(value0[i], i);
 	    }
 	  }
 	}
-
+	
 	function objectRowsCollectDimensions(data) {
 	  var firstIndex = 0;
 	  var obj;
-
+	
 	  while (firstIndex < data.length && !(obj = data[firstIndex++])) {} // jshint ignore: line
-
-
+	
+	
 	  if (obj) {
 	    var dimensions = [];
 	    each(obj, function (value, key) {
@@ -1948,25 +2059,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	} // ??? TODO merge to completedimensions, where also has
 	// default encode making logic. And the default rule
 	// should depends on series? consider 'map'.
-
-
+	
+	
 	function makeDefaultEncode(seriesModel, datasetModel, data, sourceFormat, seriesLayoutBy, completeResult) {
 	  var coordSysDefine = getCoordSysDefineBySeries(seriesModel);
 	  var encode = {}; // var encodeTooltip = [];
 	  // var encodeLabel = [];
-
+	
 	  var encodeItemName = [];
 	  var encodeSeriesName = [];
 	  var seriesType = seriesModel.subType; // ??? TODO refactor: provide by series itself.
 	  // Consider the case: 'map' series is based on geo coordSys,
 	  // 'graph', 'heatmap' can be based on cartesian. But can not
 	  // give default rule simply here.
-
+	
 	  var nSeriesMap = createHashMap(['pie', 'map', 'funnel']);
 	  var cSeriesMap = createHashMap(['line', 'bar', 'pictorialBar', 'scatter', 'effectScatter', 'candlestick', 'boxplot']); // Usually in this case series will use the first data
 	  // dimension as the "value" dimension, or other default
 	  // processes respectively.
-
+	
 	  if (coordSysDefine && cSeriesMap.get(seriesType) != null) {
 	    var ecModel = seriesModel.ecModel;
 	    var datasetMap = inner(ecModel).datasetMap;
@@ -1976,7 +2087,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      valueWayDim: 0
 	    }); // TODO
 	    // Auto detect first time axis and do arrangement.
-
+	
 	    each(coordSysDefine.coordSysDims, function (coordDim) {
 	      // In value way.
 	      if (coordSysDefine.firstCategoryDimIndex == null) {
@@ -1987,7 +2098,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // category axis, series name should better use
 	        // the other dimsion name. On the other hand, use
 	        // both dimensions name.
-
+	
 	        encodeSeriesName.push(dataDim); // encodeTooltip.push(dataDim);
 	        // encodeLabel.push(dataDim);
 	      } // In category way, category axis.
@@ -1999,7 +2110,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var dataDim = datasetRecord.categoryWayDim++;
 	            encode[coordDim] = dataDim; // encodeTooltip.push(dataDim);
 	            // encodeLabel.push(dataDim);
-
+	
 	            encodeSeriesName.push(dataDim);
 	          }
 	    });
@@ -2009,25 +2120,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  else if (nSeriesMap.get(seriesType) != null) {
 	      // Find the first not ordinal. (5 is an experience value)
 	      var firstNotOrdinal;
-
+	
 	      for (var i = 0; i < 5 && firstNotOrdinal == null; i++) {
 	        if (!doGuessOrdinal(data, sourceFormat, seriesLayoutBy, completeResult.dimensionsDefine, completeResult.startIndex, i)) {
 	          firstNotOrdinal = i;
 	        }
 	      }
-
+	
 	      if (firstNotOrdinal != null) {
 	        encode.value = firstNotOrdinal;
 	        var nameDimIndex = completeResult.potentialNameDimIndex || Math.max(firstNotOrdinal - 1, 0); // By default, label use itemName in charts.
 	        // So we dont set encodeLabel here.
-
+	
 	        encodeSeriesName.push(nameDimIndex);
 	        encodeItemName.push(nameDimIndex); // encodeTooltip.push(firstNotOrdinal);
 	      }
 	    } // encodeTooltip.length && (encode.tooltip = encodeTooltip);
 	  // encodeLabel.length && (encode.label = encodeLabel);
-
-
+	
+	
 	  encodeItemName.length && (encode.itemName = encodeItemName);
 	  encodeSeriesName.length && (encode.seriesName = encodeSeriesName);
 	  return encode;
@@ -2035,17 +2146,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * If return null/undefined, indicate that should not use datasetModel.
 	 */
-
-
+	
+	
 	function getDatasetModel(seriesModel) {
 	  var option = seriesModel.option; // Caution: consider the scenario:
 	  // A dataset is declared and a series is not expected to use the dataset,
 	  // and at the beginning `setOption({series: { noData })` (just prepare other
 	  // option but no data), then `setOption({series: {data: [...]}); In this case,
 	  // the user should set an empty array to avoid that dataset is used by default.
-
+	
 	  var thisData = option.data;
-
+	
 	  if (!thisData) {
 	    return seriesModel.ecModel.getComponent('dataset', option.datasetIndex || 0);
 	  }
@@ -2059,35 +2170,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} dimIndex
 	 * @return {boolean} Whether ordinal.
 	 */
-
-
+	
+	
 	function guessOrdinal(source, dimIndex) {
 	  return doGuessOrdinal(source.data, source.sourceFormat, source.seriesLayoutBy, source.dimensionsDefine, source.startIndex, dimIndex);
 	} // dimIndex may be overflow source data.
-
-
+	
+	
 	function doGuessOrdinal(data, sourceFormat, seriesLayoutBy, dimensionsDefine, startIndex, dimIndex) {
 	  var result; // Experience value.
-
+	
 	  var maxLoop = 5;
-
+	
 	  if (isTypedArray(data)) {
 	    return false;
 	  } // When sourceType is 'objectRows' or 'keyedColumns', dimensionsDefine
 	  // always exists in source.
-
-
+	
+	
 	  var dimName;
-
+	
 	  if (dimensionsDefine) {
 	    dimName = dimensionsDefine[dimIndex];
 	    dimName = isObject(dimName) ? dimName.name : dimName;
 	  }
-
+	
 	  if (sourceFormat === SOURCE_FORMAT_ARRAY_ROWS) {
 	    if (seriesLayoutBy === SERIES_LAYOUT_BY_ROW) {
 	      var sample = data[dimIndex];
-
+	
 	      for (var i = 0; i < (sample || []).length && i < maxLoop; i++) {
 	        if ((result = detectValue(sample[startIndex + i])) != null) {
 	          return result;
@@ -2096,7 +2207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      for (var i = 0; i < data.length && i < maxLoop; i++) {
 	        var row = data[startIndex + i];
-
+	
 	        if (row && (result = detectValue(row[dimIndex])) != null) {
 	          return result;
 	        }
@@ -2106,10 +2217,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!dimName) {
 	      return;
 	    }
-
+	
 	    for (var i = 0; i < data.length && i < maxLoop; i++) {
 	      var item = data[i];
-
+	
 	      if (item && (result = detectValue(item[dimName])) != null) {
 	        return result;
 	      }
@@ -2118,13 +2229,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!dimName) {
 	      return;
 	    }
-
+	
 	    var sample = data[dimName];
-
+	
 	    if (!sample || isTypedArray(sample)) {
 	      return false;
 	    }
-
+	
 	    for (var i = 0; i < sample.length && i < maxLoop; i++) {
 	      if ((result = detectValue(sample[i])) != null) {
 	        return result;
@@ -2134,17 +2245,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for (var i = 0; i < data.length && i < maxLoop; i++) {
 	      var item = data[i];
 	      var val = getDataItemValue(item);
-
+	
 	      if (!isArray(val)) {
 	        return false;
 	      }
-
+	
 	      if ((result = detectValue(val[dimIndex])) != null) {
 	        return result;
 	      }
 	    }
 	  }
-
+	
 	  function detectValue(val) {
 	    // Consider usage convenience, '1', '2' will be treated as "number".
 	    // `isFinit('')` get `true`.
@@ -2154,10 +2265,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return true;
 	    }
 	  }
-
+	
 	  return false;
 	}
-
+	
 	exports.detectSourceFormat = detectSourceFormat;
 	exports.getSource = getSource;
 	exports.resetSourceDefaulter = resetSourceDefaulter;
@@ -2166,44 +2277,87 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 8 */
+/*!*********************************!*\
+  !*** ./~/echarts/lib/config.js ***!
+  \*********************************/
 /***/ function(module, exports) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {// (1) The code `if (__DEV__) ...` can be removed by build tool.
+	/* WEBPACK VAR INJECTION */(function(global) {/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
+	// (1) The code `if (__DEV__) ...` can be removed by build tool.
 	// (2) If intend to use `__DEV__`, this module should be imported. Use a global
 	// variable `__DEV__` may cause that miss the declaration (see #6535), or the
 	// declaration is behind of the using position (for example in `Model.extent`,
 	// And tools like rollup can not analysis the dependency if not import).
 	var dev; // In browser
-
+	
 	if (typeof window !== 'undefined') {
 	  dev = window.__DEV__;
 	} // In node
 	else if (typeof global !== 'undefined') {
 	    dev = global.__DEV__;
 	  }
-
+	
 	if (typeof dev === 'undefined') {
 	  dev = true;
 	}
-
+	
 	var __DEV__ = dev;
 	exports.__DEV__ = __DEV__;
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 9 */
+/*!********************************************!*\
+  !*** ./~/echarts/lib/model/referHelper.js ***!
+  \********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _config = __webpack_require__(8);
-
+	var _config = __webpack_require__(/*! ../config */ 8);
+	
 	var __DEV__ = _config.__DEV__;
-
-	var _util = __webpack_require__(5);
-
+	
+	var _util = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
 	var createHashMap = _util.createHashMap;
 	var retrieve = _util.retrieve;
 	var each = _util.each;
-
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
+	
 	/**
 	 * Helper for model references.
 	 * There are many manners to refer axis/coordSys.
@@ -2211,7 +2365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// TODO
 	// merge relevant logic to this file?
 	// check: "modelHelper" of tooltip and "BrushTargetManager".
-
+	
 	/**
 	 * @return {Object} For example:
 	 * {
@@ -2239,13 +2393,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    categoryAxisMap: createHashMap()
 	  };
 	  var fetch = fetchers[coordSysName];
-
+	
 	  if (fetch) {
 	    fetch(seriesModel, result, result.axisMap, result.categoryAxisMap);
 	    return result;
 	  }
 	}
-
+	
 	var fetchers = {
 	  cartesian2d: function (seriesModel, result, axisMap, categoryAxisMap) {
 	    var xAxisModel = seriesModel.getReferringComponents('xAxis')[0];
@@ -2253,12 +2407,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    result.coordSysDims = ['x', 'y'];
 	    axisMap.set('x', xAxisModel);
 	    axisMap.set('y', yAxisModel);
-
+	
 	    if (isCategory(xAxisModel)) {
 	      categoryAxisMap.set('x', xAxisModel);
 	      result.firstCategoryDimIndex = 0;
 	    }
-
+	
 	    if (isCategory(yAxisModel)) {
 	      categoryAxisMap.set('y', yAxisModel);
 	      result.firstCategoryDimIndex = 1;
@@ -2268,7 +2422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var singleAxisModel = seriesModel.getReferringComponents('singleAxis')[0];
 	    result.coordSysDims = ['single'];
 	    axisMap.set('single', singleAxisModel);
-
+	
 	    if (isCategory(singleAxisModel)) {
 	      categoryAxisMap.set('single', singleAxisModel);
 	      result.firstCategoryDimIndex = 0;
@@ -2281,12 +2435,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    result.coordSysDims = ['radius', 'angle'];
 	    axisMap.set('radius', radiusAxisModel);
 	    axisMap.set('angle', angleAxisModel);
-
+	
 	    if (isCategory(radiusAxisModel)) {
 	      categoryAxisMap.set('radius', radiusAxisModel);
 	      result.firstCategoryDimIndex = 0;
 	    }
-
+	
 	    if (isCategory(angleAxisModel)) {
 	      categoryAxisMap.set('angle', angleAxisModel);
 	      result.firstCategoryDimIndex = 1;
@@ -2303,7 +2457,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var axisModel = ecModel.getComponent('parallelAxis', axisIndex);
 	      var axisDim = coordSysDims[index];
 	      axisMap.set(axisDim, axisModel);
-
+	
 	      if (isCategory(axisModel) && result.firstCategoryDimIndex == null) {
 	        categoryAxisMap.set(axisDim, axisModel);
 	        result.firstCategoryDimIndex = index;
@@ -2311,34 +2465,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  }
 	};
-
+	
 	function isCategory(axisModel) {
 	  return axisModel.get('type') === 'category';
 	}
-
+	
 	exports.getCoordSysDefineBySeries = getCoordSysDefineBySeries;
 
 /***/ },
 /* 10 */
+/*!**************************************!*\
+  !*** ./~/echarts/lib/data/Source.js ***!
+  \**************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(5);
-
+	var _util = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
 	var createHashMap = _util.createHashMap;
 	var isTypedArray = _util.isTypedArray;
-
-	var _clazz = __webpack_require__(11);
-
+	
+	var _clazz = __webpack_require__(/*! ../util/clazz */ 11);
+	
 	var enableClassCheck = _clazz.enableClassCheck;
-
-	var _sourceType = __webpack_require__(12);
-
+	
+	var _sourceType = __webpack_require__(/*! ./helper/sourceType */ 12);
+	
 	var SOURCE_FORMAT_ORIGINAL = _sourceType.SOURCE_FORMAT_ORIGINAL;
 	var SERIES_LAYOUT_BY_COLUMN = _sourceType.SERIES_LAYOUT_BY_COLUMN;
 	var SOURCE_FORMAT_UNKNOWN = _sourceType.SOURCE_FORMAT_UNKNOWN;
 	var SOURCE_FORMAT_TYPED_ARRAY = _sourceType.SOURCE_FORMAT_TYPED_ARRAY;
 	var SOURCE_FORMAT_KEYED_COLUMNS = _sourceType.SOURCE_FORMAT_KEYED_COLUMNS;
-
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
+	
 	/**
 	 * [sourceFormat]
 	 *
@@ -2374,7 +2550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * + "unknown"
 	 */
-
+	
 	/**
 	 * @constructor
 	 * @param {Object} fields
@@ -2396,54 +2572,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Not null/undefined.
 	   * @type {Array|Object}
 	   */
-
+	
 	  this.data = fields.data || (fields.sourceFormat === SOURCE_FORMAT_KEYED_COLUMNS ? {} : []);
 	  /**
 	   * See also "detectSourceFormat".
 	   * Not null/undefined.
 	   * @type {string}
 	   */
-
+	
 	  this.sourceFormat = fields.sourceFormat || SOURCE_FORMAT_UNKNOWN;
 	  /**
 	   * 'row' or 'column'
 	   * Not null/undefined.
 	   * @type {string} seriesLayoutBy
 	   */
-
+	
 	  this.seriesLayoutBy = fields.seriesLayoutBy || SERIES_LAYOUT_BY_COLUMN;
 	  /**
 	   * dimensions definition in option.
 	   * can be null/undefined.
 	   * @type {Array.<Object|string>}
 	   */
-
+	
 	  this.dimensionsDefine = fields.dimensionsDefine;
 	  /**
 	   * encode definition in option.
 	   * can be null/undefined.
 	   * @type {Objet|HashMap}
 	   */
-
+	
 	  this.encodeDefine = fields.encodeDefine && createHashMap(fields.encodeDefine);
 	  /**
 	   * Not null/undefined, uint.
 	   * @type {number}
 	   */
-
+	
 	  this.startIndex = fields.startIndex || 0;
 	  /**
 	   * Can be null/undefined (when unknown), uint.
 	   * @type {number}
 	   */
-
+	
 	  this.dimensionsDetectCount = fields.dimensionsDetectCount;
 	}
 	/**
 	 * Wrap original series data for some compatibility cases.
 	 */
-
-
+	
+	
 	Source.seriesDataToSource = function (data) {
 	  return new Source({
 	    data: data,
@@ -2451,61 +2627,82 @@ return /******/ (function(modules) { // webpackBootstrap
 	    fromDataset: false
 	  });
 	};
-
+	
 	enableClassCheck(Source);
 	var _default = Source;
 	module.exports = _default;
 
 /***/ },
 /* 11 */
+/*!*************************************!*\
+  !*** ./~/echarts/lib/util/clazz.js ***!
+  \*************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _config = __webpack_require__(8);
-
+	var _config = __webpack_require__(/*! ../config */ 8);
+	
 	var __DEV__ = _config.__DEV__;
-
-	var zrUtil = __webpack_require__(5);
-
+	
+	var zrUtil = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
 	var TYPE_DELIMITER = '.';
 	var IS_CONTAINER = '___EC__COMPONENT__CONTAINER___';
 	/**
 	 * Notice, parseClassType('') should returns {main: '', sub: ''}
 	 * @public
 	 */
-
+	
 	function parseClassType(componentType) {
 	  var ret = {
 	    main: '',
 	    sub: ''
 	  };
-
+	
 	  if (componentType) {
 	    componentType = componentType.split(TYPE_DELIMITER);
 	    ret.main = componentType[0] || '';
 	    ret.sub = componentType[1] || '';
 	  }
-
+	
 	  return ret;
 	}
 	/**
 	 * @public
 	 */
-
-
+	
+	
 	function checkClassType(componentType) {
 	  zrUtil.assert(/^[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)?$/.test(componentType), 'componentType "' + componentType + '" illegal');
 	}
 	/**
 	 * @public
 	 */
-
-
+	
+	
 	function enableClassExtend(RootClass, mandatoryMethods) {
 	  RootClass.$constructor = RootClass;
-
+	
 	  RootClass.extend = function (proto) {
 	    var superClass = this;
-
+	
 	    var ExtendedClass = function () {
 	      if (!proto.$constructor) {
 	        superClass.apply(this, arguments);
@@ -2513,7 +2710,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        proto.$constructor.apply(this, arguments);
 	      }
 	    };
-
+	
 	    zrUtil.extend(ExtendedClass.prototype, proto);
 	    ExtendedClass.extend = this.extend;
 	    ExtendedClass.superCall = superCall;
@@ -2523,18 +2720,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return ExtendedClass;
 	  };
 	}
-
+	
 	var classBase = 0;
 	/**
 	 * Can not use instanceof, consider different scope by
 	 * cross domain or es module import in ec extensions.
 	 * Mount a method "isInstance()" to Clz.
 	 */
-
+	
 	function enableClassCheck(Clz) {
 	  var classAttr = ['__\0is_clz', classBase++, Math.random().toFixed(3)].join('_');
 	  Clz.prototype[classAttr] = true;
-
+	
 	  Clz.isInstance = function (obj) {
 	    return !!(obj && obj[classAttr]);
 	  };
@@ -2544,13 +2741,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	// class B inherits class A, overrides method f, f call superApply('f'),
 	// class C inherits class B, do not overrides method f,
 	// then when method of class C is called, dead loop occured.
-
-
+	
+	
 	function superCall(context, methodName) {
 	  var args = zrUtil.slice(arguments, 2);
 	  return this.superClass.prototype[methodName].apply(context, args);
 	}
-
+	
 	function superApply(context, methodName, args) {
 	  return this.superClass.prototype[methodName].apply(context, args);
 	}
@@ -2560,8 +2757,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean} [options.registerWhenExtend]
 	 * @public
 	 */
-
-
+	
+	
 	function enableClassManagement(entity, options) {
 	  options = options || {};
 	  /**
@@ -2572,14 +2769,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *     or Object.<subKey, componentClass>, when componentType is 'xxx.yy'
 	   * @type {Object}
 	   */
-
+	
 	  var storage = {};
-
+	
 	  entity.registerClass = function (Clazz, componentType) {
 	    if (componentType) {
 	      checkClassType(componentType);
 	      componentType = parseClassType(componentType);
-
+	
 	      if (!componentType.sub) {
 	        storage[componentType.main] = Clazz;
 	      } else if (componentType.sub !== IS_CONTAINER) {
@@ -2587,29 +2784,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	        container[componentType.sub] = Clazz;
 	      }
 	    }
-
+	
 	    return Clazz;
 	  };
-
+	
 	  entity.getClass = function (componentMainType, subType, throwWhenNotFound) {
 	    var Clazz = storage[componentMainType];
-
+	
 	    if (Clazz && Clazz[IS_CONTAINER]) {
 	      Clazz = subType ? Clazz[subType] : null;
 	    }
-
+	
 	    if (throwWhenNotFound && !Clazz) {
 	      throw new Error(!subType ? componentMainType + '.' + 'type should be specified.' : 'Component ' + componentMainType + '.' + (subType || '') + ' not exists. Load it first.');
 	    }
-
+	
 	    return Clazz;
 	  };
-
+	
 	  entity.getClassesByMainType = function (componentType) {
 	    componentType = parseClassType(componentType);
 	    var result = [];
 	    var obj = storage[componentType.main];
-
+	
 	    if (obj && obj[IS_CONTAINER]) {
 	      zrUtil.each(obj, function (o, type) {
 	        type !== IS_CONTAINER && result.push(o);
@@ -2617,10 +2814,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      result.push(obj);
 	    }
-
+	
 	    return result;
 	  };
-
+	
 	  entity.hasClass = function (componentType) {
 	    // Just consider componentType.main.
 	    componentType = parseClassType(componentType);
@@ -2629,8 +2826,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * @return {Array.<string>} Like ['aa', 'bb'], but can not be ['aa.xx']
 	   */
-
-
+	
+	
 	  entity.getAllClassMainTypes = function () {
 	    var types = [];
 	    zrUtil.each(storage, function (obj, type) {
@@ -2643,30 +2840,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param  {string}  mainType
 	   * @return {boolean}
 	   */
-
-
+	
+	
 	  entity.hasSubTypes = function (componentType) {
 	    componentType = parseClassType(componentType);
 	    var obj = storage[componentType.main];
 	    return obj && obj[IS_CONTAINER];
 	  };
-
+	
 	  entity.parseClassType = parseClassType;
-
+	
 	  function makeContainer(componentType) {
 	    var container = storage[componentType.main];
-
+	
 	    if (!container || !container[IS_CONTAINER]) {
 	      container = storage[componentType.main] = {};
 	      container[IS_CONTAINER] = true;
 	    }
-
+	
 	    return container;
 	  }
-
+	
 	  if (options.registerWhenExtend) {
 	    var originalExtend = entity.extend;
-
+	
 	    if (originalExtend) {
 	      entity.extend = function (proto) {
 	        var ExtendedClass = originalExtend.call(this, proto);
@@ -2674,14 +2871,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 	    }
 	  }
-
+	
 	  return entity;
 	}
 	/**
 	 * @param {string|Array.<string>} properties
 	 */
-
-
+	
+	
 	function setReadOnly(obj, properties) {// FIXME It seems broken in IE8 simulation of IE11
 	  // if (!zrUtil.isArray(properties)) {
 	  //     properties = properties != null ? [properties] : [];
@@ -2697,7 +2894,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //         && Object.freeze(obj[prop]);
 	  // });
 	}
-
+	
 	exports.parseClassType = parseClassType;
 	exports.enableClassExtend = enableClassExtend;
 	exports.enableClassCheck = enableClassCheck;
@@ -2706,15 +2903,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 12 */
+/*!*************************************************!*\
+  !*** ./~/echarts/lib/data/helper/sourceType.js ***!
+  \*************************************************/
 /***/ function(module, exports) {
 
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
 	// Avoid typo.
 	var SOURCE_FORMAT_ORIGINAL = 'original';
 	var SOURCE_FORMAT_ARRAY_ROWS = 'arrayRows';
 	var SOURCE_FORMAT_OBJECT_ROWS = 'objectRows';
 	var SOURCE_FORMAT_KEYED_COLUMNS = 'keyedColumns';
 	var SOURCE_FORMAT_UNKNOWN = 'unknown'; // ??? CHANGE A NAME
-
+	
 	var SOURCE_FORMAT_TYPED_ARRAY = 'typedArray';
 	var SERIES_LAYOUT_BY_COLUMN = 'column';
 	var SERIES_LAYOUT_BY_ROW = 'row';
@@ -2729,89 +2947,128 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 13 */
+/*!******************************************************!*\
+  !*** ./~/echarts/lib/data/helper/dimensionHelper.js ***!
+  \******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(5);
-
+	var _util = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
 	var each = _util.each;
 	var createHashMap = _util.createHashMap;
 	var assert = _util.assert;
-
-	var _config = __webpack_require__(8);
-
+	
+	var _config = __webpack_require__(/*! ../../config */ 8);
+	
 	var __DEV__ = _config.__DEV__;
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
 	var OTHER_DIMENSIONS = createHashMap(['tooltip', 'label', 'itemName', 'itemId', 'seriesName']);
-
+	
 	function summarizeDimensions(data) {
 	  var summary = {};
 	  var encode = summary.encode = {};
-	  var coordDimMap = summary.coordDimMap = createHashMap();
+	  var notExtraCoordDimMap = createHashMap();
 	  var defaultedLabel = [];
+	  var defaultedTooltip = [];
 	  each(data.dimensions, function (dimName) {
 	    var dimItem = data.getDimensionInfo(dimName);
 	    var coordDim = dimItem.coordDim;
-
+	
 	    if (coordDim) {
 	      var coordDimArr = encode[coordDim];
-
+	
 	      if (!encode.hasOwnProperty(coordDim)) {
 	        coordDimArr = encode[coordDim] = [];
 	      }
-
+	
 	      coordDimArr[dimItem.coordDimIndex] = dimName;
-
-	      if (dimItem.isSysCoord && mayLabelDimType(dimItem.type)) {
-	        // Use the last coord dim (and label friendly) as default label,
-	        // because both show x, y on label is not look good, and usually
-	        // y axis is more focusd conventionally.
-	        defaultedLabel[0] = dimName;
+	
+	      if (!dimItem.isExtraCoord) {
+	        notExtraCoordDimMap.set(coordDim, 1); // Use the last coord dim (and label friendly) as default label,
+	        // because when dataset is used, it is hard to guess which dimension
+	        // can be value dimension. If both show x, y on label is not look good,
+	        // and conventionally y axis is focused more.
+	
+	        if (mayLabelDimType(dimItem.type)) {
+	          defaultedLabel[0] = dimName;
+	        }
 	      }
-
-	      coordDimMap.set(coordDim, 1);
+	
+	      if (dimItem.defaultTooltip) {
+	        defaultedTooltip.push(dimName);
+	      }
 	    }
-
+	
 	    OTHER_DIMENSIONS.each(function (v, otherDim) {
 	      var otherDimArr = encode[otherDim];
-
+	
 	      if (!encode.hasOwnProperty(otherDim)) {
 	        otherDimArr = encode[otherDim] = [];
 	      }
-
+	
 	      var dimIndex = dimItem.otherDims[otherDim];
-
+	
 	      if (dimIndex != null && dimIndex !== false) {
 	        otherDimArr[dimIndex] = dimItem.name;
 	      }
 	    });
 	  });
 	  var dataDimsOnCoord = [];
-	  coordDimMap.each(function (v, coordDim) {
-	    dataDimsOnCoord = dataDimsOnCoord.concat(encode[coordDim]);
+	  var encodeFirstDimNotExtra = {};
+	  notExtraCoordDimMap.each(function (v, coordDim) {
+	    var dimArr = encode[coordDim]; // ??? FIXME extra coord should not be set in dataDimsOnCoord.
+	    // But should fix the case that radar axes: simplify the logic
+	    // of `completeDimension`, remove `extraPrefix`.
+	
+	    encodeFirstDimNotExtra[coordDim] = dimArr[0]; // Not necessary to remove duplicate, because a data
+	    // dim canot on more than one coordDim.
+	
+	    dataDimsOnCoord = dataDimsOnCoord.concat(dimArr);
 	  });
 	  summary.dataDimsOnCoord = dataDimsOnCoord;
+	  summary.encodeFirstDimNotExtra = encodeFirstDimNotExtra;
 	  var encodeLabel = encode.label; // FIXME `encode.label` is not recommanded, because formatter can not be set
 	  // in this way. Use label.formatter instead. May be remove this approach someday.
-
+	
 	  if (encodeLabel && encodeLabel.length) {
 	    defaultedLabel = encodeLabel.slice();
 	  }
-
-	  var defaultedTooltip = defaultedLabel.slice();
+	
 	  var encodeTooltip = encode.tooltip;
-
+	
 	  if (encodeTooltip && encodeTooltip.length) {
 	    defaultedTooltip = encodeTooltip.slice();
+	  } else if (!defaultedTooltip.length) {
+	    defaultedTooltip = defaultedLabel.slice();
 	  }
-
+	
 	  encode.defaultedLabel = defaultedLabel;
 	  encode.defaultedTooltip = defaultedTooltip;
 	  return summary;
 	}
-
+	
 	function getDimensionTypeByAxis(axisType) {
 	  return axisType === 'category' ? 'ordinal' : axisType === 'time' ? 'time' : 'float';
 	}
-
+	
 	function mayLabelDimType(dimType) {
 	  // In most cases, ordinal and time do not suitable for label.
 	  // Ordinal info can be displayed on axis. Time is too long.
@@ -2828,42 +3085,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	//     )) {} // jshint ignore:line
 	//     return valueDim;
 	// }
-
-
+	
+	
 	exports.OTHER_DIMENSIONS = OTHER_DIMENSIONS;
 	exports.summarizeDimensions = summarizeDimensions;
 	exports.getDimensionTypeByAxis = getDimensionTypeByAxis;
 
 /***/ },
 /* 14 */
+/*!*******************************!*\
+  !*** ./src/liquidFillView.js ***!
+  \*******************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var echarts = __webpack_require__(2);
+	var echarts = __webpack_require__(/*! echarts/lib/echarts */ 2);
 	var numberUtil = echarts.number;
-	var symbolUtil = __webpack_require__(15);
+	var symbolUtil = __webpack_require__(/*! echarts/lib/util/symbol */ 15);
 	var parsePercent = numberUtil.parsePercent;
-
-	var LiquidLayout = __webpack_require__(76);
-
+	
+	var LiquidLayout = __webpack_require__(/*! ./liquidFillLayout */ 76);
+	
 	function getShallow(model, path) {
 	    return model && model.getShallow(path);
 	}
-
+	
 	echarts.extendChartView({
-
+	
 	    type: 'liquidFill',
-
+	
 	    render: function (seriesModel, ecModel, api) {
 	        var group = this.group;
 	        group.removeAll();
-
+	
 	        var data = seriesModel.getData();
-
+	
 	        var itemModel = data.getItemModel(0);
-
+	
 	        var center = itemModel.get('center');
 	        var radius = itemModel.get('radius');
-
+	
 	        var width = api.getWidth();
 	        var height = api.getHeight();
 	        var size = Math.min(width, height);
@@ -2871,28 +3131,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var outlineDistance = 0;
 	        var outlineBorderWidth = 0;
 	        var showOutline = seriesModel.get('outline.show');
-
+	
 	        if (showOutline) {
 	            outlineDistance = seriesModel.get('outline.borderDistance');
 	            outlineBorderWidth = parsePercent(
 	                seriesModel.get('outline.itemStyle.borderWidth'), size
 	            );
 	        }
-
+	
 	        var cx = parsePercent(center[0], width);
 	        var cy = parsePercent(center[1], height);
-
+	
 	        var outterRadius;
 	        var innerRadius;
 	        var paddingRadius;
-
+	
 	        var isFillContainer = false;
-
+	
 	        var symbol = seriesModel.get('shape');
 	        if (symbol === 'container') {
 	            // a shape that fully fills the container
 	            isFillContainer = true;
-
+	
 	            outterRadius = [
 	                width / 2,
 	                height / 2
@@ -2905,7 +3165,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                parsePercent(outlineDistance, width),
 	                parsePercent(outlineDistance, height)
 	            ];
-
+	
 	            radius = [
 	                innerRadius[0] - paddingRadius[0],
 	                innerRadius[1] - paddingRadius[1]
@@ -2915,30 +3175,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	            outterRadius = parsePercent(radius, size) / 2;
 	            innerRadius = outterRadius - outlineBorderWidth / 2;
 	            paddingRadius = parsePercent(outlineDistance, size);
-
+	
 	            radius = innerRadius - paddingRadius;
 	        }
-
+	
 	        if (showOutline) {
 	            var outline = getOutline();
 	            outline.style.lineWidth = outlineBorderWidth;
 	            group.add(getOutline());
 	        }
-
+	
 	        var left = isFillContainer ? 0 : cx - radius;
 	        var top = isFillContainer ? 0 : cy - radius;
-
+	
 	        var wavePath = null;
-
+	
 	        group.add(getBackground());
-
+	
 	        // each data item for a wave
 	        var oldData = this._data;
 	        var waves = [];
 	        data.diff(oldData)
 	            .add(function (idx) {
 	                var wave = getWave(idx, false);
-
+	
 	                var waterLevel = wave.shape.waterLevel;
 	                wave.shape.waterLevel = isFillContainer ? radius[1] : radius;
 	                echarts.graphic.initProps(wave, {
@@ -2946,34 +3206,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        waterLevel: waterLevel
 	                    }
 	                }, seriesModel);
-
+	
 	                wave.z2 = 2;
 	                setWaveAnimation(idx, wave, null);
-
+	
 	                group.add(wave);
 	                data.setItemGraphicEl(idx, wave);
 	                waves.push(wave);
 	            })
 	            .update(function (newIdx, oldIdx) {
 	                var waveElement = oldData.getItemGraphicEl(oldIdx);
-
+	
 	                // new wave is used to calculate position, but not added
 	                var newWave = getWave(newIdx, false, waveElement);
-
-	                // Shallow copy shape and style to avoid comparing style.host
-	                // when animating
-	                var shape = Object.assign({}, newWave.shape);
-	                var style = Object.assign({}, newWave.style);
-	                style.host = null;
-
-	                // update old wave with parameters of new wave
+	
+	                // changes with animation
+	                var shape = {};
+	                var shapeAttrs = ['amplitude', 'cx', 'cy', 'phase', 'radius', 'waterLevel', 'waveLength'];
+	                for (var i = 0; i < shapeAttrs.length; ++i) {
+	                    var attr = shapeAttrs[i];
+	                    if (newWave.shape.hasOwnProperty(attr)) {
+	                        shape[attr] = newWave.shape[attr];
+	                    }
+	                }
+	
+	                var style = {};
+	                var styleAttrs = ['fill', 'opacity', 'shadowBlur', 'shadowColor'];
+	                for (var i = 0; i < styleAttrs.length; ++i) {
+	                    var attr = shapeAttrs[i];
+	                    if (newWave.style.hasOwnProperty(attr)) {
+	                        style[attr] = newWave.style[attr];
+	                    }
+	                }
+	
+	                // changes with animation
 	                echarts.graphic.updateProps(waveElement, {
 	                    shape: shape,
 	                    style: style
 	                }, seriesModel);
+	
+	                // instant changes
 	                waveElement.position = newWave.position;
 	                waveElement.setClipPath(newWave.clipPath);
-
+	                waveElement.shape.inverse = newWave.inverse;
+	
 	                setWaveAnimation(newIdx, waveElement, waveElement);
 	                group.add(waveElement);
 	                data.setItemGraphicEl(newIdx, waveElement);
@@ -2984,13 +3260,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                group.remove(wave);
 	            })
 	            .execute();
-
+	
 	        if (itemModel.get('label.show')) {
 	            group.add(getText(waves));
 	        }
-
+	
 	        this._data = data;
-
+	
 	        /**
 	         * Get path for outline, background and clipping
 	         *
@@ -3014,7 +3290,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        w = r * 2 / h * w;
 	                        h = r * 2;
 	                    }
-
+	
 	                    var left = isForClipping ? 0 : cx - w / 2;
 	                    var top = isForClipping ? 0 : cy - h / 2;
 	                    path = echarts.graphic.makePath(
@@ -3047,7 +3323,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return symbolUtil.createSymbol(symbol, x, y, r * 2, r * 2);
 	                }
 	            }
-
+	
 	            return new echarts.graphic.Circle({
 	                shape: {
 	                    cx: isForClipping ? 0 : cx,
@@ -3062,13 +3338,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        function getOutline() {
 	            var outlinePath = getPath(outterRadius);
 	            outlinePath.style.fill = null;
-
+	
 	            outlinePath.setStyle(seriesModel.getModel('outline.itemStyle')
 	                .getItemStyle());
-
+	
 	            return outlinePath;
 	        }
-
+	
 	        /**
 	         * Create background
 	         */
@@ -3078,29 +3354,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	            strokePath.setStyle(seriesModel.getModel('backgroundStyle')
 	                .getItemStyle());
 	            strokePath.style.fill = null;
-
+	
 	            // Stroke is front of wave
 	            strokePath.z2 = 5;
-
+	
 	            var fillPath = getPath(radius);
 	            fillPath.setStyle(seriesModel.getModel('backgroundStyle')
 	                .getItemStyle());
 	            fillPath.style.stroke = null;
-
+	
 	            var group = new echarts.graphic.Group();
 	            group.add(strokePath);
 	            group.add(fillPath);
-
+	
 	            return group;
 	        }
-
+	
 	        /**
 	         * wave shape
 	         */
 	        function getWave(idx, isInverse, oldWave) {
 	            var radiusX = isFillContainer ? radius[0] : radius;
 	            var radiusY = isFillContainer ? radius[1] : radius;
-
+	
 	            var itemModel = data.getItemModel(idx);
 	            var itemStyleModel = itemModel.getModel('itemStyle');
 	            var phase = itemModel.get('phase');
@@ -3108,7 +3384,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                radiusY * 2);
 	            var waveLength = parsePercent(itemModel.get('waveLength'),
 	                radiusX * 2);
-
+	
 	            var value = data.get('value', idx);
 	            var waterLevel = radiusY - value * radiusY * 2;
 	            phase = oldWave ? oldWave.shape.phase
@@ -3119,7 +3395,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var id = idx % seriesColor.length;
 	                normalStyle.fill = seriesColor[id];
 	            }
-
+	
 	            var x = radiusX * 2;
 	            var wave = new LiquidLayout({
 	                shape: {
@@ -3136,12 +3412,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                position: [cx, cy]
 	            });
 	            wave.shape._waterLevel = waterLevel;
-
+	
 	            var hoverStyle = itemModel.getModel('emphasis.itemStyle')
 	                .getItemStyle();
 	            hoverStyle.lineWidth = 0;
 	            echarts.graphic.setHoverStyle(wave, hoverStyle);
-
+	
 	            // clip out the part outside the circle
 	            var clip = getPath(radius, true);
 	            // set fill for clipPath, otherwise it will not trigger hover event
@@ -3149,22 +3425,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	                fill: 'white'
 	            });
 	            wave.setClipPath(clip);
-
+	
 	            return wave;
 	        }
-
+	
 	        function setWaveAnimation(idx, wave, oldWave) {
 	            var itemModel = data.getItemModel(idx);
-
+	
 	            var maxSpeed = itemModel.get('period');
 	            var direction = itemModel.get('direction');
-
+	
 	            var value = data.get('value', idx);
-
+	
 	            var phase = itemModel.get('phase');
 	            phase = oldWave ? oldWave.shape.phase
 	                : (phase === 'auto' ? idx * Math.PI / 4 : phase);
-
+	
 	            var defaultSpeed = function (maxSpeed) {
 	                var cnt = data.count();
 	                return cnt === 0 ? maxSpeed : maxSpeed *
@@ -3178,7 +3454,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                speed = typeof maxSpeed === 'function'
 	                    ? maxSpeed(value, idx) : maxSpeed;
 	            }
-
+	
 	            // phase for moving left/right
 	            var phaseOffset = 0;
 	            if (direction === 'right' || direction == null) {
@@ -3193,7 +3469,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            else {
 	                console.error('Illegal direction value for liquid fill.');
 	            }
-
+	
 	            // wave animation of moving left/right
 	            if (direction !== 'none' && itemModel.get('waveAnimation')) {
 	                wave
@@ -3215,13 +3491,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    .start();
 	            }
 	        }
-
+	
 	        /**
 	         * text on wave
 	         */
 	        function getText(waves) {
 	            var labelModel = itemModel.getModel('label');
-
+	
 	            function formatLabel() {
 	                var formatted = seriesModel.getFormattedLabel(0, 'normal');
 	                var defaultVal = (data.get('value', 0) * 100);
@@ -3231,7 +3507,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	                return formatted == null ? defaultLabel : formatted;
 	            }
-
+	
 	            var textOption = {
 	                z2: 10,
 	                shape: {
@@ -3248,37 +3524,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	                },
 	                silent: true
 	            };
-
+	
 	            var outsideTextRect = new echarts.graphic.Rect(textOption);
 	            var color = labelModel.get('color');
 	            echarts.graphic.setText(outsideTextRect.style, labelModel, color);
-
+	
 	            var insideTextRect = new echarts.graphic.Rect(textOption);
 	            var insColor = labelModel.get('insideColor');
 	            echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
 	            insideTextRect.style.textFill = insColor;
-
+	
 	            var group = new echarts.graphic.Group();
 	            group.add(outsideTextRect);
 	            group.add(insideTextRect);
-
+	
 	            // clip out waves for insideText
 	            var boundingCircle = getPath(radius, true);
-
+	
 	            wavePath = new echarts.graphic.CompoundPath({
 	                shape: {
 	                    paths: waves
 	                },
 	                position: [cx, cy]
 	            });
-
+	
 	            wavePath.setClipPath(boundingCircle);
 	            insideTextRect.setClipPath(wavePath);
-
+	
 	            return group;
 	        }
 	    },
-
+	
 	    dispose: function () {
 	        // dispose nothing here
 	    }
@@ -3287,16 +3563,37 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 15 */
+/*!**************************************!*\
+  !*** ./~/echarts/lib/util/symbol.js ***!
+  \**************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
-
-	var graphic = __webpack_require__(16);
-
-	var BoundingRect = __webpack_require__(39);
-
+	var zrUtil = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
+	var graphic = __webpack_require__(/*! ./graphic */ 16);
+	
+	var BoundingRect = __webpack_require__(/*! zrender/lib/core/BoundingRect */ 39);
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
 	// Symbol factory
-
+	
 	/**
 	 * Triangle shape
 	 * @inner
@@ -3324,7 +3621,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Diamond shape
 	 * @inner
 	 */
-
+	
 	var Diamond = graphic.extendShape({
 	  type: 'diamond',
 	  shape: {
@@ -3349,7 +3646,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Pin shape
 	 * @inner
 	 */
-
+	
 	var Pin = graphic.extendShape({
 	  type: 'pin',
 	  shape: {
@@ -3363,14 +3660,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var x = shape.x;
 	    var y = shape.y;
 	    var w = shape.width / 5 * 3; // Height must be larger than width
-
+	
 	    var h = Math.max(w, shape.height);
 	    var r = w / 2; // Dist on y with tangent point and circle center
-
+	
 	    var dy = r * r / (h - r);
 	    var cy = y - h + r + dy;
 	    var angle = Math.asin(dy / r); // Dist on x with tangent point and circle center
-
+	
 	    var dx = Math.cos(angle) * r;
 	    var tanX = Math.sin(angle);
 	    var tanY = Math.cos(angle);
@@ -3387,7 +3684,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Arrow shape
 	 * @inner
 	 */
-
+	
 	var Arrow = graphic.extendShape({
 	  type: 'arrow',
 	  shape: {
@@ -3414,7 +3711,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Map of path contructors
 	 * @type {Object.<string, module:zrender/graphic/Path>}
 	 */
-
+	
 	var symbolCtors = {
 	  line: graphic.Line,
 	  rect: graphic.Rect,
@@ -3501,7 +3798,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  beforeBrush: function () {
 	    var style = this.style;
 	    var shape = this.shape; // FIXME
-
+	
 	    if (shape.symbolType === 'pin' && style.textPosition === 'inside') {
 	      style.textPosition = ['50%', '40%'];
 	      style.textAlign = 'center';
@@ -3511,25 +3808,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  buildPath: function (ctx, shape, inBundle) {
 	    var symbolType = shape.symbolType;
 	    var proxySymbol = symbolBuildProxies[symbolType];
-
+	
 	    if (shape.symbolType !== 'none') {
 	      if (!proxySymbol) {
 	        // Default rect
 	        symbolType = 'rect';
 	        proxySymbol = symbolBuildProxies[symbolType];
 	      }
-
+	
 	      symbolShapeMakers[symbolType](shape.x, shape.y, shape.width, shape.height, proxySymbol.shape);
 	      proxySymbol.buildPath(ctx, proxySymbol.shape, inBundle);
 	    }
 	  }
 	}); // Provide setColor helper method to avoid determine if set the fill or stroke outside
-
+	
 	function symbolPathSetColor(color, innerColor) {
 	  if (this.type !== 'image') {
 	    var symbolStyle = this.style;
 	    var symbolShape = this.shape;
-
+	
 	    if (symbolShape && symbolShape.symbolType === 'line') {
 	      symbolStyle.stroke = color;
 	    } else if (this.__isEmptyBrush) {
@@ -3540,7 +3837,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      symbolStyle.fill && (symbolStyle.fill = color);
 	      symbolStyle.stroke && (symbolStyle.stroke = color);
 	    }
-
+	
 	    this.dirty(false);
 	  }
 	}
@@ -3555,18 +3852,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean} [keepAspect=false] whether to keep the ratio of w/h,
 	 *                            for path and image only.
 	 */
-
-
+	
+	
 	function createSymbol(symbolType, x, y, w, h, color, keepAspect) {
 	  // TODO Support image object, DynamicImage.
 	  var isEmpty = symbolType.indexOf('empty') === 0;
-
+	
 	  if (isEmpty) {
 	    symbolType = symbolType.substr(5, 1).toLowerCase() + symbolType.substr(6);
 	  }
-
+	
 	  var symbolPath;
-
+	
 	  if (symbolType.indexOf('image://') === 0) {
 	    symbolPath = graphic.makeImage(symbolType.slice(8), new BoundingRect(x, y, w, h), keepAspect ? 'center' : 'cover');
 	  } else if (symbolType.indexOf('path://') === 0) {
@@ -3582,100 +3879,122 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    });
 	  }
-
+	
 	  symbolPath.__isEmptyBrush = isEmpty;
 	  symbolPath.setColor = symbolPathSetColor;
 	  symbolPath.setColor(color);
 	  return symbolPath;
 	}
-
+	
 	exports.createSymbol = createSymbol;
 
 /***/ },
 /* 16 */
+/*!***************************************!*\
+  !*** ./~/echarts/lib/util/graphic.js ***!
+  \***************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
-
-	var pathTool = __webpack_require__(17);
-
-	var colorTool = __webpack_require__(32);
-
-	var matrix = __webpack_require__(26);
-
-	var vector = __webpack_require__(27);
-
-	var Path = __webpack_require__(18);
-
-	var Transformable = __webpack_require__(25);
-
-	var ZImage = __webpack_require__(54);
-
+	var zrUtil = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
+	var pathTool = __webpack_require__(/*! zrender/lib/tool/path */ 17);
+	
+	var colorTool = __webpack_require__(/*! zrender/lib/tool/color */ 32);
+	
+	var matrix = __webpack_require__(/*! zrender/lib/core/matrix */ 26);
+	
+	var vector = __webpack_require__(/*! zrender/lib/core/vector */ 27);
+	
+	var Path = __webpack_require__(/*! zrender/lib/graphic/Path */ 18);
+	
+	var Transformable = __webpack_require__(/*! zrender/lib/mixin/Transformable */ 25);
+	
+	var ZImage = __webpack_require__(/*! zrender/lib/graphic/Image */ 54);
+	
 	exports.Image = ZImage;
-
-	var Group = __webpack_require__(55);
-
+	
+	var Group = __webpack_require__(/*! zrender/lib/container/Group */ 55);
+	
 	exports.Group = Group;
-
-	var Text = __webpack_require__(56);
-
+	
+	var Text = __webpack_require__(/*! zrender/lib/graphic/Text */ 56);
+	
 	exports.Text = Text;
-
-	var Circle = __webpack_require__(57);
-
+	
+	var Circle = __webpack_require__(/*! zrender/lib/graphic/shape/Circle */ 57);
+	
 	exports.Circle = Circle;
-
-	var Sector = __webpack_require__(58);
-
+	
+	var Sector = __webpack_require__(/*! zrender/lib/graphic/shape/Sector */ 58);
+	
 	exports.Sector = Sector;
-
-	var Ring = __webpack_require__(61);
-
+	
+	var Ring = __webpack_require__(/*! zrender/lib/graphic/shape/Ring */ 61);
+	
 	exports.Ring = Ring;
-
-	var Polygon = __webpack_require__(62);
-
+	
+	var Polygon = __webpack_require__(/*! zrender/lib/graphic/shape/Polygon */ 62);
+	
 	exports.Polygon = Polygon;
-
-	var Polyline = __webpack_require__(66);
-
+	
+	var Polyline = __webpack_require__(/*! zrender/lib/graphic/shape/Polyline */ 66);
+	
 	exports.Polyline = Polyline;
-
-	var Rect = __webpack_require__(67);
-
+	
+	var Rect = __webpack_require__(/*! zrender/lib/graphic/shape/Rect */ 67);
+	
 	exports.Rect = Rect;
-
-	var Line = __webpack_require__(68);
-
+	
+	var Line = __webpack_require__(/*! zrender/lib/graphic/shape/Line */ 68);
+	
 	exports.Line = Line;
-
-	var BezierCurve = __webpack_require__(69);
-
+	
+	var BezierCurve = __webpack_require__(/*! zrender/lib/graphic/shape/BezierCurve */ 69);
+	
 	exports.BezierCurve = BezierCurve;
-
-	var Arc = __webpack_require__(70);
-
+	
+	var Arc = __webpack_require__(/*! zrender/lib/graphic/shape/Arc */ 70);
+	
 	exports.Arc = Arc;
-
-	var CompoundPath = __webpack_require__(71);
-
+	
+	var CompoundPath = __webpack_require__(/*! zrender/lib/graphic/CompoundPath */ 71);
+	
 	exports.CompoundPath = CompoundPath;
-
-	var LinearGradient = __webpack_require__(72);
-
+	
+	var LinearGradient = __webpack_require__(/*! zrender/lib/graphic/LinearGradient */ 72);
+	
 	exports.LinearGradient = LinearGradient;
-
-	var RadialGradient = __webpack_require__(74);
-
+	
+	var RadialGradient = __webpack_require__(/*! zrender/lib/graphic/RadialGradient */ 74);
+	
 	exports.RadialGradient = RadialGradient;
-
-	var BoundingRect = __webpack_require__(39);
-
+	
+	var BoundingRect = __webpack_require__(/*! zrender/lib/core/BoundingRect */ 39);
+	
 	exports.BoundingRect = BoundingRect;
-
-	var IncrementalDisplayable = __webpack_require__(75);
-
+	
+	var IncrementalDisplayable = __webpack_require__(/*! zrender/lib/graphic/IncrementalDisplayable */ 75);
+	
 	exports.IncrementalDisplayable = IncrementalDisplayable;
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
 	var round = Math.round;
 	var mathMax = Math.max;
 	var mathMin = Math.min;
@@ -3683,15 +4002,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Extend shape with parameters
 	 */
-
+	
 	function extendShape(opts) {
 	  return Path.extend(opts);
 	}
 	/**
 	 * Extend path
 	 */
-
-
+	
+	
 	function extendPath(pathData, opts) {
 	  return pathTool.extendFromString(pathData, opts);
 	}
@@ -3702,20 +4021,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {module:zrender/core/BoundingRect} rect
 	 * @param {string} [layout=cover] 'center' or 'cover'
 	 */
-
-
+	
+	
 	function makePath(pathData, opts, rect, layout) {
 	  var path = pathTool.createFromString(pathData, opts);
 	  var boundingRect = path.getBoundingRect();
-
+	
 	  if (rect) {
 	    if (layout === 'center') {
 	      rect = centerGraphic(rect, boundingRect);
 	    }
-
+	
 	    resizePath(path, rect);
 	  }
-
+	
 	  return path;
 	}
 	/**
@@ -3725,8 +4044,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {module:zrender/core/BoundingRect} rect constrain rect
 	 * @param {string} [layout=cover] 'center' or 'cover'
 	 */
-
-
+	
+	
 	function makeImage(imageUrl, rect, layout) {
 	  var path = new ZImage({
 	    style: {
@@ -3755,21 +4074,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Object} boundingRect constraint bounding box
 	 * @return {Object} element position containing x, y, width, and height
 	 */
-
-
+	
+	
 	function centerGraphic(rect, boundingRect) {
 	  // Set rect to center, keep width / height ratio.
 	  var aspect = boundingRect.width / boundingRect.height;
 	  var width = rect.height * aspect;
 	  var height;
-
+	
 	  if (width <= rect.width) {
 	    height = rect.height;
 	  } else {
 	    width = rect.width;
 	    height = width / aspect;
 	  }
-
+	
 	  var cx = rect.x + rect.width / 2;
 	  var cy = rect.y + rect.height / 2;
 	  return {
@@ -3779,19 +4098,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    height: height
 	  };
 	}
-
+	
 	var mergePath = pathTool.mergePath;
 	/**
 	 * Resize a path to fit the rect
 	 * @param {module:zrender/graphic/Path} path
 	 * @param {Object} rect
 	 */
-
+	
 	function resizePath(path, rect) {
 	  if (!path.applyTransform) {
 	    return;
 	  }
-
+	
 	  var pathRect = path.getBoundingRect();
 	  var m = pathRect.calculateTransform(rect);
 	  path.applyTransform(m);
@@ -3809,20 +4128,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} [param.style.lineWidth]
 	 * @return {Object} Modified param
 	 */
-
-
+	
+	
 	function subPixelOptimizeLine(param) {
 	  var shape = param.shape;
 	  var lineWidth = param.style.lineWidth;
-
+	
 	  if (round(shape.x1 * 2) === round(shape.x2 * 2)) {
 	    shape.x1 = shape.x2 = subPixelOptimize(shape.x1, lineWidth, true);
 	  }
-
+	
 	  if (round(shape.y1 * 2) === round(shape.y2 * 2)) {
 	    shape.y1 = shape.y2 = subPixelOptimize(shape.y1, lineWidth, true);
 	  }
-
+	
 	  return param;
 	}
 	/**
@@ -3838,8 +4157,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} [param.style.lineWidth]
 	 * @return {Object} Modified param
 	 */
-
-
+	
+	
 	function subPixelOptimizeRect(param) {
 	  var shape = param.shape;
 	  var lineWidth = param.style.lineWidth;
@@ -3861,44 +4180,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean=} positiveOrNegative Default false (negative).
 	 * @return {number} Optimized position.
 	 */
-
-
+	
+	
 	function subPixelOptimize(position, lineWidth, positiveOrNegative) {
 	  // Assure that (position + lineWidth / 2) is near integer edge,
 	  // otherwise line will be fuzzy in canvas.
 	  var doubledPosition = round(position * 2);
 	  return (doubledPosition + round(lineWidth)) % 2 === 0 ? doubledPosition / 2 : (doubledPosition + (positiveOrNegative ? 1 : -1)) / 2;
 	}
-
+	
 	function hasFillOrStroke(fillOrStroke) {
 	  return fillOrStroke != null && fillOrStroke != 'none';
 	}
-
+	
 	function liftColor(color) {
 	  return typeof color === 'string' ? colorTool.lift(color, -0.1) : color;
 	}
 	/**
 	 * @private
 	 */
-
-
+	
+	
 	function cacheElementStl(el) {
 	  if (el.__hoverStlDirty) {
 	    var stroke = el.style.stroke;
 	    var fill = el.style.fill; // Create hoverStyle on mouseover
-
+	
 	    var hoverStyle = el.__hoverStl;
 	    hoverStyle.fill = hoverStyle.fill || (hasFillOrStroke(fill) ? liftColor(fill) : null);
 	    hoverStyle.stroke = hoverStyle.stroke || (hasFillOrStroke(stroke) ? liftColor(stroke) : null);
 	    var normalStyle = {};
-
+	
 	    for (var name in hoverStyle) {
 	      // See comment in `doSingleEnterHover`.
 	      if (hoverStyle[name] != null) {
 	        normalStyle[name] = el.style[name];
 	      }
 	    }
-
+	
 	    el.__normalStl = normalStyle;
 	    el.__hoverStlDirty = false;
 	  }
@@ -3906,15 +4225,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @private
 	 */
-
-
+	
+	
 	function doSingleEnterHover(el) {
 	  if (el.__isHover) {
 	    return;
 	  }
-
+	
 	  cacheElementStl(el);
-
+	
 	  if (el.useHoverLayer) {
 	    el.__zr && el.__zr.addHover(el, el.__hoverStl);
 	  } else {
@@ -3922,7 +4241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var insideRollbackOpt = style.insideRollbackOpt; // Consider case: only `position: 'top'` is set on emphasis, then text
 	    // color should be returned to `autoColor`, rather than remain '#fff'.
 	    // So we should rollback then apply again after style merging.
-
+	
 	    insideRollbackOpt && rollbackInsideStyle(style); // styles can be:
 	    // {
 	    //    label: {
@@ -3942,35 +4261,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // all properties in merge. So we use merge mode when setting style here, where
 	    // only properties that is not `null/undefined` can be set. The disadventage:
 	    // null/undefined can not be used to remove style any more in `emphasis`.
-
+	
 	    style.extendFrom(el.__hoverStl); // Do not save `insideRollback`.
-
+	
 	    if (insideRollbackOpt) {
 	      applyInsideStyle(style, style.insideOriginalTextPosition, insideRollbackOpt); // textFill may be rollbacked to null.
-
+	
 	      if (style.textFill == null) {
 	        style.textFill = insideRollbackOpt.autoColor;
 	      }
 	    }
-
+	
 	    el.dirty(false);
 	    el.z2 += 1;
 	  }
-
+	
 	  el.__isHover = true;
 	}
 	/**
 	 * @inner
 	 */
-
-
+	
+	
 	function doSingleLeaveHover(el) {
 	  if (!el.__isHover) {
 	    return;
 	  }
-
+	
 	  var normalStl = el.__normalStl;
-
+	
 	  if (el.useHoverLayer) {
 	    el.__zr && el.__zr.removeHover(el);
 	  } else {
@@ -3979,14 +4298,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    normalStl && el.setStyle(normalStl);
 	    el.z2 -= 1;
 	  }
-
+	
 	  el.__isHover = false;
 	}
 	/**
 	 * @inner
 	 */
-
-
+	
+	
 	function doEnterHover(el) {
 	  el.type === 'group' ? el.traverse(function (child) {
 	    if (child.type !== 'group') {
@@ -3994,7 +4313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }) : doSingleEnterHover(el);
 	}
-
+	
 	function doLeaveHover(el) {
 	  el.type === 'group' ? el.traverse(function (child) {
 	    if (child.type !== 'group') {
@@ -4005,14 +4324,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @inner
 	 */
-
-
+	
+	
 	function setElementHoverStl(el, hoverStl) {
 	  // If element has sepcified hoverStyle, then use it instead of given hoverStyle
 	  // Often used when item group has a label element and it's hoverStyle is different
 	  el.__hoverStl = el.hoverStyle || hoverStl || {};
 	  el.__hoverStlDirty = true;
-
+	
 	  if (el.__isHover) {
 	    cacheElementStl(el);
 	  }
@@ -4020,34 +4339,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @inner
 	 */
-
-
+	
+	
 	function onElementMouseOver(e) {
 	  if (this.__hoverSilentOnTouch && e.zrByTouch) {
 	    return;
 	  } // Only if element is not in emphasis status
-
-
+	
+	
 	  !this.__isEmphasis && doEnterHover(this);
 	}
 	/**
 	 * @inner
 	 */
-
-
+	
+	
 	function onElementMouseOut(e) {
 	  if (this.__hoverSilentOnTouch && e.zrByTouch) {
 	    return;
 	  } // Only if element is not in emphasis status
-
-
+	
+	
 	  !this.__isEmphasis && doLeaveHover(this);
 	}
 	/**
 	 * @inner
 	 */
-
-
+	
+	
 	function enterEmphasis() {
 	  this.__isEmphasis = true;
 	  doEnterHover(this);
@@ -4055,8 +4374,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @inner
 	 */
-
-
+	
+	
 	function leaveEmphasis() {
 	  this.__isEmphasis = false;
 	  doLeaveHover(this);
@@ -4078,8 +4397,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *        In this case, hoverSilentOnTouch should be used to disable hover-highlight
 	 *        on touch device.
 	 */
-
-
+	
+	
 	function setHoverStyle(el, hoverStyle, opt) {
 	  el.__hoverSilentOnTouch = opt && opt.hoverSilentOnTouch;
 	  el.type === 'group' ? el.traverse(function (child) {
@@ -4087,9 +4406,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      setElementHoverStl(child, hoverStyle);
 	    }
 	  }) : setElementHoverStl(el, hoverStyle); // Duplicated function will be auto-ignored, see Eventful.js.
-
+	
 	  el.on('mouseover', onElementMouseOver).on('mouseout', onElementMouseOut); // Emphasis, normal can be triggered manually
-
+	
 	  el.on('emphasis', enterEmphasis).on('normal', leaveEmphasis);
 	}
 	/**
@@ -4108,35 +4427,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} [normalSpecified]
 	 * @param {Object} [emphasisSpecified]
 	 */
-
-
+	
+	
 	function setLabelStyle(normalStyle, emphasisStyle, normalModel, emphasisModel, opt, normalSpecified, emphasisSpecified) {
 	  opt = opt || EMPTY_OBJ;
 	  var labelFetcher = opt.labelFetcher;
 	  var labelDataIndex = opt.labelDataIndex;
 	  var labelDimIndex = opt.labelDimIndex; // This scenario, `label.normal.show = true; label.emphasis.show = false`,
 	  // is not supported util someone requests.
-
+	
 	  var showNormal = normalModel.getShallow('show');
 	  var showEmphasis = emphasisModel.getShallow('show'); // Consider performance, only fetch label when necessary.
 	  // If `normal.show` is `false` and `emphasis.show` is `true` and `emphasis.formatter` is not set,
 	  // label should be displayed, where text is fetched by `normal.formatter` or `opt.defaultText`.
-
+	
 	  var baseText;
-
+	
 	  if (showNormal || showEmphasis) {
 	    if (labelFetcher) {
 	      baseText = labelFetcher.getFormattedLabel(labelDataIndex, 'normal', null, labelDimIndex);
 	    }
-
+	
 	    if (baseText == null) {
 	      baseText = zrUtil.isFunction(opt.defaultText) ? opt.defaultText(labelDataIndex, opt) : opt.defaultText;
 	    }
 	  }
-
+	
 	  var normalStyleText = showNormal ? baseText : null;
 	  var emphasisStyleText = showEmphasis ? zrUtil.retrieve2(labelFetcher ? labelFetcher.getFormattedLabel(labelDataIndex, 'emphasis', null, labelDimIndex) : null, baseText) : null; // Optimize: If style.text is null, text will not be drawn.
-
+	
 	  if (normalStyleText != null || emphasisStyleText != null) {
 	    // Always set `textStyle` even if `normalStyle.text` is null, because default
 	    // values have to be set on `normalStyle`.
@@ -4147,7 +4466,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    setTextStyle(normalStyle, normalModel, normalSpecified, opt);
 	    setTextStyle(emphasisStyle, emphasisModel, emphasisSpecified, opt, true);
 	  }
-
+	
 	  normalStyle.text = normalStyleText;
 	  emphasisStyle.text = emphasisStyleText;
 	}
@@ -4159,8 +4478,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} [opt] See `opt` of `setTextStyleCommon`.
 	 * @param {boolean} [isEmphasis]
 	 */
-
-
+	
+	
 	function setTextStyle(textStyle, textStyleModel, specifiedTextStyle, opt, isEmphasis) {
 	  setTextStyleCommon(textStyle, textStyleModel, opt, isEmphasis);
 	  specifiedTextStyle && zrUtil.extend(textStyle, specifiedTextStyle);
@@ -4175,21 +4494,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string|boolean} defaultColor Default text color.
 	 *        If set as false, it will be processed as a emphasis style.
 	 */
-
-
+	
+	
 	function setText(textStyle, labelModel, defaultColor) {
 	  var opt = {
 	    isRectText: true
 	  };
 	  var isEmphasis;
-
+	
 	  if (defaultColor === false) {
 	    isEmphasis = true;
 	  } else {
 	    // Support setting color as 'auto' to get visual color.
 	    opt.autoColor = defaultColor;
 	  }
-
+	
 	  setTextStyleCommon(textStyle, labelModel, opt, isEmphasis);
 	  textStyle.host && textStyle.host.dirty && textStyle.host.dirty(false);
 	}
@@ -4209,16 +4528,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *      forceRich: boolean
 	 * }
 	 */
-
-
+	
+	
 	function setTextStyleCommon(textStyle, textStyleModel, opt, isEmphasis) {
 	  // Consider there will be abnormal when merge hover style to normal style if given default value.
 	  opt = opt || EMPTY_OBJ;
-
+	
 	  if (opt.isRectText) {
 	    var textPosition = textStyleModel.getShallow('position') || (isEmphasis ? null : 'inside'); // 'outside' is not a valid zr textPostion value, but used
 	    // in bar series, and magric type should be considered.
-
+	
 	    textPosition === 'outside' && (textPosition = 'top');
 	    textStyle.textPosition = textPosition;
 	    textStyle.textOffset = textStyleModel.getShallow('offset');
@@ -4227,7 +4546,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    textStyle.textRotation = labelRotate;
 	    textStyle.textDistance = zrUtil.retrieve2(textStyleModel.getShallow('distance'), isEmphasis ? null : 5);
 	  }
-
+	
 	  var ecModel = textStyleModel.ecModel;
 	  var globalTextStyle = ecModel && ecModel.option.textStyle; // Consider case:
 	  // {
@@ -4243,30 +4562,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //         a: { ... }
 	  //     }
 	  // }
-
+	
 	  var richItemNames = getRichItemNames(textStyleModel);
 	  var richResult;
-
+	
 	  if (richItemNames) {
 	    richResult = {};
-
+	
 	    for (var name in richItemNames) {
 	      if (richItemNames.hasOwnProperty(name)) {
 	        // Cascade is supported in rich.
 	        var richTextStyle = textStyleModel.getModel(['rich', name]); // In rich, never `disableBox`.
-
+	
 	        setTokenTextStyle(richResult[name] = {}, richTextStyle, globalTextStyle, opt, isEmphasis);
 	      }
 	    }
 	  }
-
+	
 	  textStyle.rich = richResult;
 	  setTokenTextStyle(textStyle, textStyleModel, globalTextStyle, opt, isEmphasis, true);
-
+	
 	  if (opt.forceRich && !opt.textStyle) {
 	    opt.textStyle = {};
 	  }
-
+	
 	  return textStyle;
 	} // Consider case:
 	// {
@@ -4282,58 +4601,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	//         a: { ... }
 	//     }
 	// }
-
-
+	
+	
 	function getRichItemNames(textStyleModel) {
 	  // Use object to remove duplicated names.
 	  var richItemNameMap;
-
+	
 	  while (textStyleModel && textStyleModel !== textStyleModel.ecModel) {
 	    var rich = (textStyleModel.option || EMPTY_OBJ).rich;
-
+	
 	    if (rich) {
 	      richItemNameMap = richItemNameMap || {};
-
+	
 	      for (var name in rich) {
 	        if (rich.hasOwnProperty(name)) {
 	          richItemNameMap[name] = 1;
 	        }
 	      }
 	    }
-
+	
 	    textStyleModel = textStyleModel.parentModel;
 	  }
-
+	
 	  return richItemNameMap;
 	}
-
+	
 	function setTokenTextStyle(textStyle, textStyleModel, globalTextStyle, opt, isEmphasis, isBlock) {
 	  // In merge mode, default value should not be given.
 	  globalTextStyle = !isEmphasis && globalTextStyle || EMPTY_OBJ;
 	  textStyle.textFill = getAutoColor(textStyleModel.getShallow('color'), opt) || globalTextStyle.color;
 	  textStyle.textStroke = getAutoColor(textStyleModel.getShallow('textBorderColor'), opt) || globalTextStyle.textBorderColor;
 	  textStyle.textStrokeWidth = zrUtil.retrieve2(textStyleModel.getShallow('textBorderWidth'), globalTextStyle.textBorderWidth);
-
+	
 	  if (!isEmphasis) {
 	    if (isBlock) {
 	      // Always set `insideRollback`, for clearing previous.
 	      var originalTextPosition = textStyle.textPosition;
 	      textStyle.insideRollback = applyInsideStyle(textStyle, originalTextPosition, opt); // Save original textPosition, because style.textPosition will be repalced by
 	      // real location (like [10, 30]) in zrender.
-
+	
 	      textStyle.insideOriginalTextPosition = originalTextPosition;
 	      textStyle.insideRollbackOpt = opt;
 	    } // Set default finally.
-
-
+	
+	
 	    if (textStyle.textFill == null) {
 	      textStyle.textFill = opt.autoColor;
 	    }
 	  } // Do not use `getFont` here, because merge should be supported, where
 	  // part of these properties may be changed in emphasis style, and the
 	  // others should remain their original value got from normal style.
-
-
+	
+	
 	  textStyle.fontStyle = textStyleModel.getShallow('fontStyle') || globalTextStyle.fontStyle;
 	  textStyle.fontWeight = textStyleModel.getShallow('fontWeight') || globalTextStyle.fontWeight;
 	  textStyle.fontSize = textStyleModel.getShallow('fontSize') || globalTextStyle.fontSize;
@@ -4344,7 +4663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  textStyle.textWidth = textStyleModel.getShallow('width');
 	  textStyle.textHeight = textStyleModel.getShallow('height');
 	  textStyle.textTag = textStyleModel.getShallow('tag');
-
+	
 	  if (!isBlock || !opt.disableBox) {
 	    textStyle.textBackgroundColor = getAutoColor(textStyleModel.getShallow('backgroundColor'), opt);
 	    textStyle.textPadding = textStyleModel.getShallow('padding');
@@ -4356,21 +4675,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    textStyle.textBoxShadowOffsetX = textStyleModel.getShallow('shadowOffsetX');
 	    textStyle.textBoxShadowOffsetY = textStyleModel.getShallow('shadowOffsetY');
 	  }
-
+	
 	  textStyle.textShadowColor = textStyleModel.getShallow('textShadowColor') || globalTextStyle.textShadowColor;
 	  textStyle.textShadowBlur = textStyleModel.getShallow('textShadowBlur') || globalTextStyle.textShadowBlur;
 	  textStyle.textShadowOffsetX = textStyleModel.getShallow('textShadowOffsetX') || globalTextStyle.textShadowOffsetX;
 	  textStyle.textShadowOffsetY = textStyleModel.getShallow('textShadowOffsetY') || globalTextStyle.textShadowOffsetY;
 	}
-
+	
 	function getAutoColor(color, opt) {
 	  return color !== 'auto' ? color : opt && opt.autoColor ? opt.autoColor : null;
 	}
-
+	
 	function applyInsideStyle(textStyle, textPosition, opt) {
 	  var useInsideStyle = opt.useInsideStyle;
 	  var insideRollback;
-
+	
 	  if (textStyle.textFill == null && useInsideStyle !== false && (useInsideStyle === true || opt.isRectText && textPosition // textPosition can be [10, 30]
 	  && typeof textPosition === 'string' && textPosition.indexOf('inside') >= 0)) {
 	    insideRollback = {
@@ -4379,33 +4698,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	      textStrokeWidth: textStyle.textStrokeWidth
 	    };
 	    textStyle.textFill = '#fff'; // Consider text with #fff overflow its container.
-
+	
 	    if (textStyle.textStroke == null) {
 	      textStyle.textStroke = opt.autoColor;
 	      textStyle.textStrokeWidth == null && (textStyle.textStrokeWidth = 2);
 	    }
 	  }
-
+	
 	  return insideRollback;
 	}
-
+	
 	function rollbackInsideStyle(style) {
 	  var insideRollback = style.insideRollback;
-
+	
 	  if (insideRollback) {
 	    style.textFill = insideRollback.textFill;
 	    style.textStroke = insideRollback.textStroke;
 	    style.textStrokeWidth = insideRollback.textStrokeWidth;
 	  }
 	}
-
+	
 	function getFont(opt, ecModel) {
 	  // ecModel or default text style model.
 	  var gTextStyleModel = ecModel || ecModel.getModel('textStyle');
 	  return zrUtil.trim([// FIXME in node-canvas fontWeight is before fontStyle
 	  opt.fontStyle || gTextStyleModel && gTextStyleModel.getShallow('fontStyle') || '', opt.fontWeight || gTextStyleModel && gTextStyleModel.getShallow('fontWeight') || '', (opt.fontSize || gTextStyleModel && gTextStyleModel.getShallow('fontSize') || 12) + 'px', opt.fontFamily || gTextStyleModel && gTextStyleModel.getShallow('fontFamily') || 'sans-serif'].join(' '));
 	}
-
+	
 	function animateOrSetProps(isUpdate, el, props, animatableModel, dataIndex, cb) {
 	  if (typeof dataIndex === 'function') {
 	    cb = dataIndex;
@@ -4413,24 +4732,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } // Do not check 'animation' property directly here. Consider this case:
 	  // animation model is an `itemModel`, whose does not have `isAnimationEnabled`
 	  // but its parent model (`seriesModel`) does.
-
-
+	
+	
 	  var animationEnabled = animatableModel && animatableModel.isAnimationEnabled();
-
+	
 	  if (animationEnabled) {
 	    var postfix = isUpdate ? 'Update' : '';
 	    var duration = animatableModel.getShallow('animationDuration' + postfix);
 	    var animationEasing = animatableModel.getShallow('animationEasing' + postfix);
 	    var animationDelay = animatableModel.getShallow('animationDelay' + postfix);
-
+	
 	    if (typeof animationDelay === 'function') {
 	      animationDelay = animationDelay(dataIndex, animatableModel.getAnimationDelayParams ? animatableModel.getAnimationDelayParams(el, dataIndex) : null);
 	    }
-
+	
 	    if (typeof duration === 'function') {
 	      duration = duration(dataIndex);
 	    }
-
+	
 	    duration > 0 ? el.animateTo(props, duration, animationDelay || 0, animationEasing, cb, !!cb) : (el.stopAnimation(), el.attr(props), cb && cb());
 	  } else {
 	    el.stopAnimation();
@@ -4460,8 +4779,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *         position: [100, 100]
 	 *     }, seriesModel, function () { console.log('Animation done!'); });
 	 */
-
-
+	
+	
 	function updateProps(el, props, animatableModel, dataIndex, cb) {
 	  animateOrSetProps(true, el, props, animatableModel, dataIndex, cb);
 	}
@@ -4479,8 +4798,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} [dataIndex]
 	 * @param {Function} cb
 	 */
-
-
+	
+	
 	function initProps(el, props, animatableModel, dataIndex, cb) {
 	  animateOrSetProps(false, el, props, animatableModel, dataIndex, cb);
 	}
@@ -4491,16 +4810,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {module:zrender/mixin/Transformable} target
 	 * @param {module:zrender/mixin/Transformable} [ancestor]
 	 */
-
-
+	
+	
 	function getTransform(target, ancestor) {
 	  var mat = matrix.identity([]);
-
+	
 	  while (target && target !== ancestor) {
 	    matrix.mul(mat, target.getLocalTransform(), mat);
 	    target = target.parent;
 	  }
-
+	
 	  return mat;
 	}
 	/**
@@ -4512,17 +4831,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean=} invert Whether use invert matrix.
 	 * @return {Array.<number>} [x, y]
 	 */
-
-
+	
+	
 	function applyTransform(target, transform, invert) {
 	  if (transform && !zrUtil.isArrayLike(transform)) {
 	    transform = Transformable.getLocalTransform(transform);
 	  }
-
+	
 	  if (invert) {
 	    transform = matrix.invert([], transform);
 	  }
-
+	
 	  return vector.applyTransform([], target, transform);
 	}
 	/**
@@ -4531,8 +4850,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean=} invert Whether use invert matrix.
 	 * @return {string} Transformed direction. 'left' 'right' 'top' 'bottom'
 	 */
-
-
+	
+	
 	function transformDirection(direction, transform, invert) {
 	  // Pick a base, ensure that transform result will not be (0, 0).
 	  var hBase = transform[4] === 0 || transform[5] === 0 || transform[0] === 0 ? 1 : Math.abs(2 * transform[4] / transform[0]);
@@ -4545,13 +4864,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Apply group transition animation from g1 to g2.
 	 * If no animatableModel, no animation.
 	 */
-
-
+	
+	
 	function groupTransition(g1, g2, animatableModel, cb) {
 	  if (!g1 || !g2) {
 	    return;
 	  }
-
+	
 	  function getElMap(g) {
 	    var elMap = {};
 	    g.traverse(function (el) {
@@ -4561,25 +4880,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    return elMap;
 	  }
-
+	
 	  function getAnimatableProps(el) {
 	    var obj = {
 	      position: vector.clone(el.position),
 	      rotation: el.rotation
 	    };
-
+	
 	    if (el.shape) {
 	      obj.shape = zrUtil.extend({}, el.shape);
 	    }
-
+	
 	    return obj;
 	  }
-
+	
 	  var elMap1 = getElMap(g1);
 	  g2.traverse(function (el) {
 	    if (!el.isGroup && el.anid) {
 	      var oldEl = elMap1[el.anid];
-
+	
 	      if (oldEl) {
 	        var newProp = getAnimatableProps(el);
 	        el.attr(getAnimatableProps(oldEl));
@@ -4589,7 +4908,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      //         graphic.updateProps
 	      //     }
 	      // }
-
+	
 	    }
 	  });
 	}
@@ -4598,8 +4917,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} rect {x, y, width, height}
 	 * @return {Array.<Array.<number>>} A new clipped points.
 	 */
-
-
+	
+	
 	function clipPointsByRect(points, rect) {
 	  return zrUtil.map(points, function (point) {
 	    var x = point[0];
@@ -4616,14 +4935,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} rect {x, y, width, height}
 	 * @return {Object} A new clipped rect. If rect size are negative, return undefined.
 	 */
-
-
+	
+	
 	function clipRectByRect(targetRect, rect) {
 	  var x = mathMax(targetRect.x, rect.x);
 	  var x2 = mathMin(targetRect.x + targetRect.width, rect.x + rect.width);
 	  var y = mathMax(targetRect.y, rect.y);
 	  var y2 = mathMin(targetRect.y + targetRect.height, rect.y + rect.height);
-
+	
 	  if (x2 >= x && y2 >= y) {
 	    return {
 	      x: x,
@@ -4639,8 +4958,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} [rect] {x, y, width, height}
 	 * @return {module:zrender/Element} Icon path or image element.
 	 */
-
-
+	
+	
 	function createIcon(iconStr, opt, rect) {
 	  opt = zrUtil.extend({
 	    rectHover: true
@@ -4654,12 +4973,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    width: 2,
 	    height: 2
 	  };
-
+	
 	  if (iconStr) {
 	    return iconStr.indexOf('image://') === 0 ? (style.image = iconStr.slice(8), zrUtil.defaults(style, rect), new ZImage(opt)) : makePath(iconStr.replace('path://', ''), opt, rect, 'center');
 	  }
 	}
-
+	
 	exports.extendShape = extendShape;
 	exports.extendPath = extendPath;
 	exports.makePath = makePath;
@@ -4686,44 +5005,47 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 17 */
+/*!**********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/tool/path.js ***!
+  \**********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
-	var PathProxy = __webpack_require__(42);
-
-	var transformPath = __webpack_require__(53);
-
+	var Path = __webpack_require__(/*! ../graphic/Path */ 18);
+	
+	var PathProxy = __webpack_require__(/*! ../core/PathProxy */ 42);
+	
+	var transformPath = __webpack_require__(/*! ./transformPath */ 53);
+	
 	// command chars
 	var cc = ['m', 'M', 'l', 'L', 'v', 'V', 'h', 'H', 'z', 'Z', 'c', 'C', 'q', 'Q', 't', 'T', 's', 'S', 'a', 'A'];
 	var mathSqrt = Math.sqrt;
 	var mathSin = Math.sin;
 	var mathCos = Math.cos;
 	var PI = Math.PI;
-
+	
 	var vMag = function (v) {
 	  return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
 	};
-
+	
 	var vRatio = function (u, v) {
 	  return (u[0] * v[0] + u[1] * v[1]) / (vMag(u) * vMag(v));
 	};
-
+	
 	var vAngle = function (u, v) {
 	  return (u[0] * v[1] < u[1] * v[0] ? -1 : 1) * Math.acos(vRatio(u, v));
 	};
-
+	
 	function processArc(x1, y1, x2, y2, fa, fs, rx, ry, psiDeg, cmd, path) {
 	  var psi = psiDeg * (PI / 180.0);
 	  var xp = mathCos(psi) * (x1 - x2) / 2.0 + mathSin(psi) * (y1 - y2) / 2.0;
 	  var yp = -1 * mathSin(psi) * (x1 - x2) / 2.0 + mathCos(psi) * (y1 - y2) / 2.0;
 	  var lambda = xp * xp / (rx * rx) + yp * yp / (ry * ry);
-
+	
 	  if (lambda > 1) {
 	    rx *= mathSqrt(lambda);
 	    ry *= mathSqrt(lambda);
 	  }
-
+	
 	  var f = (fa === fs ? -1 : 1) * mathSqrt((rx * rx * (ry * ry) - rx * rx * (yp * yp) - ry * ry * (xp * xp)) / (rx * rx * (yp * yp) + ry * ry * (xp * xp))) || 0;
 	  var cxp = f * rx * yp / ry;
 	  var cyp = f * -ry * xp / rx;
@@ -4733,68 +5055,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var u = [(xp - cxp) / rx, (yp - cyp) / ry];
 	  var v = [(-1 * xp - cxp) / rx, (-1 * yp - cyp) / ry];
 	  var dTheta = vAngle(u, v);
-
+	
 	  if (vRatio(u, v) <= -1) {
 	    dTheta = PI;
 	  }
-
+	
 	  if (vRatio(u, v) >= 1) {
 	    dTheta = 0;
 	  }
-
+	
 	  if (fs === 0 && dTheta > 0) {
 	    dTheta = dTheta - 2 * PI;
 	  }
-
+	
 	  if (fs === 1 && dTheta < 0) {
 	    dTheta = dTheta + 2 * PI;
 	  }
-
+	
 	  path.addData(cmd, cx, cy, rx, ry, theta, dTheta, psi, fs);
 	}
-
+	
 	function createPathProxyFromString(data) {
 	  if (!data) {
 	    return [];
 	  } // command string
-
-
+	
+	
 	  var cs = data.replace(/-/g, ' -').replace(/  /g, ' ').replace(/ /g, ',').replace(/,,/g, ',');
 	  var n; // create pipes so that we can split the data
-
+	
 	  for (n = 0; n < cc.length; n++) {
 	    cs = cs.replace(new RegExp(cc[n], 'g'), '|' + cc[n]);
 	  } // create array
-
-
+	
+	
 	  var arr = cs.split('|'); // init context point
-
+	
 	  var cpx = 0;
 	  var cpy = 0;
 	  var path = new PathProxy();
 	  var CMD = PathProxy.CMD;
 	  var prevCmd;
-
+	
 	  for (n = 1; n < arr.length; n++) {
 	    var str = arr[n];
 	    var c = str.charAt(0);
 	    var off = 0;
 	    var p = str.slice(1).replace(/e,-/g, 'e-').split(',');
 	    var cmd;
-
+	
 	    if (p.length > 0 && p[0] === '') {
 	      p.shift();
 	    }
-
+	
 	    for (var i = 0; i < p.length; i++) {
 	      p[i] = parseFloat(p[i]);
 	    }
-
+	
 	    while (off < p.length && !isNaN(p[off])) {
 	      if (isNaN(p[0])) {
 	        break;
 	      }
-
+	
 	      var ctlPtx;
 	      var ctlPty;
 	      var rx;
@@ -4804,7 +5126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var fs;
 	      var x1 = cpx;
 	      var y1 = cpy; // convert l, H, h, V, and v to L
-
+	
 	      switch (c) {
 	        case 'l':
 	          cpx += p[off++];
@@ -4812,14 +5134,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	          cmd = CMD.L;
 	          path.addData(cmd, cpx, cpy);
 	          break;
-
+	
 	        case 'L':
 	          cpx = p[off++];
 	          cpy = p[off++];
 	          cmd = CMD.L;
 	          path.addData(cmd, cpx, cpy);
 	          break;
-
+	
 	        case 'm':
 	          cpx += p[off++];
 	          cpy += p[off++];
@@ -4827,7 +5149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          path.addData(cmd, cpx, cpy);
 	          c = 'l';
 	          break;
-
+	
 	        case 'M':
 	          cpx = p[off++];
 	          cpy = p[off++];
@@ -4835,56 +5157,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	          path.addData(cmd, cpx, cpy);
 	          c = 'L';
 	          break;
-
+	
 	        case 'h':
 	          cpx += p[off++];
 	          cmd = CMD.L;
 	          path.addData(cmd, cpx, cpy);
 	          break;
-
+	
 	        case 'H':
 	          cpx = p[off++];
 	          cmd = CMD.L;
 	          path.addData(cmd, cpx, cpy);
 	          break;
-
+	
 	        case 'v':
 	          cpy += p[off++];
 	          cmd = CMD.L;
 	          path.addData(cmd, cpx, cpy);
 	          break;
-
+	
 	        case 'V':
 	          cpy = p[off++];
 	          cmd = CMD.L;
 	          path.addData(cmd, cpx, cpy);
 	          break;
-
+	
 	        case 'C':
 	          cmd = CMD.C;
 	          path.addData(cmd, p[off++], p[off++], p[off++], p[off++], p[off++], p[off++]);
 	          cpx = p[off - 2];
 	          cpy = p[off - 1];
 	          break;
-
+	
 	        case 'c':
 	          cmd = CMD.C;
 	          path.addData(cmd, p[off++] + cpx, p[off++] + cpy, p[off++] + cpx, p[off++] + cpy, p[off++] + cpx, p[off++] + cpy);
 	          cpx += p[off - 2];
 	          cpy += p[off - 1];
 	          break;
-
+	
 	        case 'S':
 	          ctlPtx = cpx;
 	          ctlPty = cpy;
 	          var len = path.len();
 	          var pathData = path.data;
-
+	
 	          if (prevCmd === CMD.C) {
 	            ctlPtx += cpx - pathData[len - 4];
 	            ctlPty += cpy - pathData[len - 3];
 	          }
-
+	
 	          cmd = CMD.C;
 	          x1 = p[off++];
 	          y1 = p[off++];
@@ -4892,18 +5214,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	          cpy = p[off++];
 	          path.addData(cmd, ctlPtx, ctlPty, x1, y1, cpx, cpy);
 	          break;
-
+	
 	        case 's':
 	          ctlPtx = cpx;
 	          ctlPty = cpy;
 	          var len = path.len();
 	          var pathData = path.data;
-
+	
 	          if (prevCmd === CMD.C) {
 	            ctlPtx += cpx - pathData[len - 4];
 	            ctlPty += cpy - pathData[len - 3];
 	          }
-
+	
 	          cmd = CMD.C;
 	          x1 = cpx + p[off++];
 	          y1 = cpy + p[off++];
@@ -4911,7 +5233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          cpy += p[off++];
 	          path.addData(cmd, ctlPtx, ctlPty, x1, y1, cpx, cpy);
 	          break;
-
+	
 	        case 'Q':
 	          x1 = p[off++];
 	          y1 = p[off++];
@@ -4920,7 +5242,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          cmd = CMD.Q;
 	          path.addData(cmd, x1, y1, cpx, cpy);
 	          break;
-
+	
 	        case 'q':
 	          x1 = p[off++] + cpx;
 	          y1 = p[off++] + cpy;
@@ -4929,41 +5251,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	          cmd = CMD.Q;
 	          path.addData(cmd, x1, y1, cpx, cpy);
 	          break;
-
+	
 	        case 'T':
 	          ctlPtx = cpx;
 	          ctlPty = cpy;
 	          var len = path.len();
 	          var pathData = path.data;
-
+	
 	          if (prevCmd === CMD.Q) {
 	            ctlPtx += cpx - pathData[len - 4];
 	            ctlPty += cpy - pathData[len - 3];
 	          }
-
+	
 	          cpx = p[off++];
 	          cpy = p[off++];
 	          cmd = CMD.Q;
 	          path.addData(cmd, ctlPtx, ctlPty, cpx, cpy);
 	          break;
-
+	
 	        case 't':
 	          ctlPtx = cpx;
 	          ctlPty = cpy;
 	          var len = path.len();
 	          var pathData = path.data;
-
+	
 	          if (prevCmd === CMD.Q) {
 	            ctlPtx += cpx - pathData[len - 4];
 	            ctlPty += cpy - pathData[len - 3];
 	          }
-
+	
 	          cpx += p[off++];
 	          cpy += p[off++];
 	          cmd = CMD.Q;
 	          path.addData(cmd, ctlPtx, ctlPty, cpx, cpy);
 	          break;
-
+	
 	        case 'A':
 	          rx = p[off++];
 	          ry = p[off++];
@@ -4976,7 +5298,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          cmd = CMD.A;
 	          processArc(x1, y1, cpx, cpy, fa, fs, rx, ry, psi, cmd, path);
 	          break;
-
+	
 	        case 'a':
 	          rx = p[off++];
 	          ry = p[off++];
@@ -4991,30 +5313,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	          break;
 	      }
 	    }
-
+	
 	    if (c === 'z' || c === 'Z') {
 	      cmd = CMD.Z;
 	      path.addData(cmd);
 	    }
-
+	
 	    prevCmd = cmd;
 	  }
-
+	
 	  path.toStatic();
 	  return path;
 	} // TODO Optimize double memory cost problem
-
-
+	
+	
 	function createPathOptions(str, opts) {
 	  var pathProxy = createPathProxyFromString(str);
 	  opts = opts || {};
-
+	
 	  opts.buildPath = function (path) {
 	    if (path.setData) {
 	      path.setData(pathProxy.data); // Svg and vml renderer don't have context
-
+	
 	      var ctx = path.getContext();
-
+	
 	      if (ctx) {
 	        path.rebuildPath(ctx);
 	      }
@@ -5023,12 +5345,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      pathProxy.rebuildPath(ctx);
 	    }
 	  };
-
+	
 	  opts.applyTransform = function (m) {
 	    transformPath(pathProxy, m);
 	    this.dirty(true);
 	  };
-
+	
 	  return opts;
 	}
 	/**
@@ -5036,8 +5358,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * http://www.w3.org/TR/SVG/paths.html#PathData
 	 * @param  {Object} opts Other options
 	 */
-
-
+	
+	
 	function createFromString(str, opts) {
 	  return new Path(createPathOptions(str, opts));
 	}
@@ -5046,8 +5368,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {string} str
 	 * @param  {Object} opts Other options
 	 */
-
-
+	
+	
 	function extendFromString(str, opts) {
 	  return Path.extend(createPathOptions(str, opts));
 	}
@@ -5057,61 +5379,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	// TODO Apply transform
 	// TODO stroke dash
 	// TODO Optimize double memory cost problem
-
-
+	
+	
 	function mergePath(pathEls, opts) {
 	  var pathList = [];
 	  var len = pathEls.length;
-
+	
 	  for (var i = 0; i < len; i++) {
 	    var pathEl = pathEls[i];
-
+	
 	    if (!pathEl.path) {
 	      pathEl.createPathProxy();
 	    }
-
+	
 	    if (pathEl.__dirtyPath) {
 	      pathEl.buildPath(pathEl.path, pathEl.shape, true);
 	    }
-
+	
 	    pathList.push(pathEl.path);
 	  }
-
+	
 	  var pathBundle = new Path(opts); // Need path proxy.
-
+	
 	  pathBundle.createPathProxy();
-
+	
 	  pathBundle.buildPath = function (path) {
 	    path.appendPath(pathList); // Svg and vml renderer don't have context
-
+	
 	    var ctx = path.getContext();
-
+	
 	    if (ctx) {
 	      path.rebuildPath(ctx);
 	    }
 	  };
-
+	
 	  return pathBundle;
 	}
-
+	
 	exports.createFromString = createFromString;
 	exports.extendFromString = extendFromString;
 	exports.mergePath = mergePath;
 
 /***/ },
 /* 18 */
+/*!*************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/Path.js ***!
+  \*************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Displayable = __webpack_require__(19);
-
-	var zrUtil = __webpack_require__(5);
-
-	var PathProxy = __webpack_require__(42);
-
-	var pathContain = __webpack_require__(45);
-
-	var Pattern = __webpack_require__(52);
-
+	var Displayable = __webpack_require__(/*! ./Displayable */ 19);
+	
+	var zrUtil = __webpack_require__(/*! ../core/util */ 5);
+	
+	var PathProxy = __webpack_require__(/*! ../core/PathProxy */ 42);
+	
+	var pathContain = __webpack_require__(/*! ../contain/path */ 45);
+	
+	var Pattern = __webpack_require__(/*! ./Pattern */ 52);
+	
 	var getCanvasPattern = Pattern.prototype.getCanvasPattern;
 	var abs = Math.abs;
 	var pathProxyForDraw = new PathProxy(true);
@@ -5121,17 +5446,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @constructor
 	 * @param {Object} opts
 	 */
-
+	
 	function Path(opts) {
 	  Displayable.call(this, opts);
 	  /**
 	   * @type {module:zrender/core/PathProxy}
 	   * @readOnly
 	   */
-
+	
 	  this.path = null;
 	}
-
+	
 	Path.prototype = {
 	  constructor: Path,
 	  type: 'path',
@@ -5150,56 +5475,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var hasStrokePattern = hasStroke && !!stroke.image;
 	    style.bind(ctx, this, prevEl);
 	    this.setTransform(ctx);
-
+	
 	    if (this.__dirty) {
 	      var rect; // Update gradient because bounding rect may changed
-
+	
 	      if (hasFillGradient) {
 	        rect = rect || this.getBoundingRect();
 	        this._fillGradient = style.getGradient(ctx, fill, rect);
 	      }
-
+	
 	      if (hasStrokeGradient) {
 	        rect = rect || this.getBoundingRect();
 	        this._strokeGradient = style.getGradient(ctx, stroke, rect);
 	      }
 	    } // Use the gradient or pattern
-
-
+	
+	
 	    if (hasFillGradient) {
 	      // PENDING If may have affect the state
 	      ctx.fillStyle = this._fillGradient;
 	    } else if (hasFillPattern) {
 	      ctx.fillStyle = getCanvasPattern.call(fill, ctx);
 	    }
-
+	
 	    if (hasStrokeGradient) {
 	      ctx.strokeStyle = this._strokeGradient;
 	    } else if (hasStrokePattern) {
 	      ctx.strokeStyle = getCanvasPattern.call(stroke, ctx);
 	    }
-
+	
 	    var lineDash = style.lineDash;
 	    var lineDashOffset = style.lineDashOffset;
 	    var ctxLineDash = !!ctx.setLineDash; // Update path sx, sy
-
+	
 	    var scale = this.getGlobalScale();
 	    path.setScale(scale[0], scale[1]); // Proxy context
 	    // Rebuild path in following 2 cases
 	    // 1. Path is dirty
 	    // 2. Path needs javascript implemented lineDash stroking.
 	    //    In this case, lineDash information will not be saved in PathProxy
-
+	
 	    if (this.__dirtyPath || lineDash && !ctxLineDash && hasStroke) {
 	      path.beginPath(ctx); // Setting line dash before build path
-
+	
 	      if (lineDash && !ctxLineDash) {
 	        path.setLineDash(lineDash);
 	        path.setLineDashOffset(lineDashOffset);
 	      }
-
+	
 	      this.buildPath(path, this.shape, false); // Clear path dirty flag
-
+	
 	      if (this.path) {
 	        this.__dirtyPath = false;
 	      }
@@ -5208,23 +5533,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	      ctx.beginPath();
 	      this.path.rebuildPath(ctx);
 	    }
-
+	
 	    hasFill && path.fill(ctx);
-
+	
 	    if (lineDash && ctxLineDash) {
 	      ctx.setLineDash(lineDash);
 	      ctx.lineDashOffset = lineDashOffset;
 	    }
-
+	
 	    hasStroke && path.stroke(ctx);
-
+	
 	    if (lineDash && ctxLineDash) {
 	      // PENDING
 	      // Remove lineDash
 	      ctx.setLineDash([]);
 	    } // Draw rect text
-
-
+	
+	
 	    if (style.text != null) {
 	      // Only restore transform when needs draw text.
 	      this.restoreTransform(ctx);
@@ -5241,44 +5566,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var rect = this._rect;
 	    var style = this.style;
 	    var needsUpdateRect = !rect;
-
+	
 	    if (needsUpdateRect) {
 	      var path = this.path;
-
+	
 	      if (!path) {
 	        // Create path on demand.
 	        path = this.path = new PathProxy();
 	      }
-
+	
 	      if (this.__dirtyPath) {
 	        path.beginPath();
 	        this.buildPath(path, this.shape, false);
 	      }
-
+	
 	      rect = path.getBoundingRect();
 	    }
-
+	
 	    this._rect = rect;
-
+	
 	    if (style.hasStroke()) {
 	      // Needs update rect with stroke lineWidth when
 	      // 1. Element changes scale or lineWidth
 	      // 2. Shape is changed
 	      var rectWithStroke = this._rectWithStroke || (this._rectWithStroke = rect.clone());
-
+	
 	      if (this.__dirty || needsUpdateRect) {
 	        rectWithStroke.copy(rect); // FIXME Must after updateTransform
-
+	
 	        var w = style.lineWidth; // PENDING, Min line width is needed when line is horizontal or vertical
-
+	
 	        var lineScale = style.strokeNoScale ? this.getLineScale() : 1; // Only add extra hover lineWidth when there are no fill
-
+	
 	        if (!style.hasFill()) {
 	          w = Math.max(w, this.strokeContainThreshold || 4);
 	        } // Consider line width
 	        // Line scale can't be 0;
-
-
+	
+	
 	        if (lineScale > 1e-10) {
 	          rectWithStroke.width += w / lineScale;
 	          rectWithStroke.height += w / lineScale;
@@ -5286,11 +5611,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	          rectWithStroke.y -= w / lineScale / 2;
 	        }
 	      } // Return rect with stroke
-
-
+	
+	
 	      return rectWithStroke;
 	    }
-
+	
 	    return rect;
 	  },
 	  contain: function (x, y) {
@@ -5299,34 +5624,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var style = this.style;
 	    x = localPos[0];
 	    y = localPos[1];
-
+	
 	    if (rect.contain(x, y)) {
 	      var pathData = this.path.data;
-
+	
 	      if (style.hasStroke()) {
 	        var lineWidth = style.lineWidth;
 	        var lineScale = style.strokeNoScale ? this.getLineScale() : 1; // Line scale can't be 0;
-
+	
 	        if (lineScale > 1e-10) {
 	          // Only add extra hover lineWidth when there are no fill
 	          if (!style.hasFill()) {
 	            lineWidth = Math.max(lineWidth, this.strokeContainThreshold);
 	          }
-
+	
 	          if (pathContain.containStroke(pathData, lineWidth / lineScale, x, y)) {
 	            return true;
 	          }
 	        }
 	      }
-
+	
 	      if (style.hasFill()) {
 	        return pathContain.contain(pathData, x, y);
 	      }
 	    }
-
+	
 	    return false;
 	  },
-
+	
 	  /**
 	   * @param  {boolean} dirtyPath
 	   */
@@ -5334,21 +5659,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (dirtyPath == null) {
 	      dirtyPath = true;
 	    } // Only mark dirty, not mark clean
-
-
+	
+	
 	    if (dirtyPath) {
 	      this.__dirtyPath = dirtyPath;
 	      this._rect = null;
 	    }
-
+	
 	    this.__dirty = true;
 	    this.__zr && this.__zr.refresh(); // Used as a clipping path
-
+	
 	    if (this.__clipTarget) {
 	      this.__clipTarget.dirty();
 	    }
 	  },
-
+	
 	  /**
 	   * Alias for animate('shape')
 	   * @param {boolean} loop
@@ -5367,14 +5692,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      Displayable.prototype.attrKV.call(this, key, value);
 	    }
 	  },
-
+	
 	  /**
 	   * @param {Object|string} key
 	   * @param {*} value
 	   */
 	  setShape: function (key, value) {
 	    var shape = this.shape; // Path from string may not have shape
-
+	
 	    if (shape) {
 	      if (zrUtil.isObject(key)) {
 	        for (var name in key) {
@@ -5385,10 +5710,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else {
 	        shape[key] = value;
 	      }
-
+	
 	      this.dirty(true);
 	    }
-
+	
 	    return this;
 	  },
 	  getLineScale: function () {
@@ -5396,7 +5721,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Determinant of `m` means how much the area is enlarged by the
 	    // transformation. So its square root can be used as a scale factor
 	    // for width.
-
+	
 	    return m && abs(m[0] - 1) > 1e-10 && abs(m[3] - 1) > 1e-10 ? Math.sqrt(abs(m[0] * m[3] - m[2] * m[1])) : 1;
 	  }
 	};
@@ -5410,67 +5735,70 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} [props.style] Extended default style config
 	 * @param {Object} [props.shape] Extended default shape config
 	 */
-
+	
 	Path.extend = function (defaults) {
 	  var Sub = function (opts) {
 	    Path.call(this, opts);
-
+	
 	    if (defaults.style) {
 	      // Extend default style
 	      this.style.extendFrom(defaults.style, false);
 	    } // Extend default shape
-
-
+	
+	
 	    var defaultShape = defaults.shape;
-
+	
 	    if (defaultShape) {
 	      this.shape = this.shape || {};
 	      var thisShape = this.shape;
-
+	
 	      for (var name in defaultShape) {
 	        if (!thisShape.hasOwnProperty(name) && defaultShape.hasOwnProperty(name)) {
 	          thisShape[name] = defaultShape[name];
 	        }
 	      }
 	    }
-
+	
 	    defaults.init && defaults.init.call(this, opts);
 	  };
-
+	
 	  zrUtil.inherits(Sub, Path); // FIXME 不能 extend position, rotation 等引用对象
-
+	
 	  for (var name in defaults) {
 	    // Extending prototype values and methods
 	    if (name !== 'style' && name !== 'shape') {
 	      Sub.prototype[name] = defaults[name];
 	    }
 	  }
-
+	
 	  return Sub;
 	};
-
+	
 	zrUtil.inherits(Path, Displayable);
 	var _default = Path;
 	module.exports = _default;
 
 /***/ },
 /* 19 */
+/*!********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/Displayable.js ***!
+  \********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
-
-	var Style = __webpack_require__(20);
-
-	var Element = __webpack_require__(22);
-
-	var RectText = __webpack_require__(36);
-
+	var zrUtil = __webpack_require__(/*! ../core/util */ 5);
+	
+	var Style = __webpack_require__(/*! ./Style */ 20);
+	
+	var Element = __webpack_require__(/*! ../Element */ 22);
+	
+	var RectText = __webpack_require__(/*! ./mixin/RectText */ 36);
+	
 	/**
 	 * 可绘制的图形基类
 	 * Base class of all displayable graphic objects
 	 * @module zrender/graphic/Displayable
 	 */
-
+	
 	/**
 	 * @alias module:zrender/graphic/Displayable
 	 * @extends module:zrender/Element
@@ -5479,7 +5807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function Displayable(opts) {
 	  opts = opts || {};
 	  Element.call(this, opts); // Extend properties
-
+	
 	  for (var name in opts) {
 	    if (opts.hasOwnProperty(name) && name !== 'style') {
 	      this[name] = opts[name];
@@ -5488,19 +5816,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * @type {module:zrender/graphic/Style}
 	   */
-
-
+	
+	
 	  this.style = new Style(opts.style, this);
 	  this._rect = null; // Shapes for cascade clipping.
-
+	
 	  this.__clipPaths = []; // FIXME Stateful must be mixined after style is setted
 	  // Stateful.call(this, opts);
 	}
-
+	
 	Displayable.prototype = {
 	  constructor: Displayable,
 	  type: 'displayable',
-
+	
 	  /**
 	   * Displayable 是否为脏，Painter 中会根据该标记判断是否需要是否需要重新绘制
 	   * Dirty flag. From which painter will determine if this displayable object needs brush
@@ -5508,7 +5836,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {boolean}
 	   */
 	  __dirty: true,
-
+	
 	  /**
 	   * 图形是否可见，为true时不绘制图形，但是仍能触发鼠标事件
 	   * If ignore drawing of the displayable object. Mouse event will still be triggered
@@ -5517,21 +5845,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @default false
 	   */
 	  invisible: false,
-
+	
 	  /**
 	   * @name module:/zrender/graphic/Displayable#z
 	   * @type {number}
 	   * @default 0
 	   */
 	  z: 0,
-
+	
 	  /**
 	   * @name module:/zrender/graphic/Displayable#z
 	   * @type {number}
 	   * @default 0
 	   */
 	  z2: 0,
-
+	
 	  /**
 	   * z层level，决定绘画在哪层canvas中
 	   * @name module:/zrender/graphic/Displayable#zlevel
@@ -5539,7 +5867,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @default 0
 	   */
 	  zlevel: 0,
-
+	
 	  /**
 	   * 是否可拖拽
 	   * @name module:/zrender/graphic/Displayable#draggable
@@ -5547,7 +5875,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @default false
 	   */
 	  draggable: false,
-
+	
 	  /**
 	   * 是否正在拖拽
 	   * @name module:/zrender/graphic/Displayable#draggable
@@ -5555,7 +5883,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @default false
 	   */
 	  dragging: false,
-
+	
 	  /**
 	   * 是否相应鼠标事件
 	   * @name module:/zrender/graphic/Displayable#silent
@@ -5563,35 +5891,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @default false
 	   */
 	  silent: false,
-
+	
 	  /**
 	   * If enable culling
 	   * @type {boolean}
 	   * @default false
 	   */
 	  culling: false,
-
+	
 	  /**
 	   * Mouse cursor when hovered
 	   * @name module:/zrender/graphic/Displayable#cursor
 	   * @type {string}
 	   */
 	  cursor: 'pointer',
-
+	
 	  /**
 	   * If hover area is bounding rect
 	   * @name module:/zrender/graphic/Displayable#rectHover
 	   * @type {string}
 	   */
 	  rectHover: false,
-
+	
 	  /**
 	   * Render the element progressively when the value >= 0,
 	   * usefull for large data.
 	   * @type {boolean}
 	   */
 	  progressive: false,
-
+	
 	  /**
 	   * @type {boolean}
 	   */
@@ -5600,21 +5928,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  inplace: false,
 	  beforeBrush: function (ctx) {},
 	  afterBrush: function (ctx) {},
-
+	
 	  /**
 	   * 图形绘制方法
 	   * @param {CanvasRenderingContext2D} ctx
 	   */
 	  // Interface
 	  brush: function (ctx, prevEl) {},
-
+	
 	  /**
 	   * 获取最小包围盒
 	   * @return {module:zrender/core/BoundingRect}
 	   */
 	  // Interface
 	  getBoundingRect: function () {},
-
+	
 	  /**
 	   * 判断坐标 x, y 是否在图形上
 	   * If displayable element contain coord x, y
@@ -5625,7 +5953,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  contain: function (x, y) {
 	    return this.rectContain(x, y);
 	  },
-
+	
 	  /**
 	   * @param  {Function} cb
 	   * @param  {}   context
@@ -5633,7 +5961,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  traverse: function (cb, context) {
 	    cb.call(context, this);
 	  },
-
+	
 	  /**
 	   * 判断坐标 x, y 是否在图形的包围盒上
 	   * If bounding rect of element contain coord x, y
@@ -5646,7 +5974,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var rect = this.getBoundingRect();
 	    return rect.contain(coord[0], coord[1]);
 	  },
-
+	
 	  /**
 	   * 标记图形元素为脏，并且在下一帧重绘
 	   * Mark displayable element dirty and refresh next frame
@@ -5656,7 +5984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._rect = null;
 	    this.__zr && this.__zr.refresh();
 	  },
-
+	
 	  /**
 	   * 图形是否会触发事件
 	   * If displayable object binded any event
@@ -5672,7 +6000,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //         || this.ondrop
 	  //     );
 	  // },
-
+	
 	  /**
 	   * Alias for animate('style')
 	   * @param {boolean} loop
@@ -5687,7 +6015,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.style.set(value);
 	    }
 	  },
-
+	
 	  /**
 	   * @param {Object|string} key
 	   * @param {*} value
@@ -5697,7 +6025,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.dirty(false);
 	    return this;
 	  },
-
+	
 	  /**
 	   * Use given style object
 	   * @param  {Object} obj
@@ -5710,41 +6038,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	zrUtil.inherits(Displayable, Element);
 	zrUtil.mixin(Displayable, RectText); // zrUtil.mixin(Displayable, Stateful);
-
+	
 	var _default = Displayable;
 	module.exports = _default;
 
 /***/ },
 /* 20 */
+/*!**************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/Style.js ***!
+  \**************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var fixShadow = __webpack_require__(21);
-
+	var fixShadow = __webpack_require__(/*! ./helper/fixShadow */ 21);
+	
 	var STYLE_COMMON_PROPS = [['shadowBlur', 0], ['shadowOffsetX', 0], ['shadowOffsetY', 0], ['shadowColor', '#000'], ['lineCap', 'butt'], ['lineJoin', 'miter'], ['miterLimit', 10]]; // var SHADOW_PROPS = STYLE_COMMON_PROPS.slice(0, 4);
 	// var LINE_PROPS = STYLE_COMMON_PROPS.slice(4);
-
+	
 	var Style = function (opts, host) {
 	  this.extendFrom(opts, false);
 	  this.host = host;
 	};
-
+	
 	function createLinearGradient(ctx, obj, rect) {
 	  var x = obj.x == null ? 0 : obj.x;
 	  var x2 = obj.x2 == null ? 1 : obj.x2;
 	  var y = obj.y == null ? 0 : obj.y;
 	  var y2 = obj.y2 == null ? 0 : obj.y2;
-
+	
 	  if (!obj.global) {
 	    x = x * rect.width + rect.x;
 	    x2 = x2 * rect.width + rect.x;
 	    y = y * rect.height + rect.y;
 	    y2 = y2 * rect.height + rect.y;
-	  }
-
+	  } // Fix NaN when rect is Infinity
+	
+	
+	  x = isNaN(x) ? 0 : x;
+	  x2 = isNaN(x2) ? 1 : x2;
+	  y = isNaN(y) ? 0 : y;
+	  y2 = isNaN(y2) ? 0 : y2;
 	  var canvasGradient = ctx.createLinearGradient(x, y, x2, y2);
 	  return canvasGradient;
 	}
-
+	
 	function createRadialGradient(ctx, obj, rect) {
 	  var width = rect.width;
 	  var height = rect.height;
@@ -5752,70 +6088,70 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var x = obj.x == null ? 0.5 : obj.x;
 	  var y = obj.y == null ? 0.5 : obj.y;
 	  var r = obj.r == null ? 0.5 : obj.r;
-
+	
 	  if (!obj.global) {
 	    x = x * width + rect.x;
 	    y = y * height + rect.y;
 	    r = r * min;
 	  }
-
+	
 	  var canvasGradient = ctx.createRadialGradient(x, y, 0, x, y, r);
 	  return canvasGradient;
 	}
-
+	
 	Style.prototype = {
 	  constructor: Style,
-
+	
 	  /**
 	   * @type {module:zrender/graphic/Displayable}
 	   */
 	  host: null,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  fill: '#000',
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  stroke: null,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  opacity: 1,
-
+	
 	  /**
 	   * @type {Array.<number>}
 	   */
 	  lineDash: null,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  lineDashOffset: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  shadowBlur: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  shadowOffsetX: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  shadowOffsetY: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  lineWidth: 1,
-
+	
 	  /**
 	   * If stroke ignore scale
 	   * @type {Boolean}
@@ -5823,12 +6159,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  strokeNoScale: false,
 	  // Bounding rect text configuration
 	  // Not affected by element transform
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  text: null,
-
+	
 	  /**
 	   * If `fontSize` or `fontFamily` exists, `font` will be reset by
 	   * `fontSize`, `fontStyle`, `fontWeight`, `fontFamily`.
@@ -5837,66 +6173,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {string}
 	   */
 	  font: null,
-
+	
 	  /**
 	   * The same as font. Use font please.
 	   * @deprecated
 	   * @type {string}
 	   */
 	  textFont: null,
-
+	
 	  /**
 	   * It helps merging respectively, rather than parsing an entire font string.
 	   * @type {string}
 	   */
 	  fontStyle: null,
-
+	
 	  /**
 	   * It helps merging respectively, rather than parsing an entire font string.
 	   * @type {string}
 	   */
 	  fontWeight: null,
-
+	
 	  /**
 	   * It helps merging respectively, rather than parsing an entire font string.
 	   * Should be 12 but not '12px'.
 	   * @type {number}
 	   */
 	  fontSize: null,
-
+	
 	  /**
 	   * It helps merging respectively, rather than parsing an entire font string.
 	   * @type {string}
 	   */
 	  fontFamily: null,
-
+	
 	  /**
 	   * Reserved for special functinality, like 'hr'.
 	   * @type {string}
 	   */
 	  textTag: null,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  textFill: '#000',
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  textStroke: null,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textWidth: null,
-
+	
 	  /**
 	   * Only for textBackground.
 	   * @type {number}
 	   */
 	  textHeight: null,
-
+	
 	  /**
 	   * textStroke may be set as some color as a default
 	   * value in upper applicaion, where the default value
@@ -5905,12 +6241,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {number}
 	   */
 	  textStrokeWidth: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textLineHeight: null,
-
+	
 	  /**
 	   * 'inside', 'left', 'right', 'top', 'bottom'
 	   * [x, y]
@@ -5919,87 +6255,87 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @default 'inside'
 	   */
 	  textPosition: 'inside',
-
+	
 	  /**
 	   * If not specified, use the boundingRect of a `displayable`.
 	   * @type {Object}
 	   */
 	  textRect: null,
-
+	
 	  /**
 	   * [x, y]
 	   * @type {Array.<number>}
 	   */
 	  textOffset: null,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  textAlign: null,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  textVerticalAlign: null,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textDistance: 5,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  textShadowColor: 'transparent',
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textShadowBlur: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textShadowOffsetX: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textShadowOffsetY: 0,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  textBoxShadowColor: 'transparent',
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textBoxShadowBlur: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textBoxShadowOffsetX: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textBoxShadowOffsetY: 0,
-
+	
 	  /**
 	   * Whether transform text.
 	   * Only useful in Path and Image element
 	   * @type {boolean}
 	   */
 	  transformText: false,
-
+	
 	  /**
 	   * Text rotate around position of Path or Image
 	   * Only useful in Path and Image element and transformText is false.
 	   */
 	  textRotation: 0,
-
+	
 	  /**
 	   * Text origin of text rotation, like [10, 40].
 	   * Based on x, y of rect.
@@ -6009,51 +6345,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {string|Array.<number>}
 	   */
 	  textOrigin: null,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  textBackgroundColor: null,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  textBorderColor: null,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textBorderWidth: 0,
-
+	
 	  /**
 	   * @type {number}
 	   */
 	  textBorderRadius: 0,
-
+	
 	  /**
 	   * Can be `2` or `[2, 4]` or `[2, 3, 4, 5]`
 	   * @type {number|Array.<number>}
 	   */
 	  textPadding: null,
-
+	
 	  /**
 	   * Text styles for rich text.
 	   * @type {Object}
 	   */
 	  rich: null,
-
+	
 	  /**
 	   * {outerWidth, outerHeight, ellipsis, placeholder}
 	   * @type {Object}
 	   */
 	  truncate: null,
-
+	
 	  /**
 	   * https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
 	   * @type {string}
 	   */
 	  blend: null,
-
+	
 	  /**
 	   * @param {CanvasRenderingContext2D} ctx
 	   */
@@ -6061,33 +6397,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var style = this;
 	    var prevStyle = prevEl && prevEl.style;
 	    var firstDraw = !prevStyle;
-
+	
 	    for (var i = 0; i < STYLE_COMMON_PROPS.length; i++) {
 	      var prop = STYLE_COMMON_PROPS[i];
 	      var styleName = prop[0];
-
+	
 	      if (firstDraw || style[styleName] !== prevStyle[styleName]) {
 	        // FIXME Invalid property value will cause style leak from previous element.
 	        ctx[styleName] = fixShadow(ctx, styleName, style[styleName] || prop[1]);
 	      }
 	    }
-
+	
 	    if (firstDraw || style.fill !== prevStyle.fill) {
 	      ctx.fillStyle = style.fill;
 	    }
-
+	
 	    if (firstDraw || style.stroke !== prevStyle.stroke) {
 	      ctx.strokeStyle = style.stroke;
 	    }
-
+	
 	    if (firstDraw || style.opacity !== prevStyle.opacity) {
 	      ctx.globalAlpha = style.opacity == null ? 1 : style.opacity;
 	    }
-
+	
 	    if (firstDraw || style.blend !== prevStyle.blend) {
 	      ctx.globalCompositeOperation = style.blend || 'source-over';
 	    }
-
+	
 	    if (this.hasStroke()) {
 	      var lineWidth = style.lineWidth;
 	      ctx.lineWidth = lineWidth / (this.strokeNoScale && el && el.getLineScale ? el.getLineScale() : 1);
@@ -6101,7 +6437,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var stroke = this.stroke;
 	    return stroke != null && stroke !== 'none' && this.lineWidth > 0;
 	  },
-
+	
 	  /**
 	   * Extend from other style
 	   * @param {zrender/graphic/Style} otherStyle
@@ -6118,7 +6454,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  },
-
+	
 	  /**
 	   * Batch setting style with a given object
 	   * @param {Object|string} obj
@@ -6131,7 +6467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.extendFrom(obj, true);
 	    }
 	  },
-
+	
 	  /**
 	   * Clone
 	   * @return {zrender/graphic/Style} [description]
@@ -6145,31 +6481,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var method = obj.type === 'radial' ? createRadialGradient : createLinearGradient;
 	    var canvasGradient = method(ctx, obj, rect);
 	    var colorStops = obj.colorStops;
-
+	
 	    for (var i = 0; i < colorStops.length; i++) {
 	      canvasGradient.addColorStop(colorStops[i].offset, colorStops[i].color);
 	    }
-
+	
 	    return canvasGradient;
 	  }
 	};
 	var styleProto = Style.prototype;
-
+	
 	for (var i = 0; i < STYLE_COMMON_PROPS.length; i++) {
 	  var prop = STYLE_COMMON_PROPS[i];
-
+	
 	  if (!(prop[0] in styleProto)) {
 	    styleProto[prop[0]] = prop[1];
 	  }
 	} // Provide for others
-
-
+	
+	
 	Style.getGradient = styleProto.getGradient;
 	var _default = Style;
 	module.exports = _default;
 
 /***/ },
 /* 21 */
+/*!*************************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/helper/fixShadow.js ***!
+  \*************************************************************/
 /***/ function(module, exports) {
 
 	var SHADOW_PROPS = {
@@ -6183,31 +6522,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'textBoxShadowOffsetX': 1,
 	  'textBoxShadowOffsetY': 1
 	};
-
+	
 	function _default(ctx, propName, value) {
 	  if (SHADOW_PROPS.hasOwnProperty(propName)) {
 	    return value *= ctx.dpr;
 	  }
-
+	
 	  return value;
 	}
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 22 */
+/*!********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/Element.js ***!
+  \********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var guid = __webpack_require__(23);
-
-	var Eventful = __webpack_require__(24);
-
-	var Transformable = __webpack_require__(25);
-
-	var Animatable = __webpack_require__(28);
-
-	var zrUtil = __webpack_require__(5);
-
+	var guid = __webpack_require__(/*! ./core/guid */ 23);
+	
+	var Eventful = __webpack_require__(/*! ./mixin/Eventful */ 24);
+	
+	var Transformable = __webpack_require__(/*! ./mixin/Transformable */ 25);
+	
+	var Animatable = __webpack_require__(/*! ./mixin/Animatable */ 28);
+	
+	var zrUtil = __webpack_require__(/*! ./core/util */ 5);
+	
 	/**
 	 * @alias module:zrender/Element
 	 * @constructor
@@ -6224,10 +6566,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * 画布元素ID
 	   * @type {string}
 	   */
-
+	
 	  this.id = opts.id || guid();
 	};
-
+	
 	Element.prototype = {
 	  /**
 	   * 元素类型
@@ -6235,14 +6577,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {string}
 	   */
 	  type: 'element',
-
+	
 	  /**
 	   * 元素名字
 	   * Element name
 	   * @type {string}
 	   */
 	  name: '',
-
+	
 	  /**
 	   * ZRender 实例对象，会在 element 添加到 zrender 实例中后自动赋值
 	   * ZRender instance will be assigned when element is associated with zrender
@@ -6250,7 +6592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {module:zrender/ZRender}
 	   */
 	  __zr: null,
-
+	
 	  /**
 	   * 图形是否忽略，为true时忽略图形的绘制以及事件触发
 	   * If ignore drawing and events of the element object
@@ -6259,7 +6601,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @default false
 	   */
 	  ignore: false,
-
+	
 	  /**
 	   * 用于裁剪的路径(shape)，所有 Group 内的路径在绘制时都会被这个路径裁剪
 	   * 该路径会继承被裁减对象的变换
@@ -6268,13 +6610,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @readOnly
 	   */
 	  clipPath: null,
-
+	
 	  /**
 	   * 是否是 Group
 	   * @type {boolean}
 	   */
 	  isGroup: false,
-
+	
 	  /**
 	   * Drift element
 	   * @param  {number} dx dx on the global space
@@ -6285,47 +6627,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	      case 'horizontal':
 	        dy = 0;
 	        break;
-
+	
 	      case 'vertical':
 	        dx = 0;
 	        break;
 	    }
-
+	
 	    var m = this.transform;
-
+	
 	    if (!m) {
 	      m = this.transform = [1, 0, 0, 1, 0, 0];
 	    }
-
+	
 	    m[4] += dx;
 	    m[5] += dy;
 	    this.decomposeTransform();
 	    this.dirty(false);
 	  },
-
+	
 	  /**
 	   * Hook before update
 	   */
 	  beforeUpdate: function () {},
-
+	
 	  /**
 	   * Hook after update
 	   */
 	  afterUpdate: function () {},
-
+	
 	  /**
 	   * Update each frame
 	   */
 	  update: function () {
 	    this.updateTransform();
 	  },
-
+	
 	  /**
 	   * @param  {Function} cb
 	   * @param  {}   context
 	   */
 	  traverse: function (cb, context) {},
-
+	
 	  /**
 	   * @protected
 	   */
@@ -6334,11 +6676,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // Copy the array
 	      if (value) {
 	        var target = this[key];
-
+	
 	        if (!target) {
 	          target = this[key] = [];
 	        }
-
+	
 	        target[0] = value[0];
 	        target[1] = value[1];
 	      }
@@ -6346,7 +6688,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this[key] = value;
 	    }
 	  },
-
+	
 	  /**
 	   * Hide the element
 	   */
@@ -6354,7 +6696,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.ignore = true;
 	    this.__zr && this.__zr.refresh();
 	  },
-
+	
 	  /**
 	   * Show the element
 	   */
@@ -6362,7 +6704,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.ignore = false;
 	    this.__zr && this.__zr.refresh();
 	  },
-
+	
 	  /**
 	   * @param {string|Object} key
 	   * @param {*} value
@@ -6377,49 +6719,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    }
-
+	
 	    this.dirty(false);
 	    return this;
 	  },
-
+	
 	  /**
 	   * @param {module:zrender/graphic/Path} clipPath
 	   */
 	  setClipPath: function (clipPath) {
 	    var zr = this.__zr;
-
+	
 	    if (zr) {
 	      clipPath.addSelfToZr(zr);
 	    } // Remove previous clip path
-
-
+	
+	
 	    if (this.clipPath && this.clipPath !== clipPath) {
 	      this.removeClipPath();
 	    }
-
+	
 	    this.clipPath = clipPath;
 	    clipPath.__zr = zr;
 	    clipPath.__clipTarget = this;
 	    this.dirty(false);
 	  },
-
+	
 	  /**
 	   */
 	  removeClipPath: function () {
 	    var clipPath = this.clipPath;
-
+	
 	    if (clipPath) {
 	      if (clipPath.__zr) {
 	        clipPath.removeSelfFromZr(clipPath.__zr);
 	      }
-
+	
 	      clipPath.__zr = null;
 	      clipPath.__clipTarget = null;
 	      this.clipPath = null;
 	      this.dirty(false);
 	    }
 	  },
-
+	
 	  /**
 	   * Add self from zrender instance.
 	   * Not recursively because it will be invoked when element added to storage.
@@ -6427,20 +6769,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  addSelfToZr: function (zr) {
 	    this.__zr = zr; // 添加动画
-
+	
 	    var animators = this.animators;
-
+	
 	    if (animators) {
 	      for (var i = 0; i < animators.length; i++) {
 	        zr.animation.addAnimator(animators[i]);
 	      }
 	    }
-
+	
 	    if (this.clipPath) {
 	      this.clipPath.addSelfToZr(zr);
 	    }
 	  },
-
+	
 	  /**
 	   * Remove self from zrender instance.
 	   * Not recursively because it will be invoked when element added to storage.
@@ -6448,15 +6790,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  removeSelfFromZr: function (zr) {
 	    this.__zr = null; // 移除动画
-
+	
 	    var animators = this.animators;
-
+	
 	    if (animators) {
 	      for (var i = 0; i < animators.length; i++) {
 	        zr.animation.removeAnimator(animators[i]);
 	      }
 	    }
-
+	
 	    if (this.clipPath) {
 	      this.clipPath.removeSelfFromZr(zr);
 	    }
@@ -6470,6 +6812,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 23 */
+/*!**********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/guid.js ***!
+  \**********************************************/
 /***/ function(module, exports) {
 
 	/**
@@ -6478,15 +6823,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @author errorrik (errorrik@gmail.com)
 	 */
 	var idStart = 0x0907;
-
+	
 	function _default() {
 	  return idStart++;
 	}
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 24 */
+/*!***************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/mixin/Eventful.js ***!
+  \***************************************************/
 /***/ function(module, exports) {
 
 	/**
@@ -6501,14 +6849,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @alias module:zrender/mixin/Eventful
 	 * @constructor
 	 */
-
+	
 	var Eventful = function () {
 	  this._$handlers = {};
 	};
-
+	
 	Eventful.prototype = {
 	  constructor: Eventful,
-
+	
 	  /**
 	   * 单次触发绑定，trigger后销毁
 	   *
@@ -6518,30 +6866,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  one: function (event, handler, context) {
 	    var _h = this._$handlers;
-
+	
 	    if (!handler || !event) {
 	      return this;
 	    }
-
+	
 	    if (!_h[event]) {
 	      _h[event] = [];
 	    }
-
+	
 	    for (var i = 0; i < _h[event].length; i++) {
 	      if (_h[event][i].h === handler) {
 	        return this;
 	      }
 	    }
-
+	
 	    _h[event].push({
 	      h: handler,
 	      one: true,
 	      ctx: context || this
 	    });
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 绑定事件
 	   * @param {string} event 事件名
@@ -6550,30 +6898,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  on: function (event, handler, context) {
 	    var _h = this._$handlers;
-
+	
 	    if (!handler || !event) {
 	      return this;
 	    }
-
+	
 	    if (!_h[event]) {
 	      _h[event] = [];
 	    }
-
+	
 	    for (var i = 0; i < _h[event].length; i++) {
 	      if (_h[event][i].h === handler) {
 	        return this;
 	      }
 	    }
-
+	
 	    _h[event].push({
 	      h: handler,
 	      one: false,
 	      ctx: context || this
 	    });
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 是否绑定了事件
 	   * @param  {string}  event
@@ -6583,7 +6931,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _h = this._$handlers;
 	    return _h[event] && _h[event].length;
 	  },
-
+	
 	  /**
 	   * 解绑事件
 	   * @param {string} event 事件名
@@ -6591,35 +6939,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  off: function (event, handler) {
 	    var _h = this._$handlers;
-
+	
 	    if (!event) {
 	      this._$handlers = {};
 	      return this;
 	    }
-
+	
 	    if (handler) {
 	      if (_h[event]) {
 	        var newList = [];
-
+	
 	        for (var i = 0, l = _h[event].length; i < l; i++) {
 	          if (_h[event][i]['h'] != handler) {
 	            newList.push(_h[event][i]);
 	          }
 	        }
-
+	
 	        _h[event] = newList;
 	      }
-
+	
 	      if (_h[event] && _h[event].length === 0) {
 	        delete _h[event];
 	      }
 	    } else {
 	      delete _h[event];
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 事件分发
 	   *
@@ -6629,52 +6977,52 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this._$handlers[type]) {
 	      var args = arguments;
 	      var argLen = args.length;
-
+	
 	      if (argLen > 3) {
 	        args = arrySlice.call(args, 1);
 	      }
-
+	
 	      var _h = this._$handlers[type];
 	      var len = _h.length;
-
+	
 	      for (var i = 0; i < len;) {
 	        // Optimize advise from backbone
 	        switch (argLen) {
 	          case 1:
 	            _h[i]['h'].call(_h[i]['ctx']);
-
+	
 	            break;
-
+	
 	          case 2:
 	            _h[i]['h'].call(_h[i]['ctx'], args[1]);
-
+	
 	            break;
-
+	
 	          case 3:
 	            _h[i]['h'].call(_h[i]['ctx'], args[1], args[2]);
-
+	
 	            break;
-
+	
 	          default:
 	            // have more than 2 given arguments
 	            _h[i]['h'].apply(_h[i]['ctx'], args);
-
+	
 	            break;
 	        }
-
+	
 	        if (_h[i]['one']) {
 	          _h.splice(i, 1);
-
+	
 	          len--;
 	        } else {
 	          i++;
 	        }
 	      }
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 带有context的事件分发, 最后一个参数是事件回调的context
 	   * @param {string} type 事件类型
@@ -6683,149 +7031,152 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this._$handlers[type]) {
 	      var args = arguments;
 	      var argLen = args.length;
-
+	
 	      if (argLen > 4) {
 	        args = arrySlice.call(args, 1, args.length - 1);
 	      }
-
+	
 	      var ctx = args[args.length - 1];
 	      var _h = this._$handlers[type];
 	      var len = _h.length;
-
+	
 	      for (var i = 0; i < len;) {
 	        // Optimize advise from backbone
 	        switch (argLen) {
 	          case 1:
 	            _h[i]['h'].call(ctx);
-
+	
 	            break;
-
+	
 	          case 2:
 	            _h[i]['h'].call(ctx, args[1]);
-
+	
 	            break;
-
+	
 	          case 3:
 	            _h[i]['h'].call(ctx, args[1], args[2]);
-
+	
 	            break;
-
+	
 	          default:
 	            // have more than 2 given arguments
 	            _h[i]['h'].apply(ctx, args);
-
+	
 	            break;
 	        }
-
+	
 	        if (_h[i]['one']) {
 	          _h.splice(i, 1);
-
+	
 	          len--;
 	        } else {
 	          i++;
 	        }
 	      }
 	    }
-
+	
 	    return this;
 	  }
 	}; // 对象可以通过 onxxxx 绑定事件
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#onclick
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#onmouseover
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#onmouseout
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#onmousemove
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#onmousewheel
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#onmousedown
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#onmouseup
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#ondrag
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#ondragstart
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#ondragend
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#ondragenter
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#ondragleave
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#ondragover
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	/**
 	 * @event module:zrender/mixin/Eventful#ondrop
 	 * @type {Function}
 	 * @default null
 	 */
-
+	
 	var _default = Eventful;
 	module.exports = _default;
 
 /***/ },
 /* 25 */
+/*!********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/mixin/Transformable.js ***!
+  \********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var matrix = __webpack_require__(26);
-
-	var vector = __webpack_require__(27);
-
+	var matrix = __webpack_require__(/*! ../core/matrix */ 26);
+	
+	var vector = __webpack_require__(/*! ../core/vector */ 27);
+	
 	/**
 	 * 提供变换扩展
 	 * @module zrender/mixin/Transformable
@@ -6833,7 +7184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var mIdentity = matrix.identity;
 	var EPSILON = 5e-5;
-
+	
 	function isNotAroundZero(val) {
 	  return val > EPSILON || val < -EPSILON;
 	}
@@ -6841,11 +7192,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @alias module:zrender/mixin/Transformable
 	 * @constructor
 	 */
-
-
+	
+	
 	var Transformable = function (opts) {
 	  opts = opts || {}; // If there are no given position, rotation, scale
-
+	
 	  if (!opts.position) {
 	    /**
 	     * 平移
@@ -6854,7 +7205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    this.position = [0, 0];
 	  }
-
+	
 	  if (opts.rotation == null) {
 	    /**
 	     * 旋转
@@ -6863,7 +7214,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    this.rotation = 0;
 	  }
-
+	
 	  if (!opts.scale) {
 	    /**
 	     * 缩放
@@ -6877,42 +7228,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @type {Array.<number>}
 	   * @default null
 	   */
-
-
+	
+	
 	  this.origin = this.origin || null;
 	};
-
+	
 	var transformableProto = Transformable.prototype;
 	transformableProto.transform = null;
 	/**
 	 * 判断是否需要有坐标变换
 	 * 如果有坐标变换, 则从position, rotation, scale以及父节点的transform计算出自身的transform矩阵
 	 */
-
+	
 	transformableProto.needLocalTransform = function () {
 	  return isNotAroundZero(this.rotation) || isNotAroundZero(this.position[0]) || isNotAroundZero(this.position[1]) || isNotAroundZero(this.scale[0] - 1) || isNotAroundZero(this.scale[1] - 1);
 	};
-
+	
 	transformableProto.updateTransform = function () {
 	  var parent = this.parent;
 	  var parentHasTransform = parent && parent.transform;
 	  var needLocalTransform = this.needLocalTransform();
 	  var m = this.transform;
-
+	
 	  if (!(needLocalTransform || parentHasTransform)) {
 	    m && mIdentity(m);
 	    return;
 	  }
-
+	
 	  m = m || matrix.create();
-
+	
 	  if (needLocalTransform) {
 	    this.getLocalTransform(m);
 	  } else {
 	    mIdentity(m);
 	  } // 应用父节点变换
-
-
+	
+	
 	  if (parentHasTransform) {
 	    if (needLocalTransform) {
 	      matrix.mul(m, parent.transform, m);
@@ -6920,13 +7271,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      matrix.copy(m, parent.transform);
 	    }
 	  } // 保存这个变换矩阵
-
-
+	
+	
 	  this.transform = m;
 	  this.invTransform = this.invTransform || matrix.create();
 	  matrix.invert(this.invTransform, m);
 	};
-
+	
 	transformableProto.getLocalTransform = function (m) {
 	  return Transformable.getLocalTransform(this, m);
 	};
@@ -6934,64 +7285,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * 将自己的transform应用到context上
 	 * @param {CanvasRenderingContext2D} ctx
 	 */
-
-
+	
+	
 	transformableProto.setTransform = function (ctx) {
 	  var m = this.transform;
 	  var dpr = ctx.dpr || 1;
-
+	
 	  if (m) {
 	    ctx.setTransform(dpr * m[0], dpr * m[1], dpr * m[2], dpr * m[3], dpr * m[4], dpr * m[5]);
 	  } else {
 	    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 	  }
 	};
-
+	
 	transformableProto.restoreTransform = function (ctx) {
 	  var dpr = ctx.dpr || 1;
 	  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 	};
-
+	
 	var tmpTransform = [];
 	/**
 	 * 分解`transform`矩阵到`position`, `rotation`, `scale`
 	 */
-
+	
 	transformableProto.decomposeTransform = function () {
 	  if (!this.transform) {
 	    return;
 	  }
-
+	
 	  var parent = this.parent;
 	  var m = this.transform;
-
+	
 	  if (parent && parent.transform) {
 	    // Get local transform and decompose them to position, scale, rotation
 	    matrix.mul(tmpTransform, parent.invTransform, m);
 	    m = tmpTransform;
 	  }
-
+	
 	  var sx = m[0] * m[0] + m[1] * m[1];
 	  var sy = m[2] * m[2] + m[3] * m[3];
 	  var position = this.position;
 	  var scale = this.scale;
-
+	
 	  if (isNotAroundZero(sx - 1)) {
 	    sx = Math.sqrt(sx);
 	  }
-
+	
 	  if (isNotAroundZero(sy - 1)) {
 	    sy = Math.sqrt(sy);
 	  }
-
+	
 	  if (m[0] < 0) {
 	    sx = -sx;
 	  }
-
+	
 	  if (m[3] < 0) {
 	    sy = -sy;
 	  }
-
+	
 	  position[0] = m[4];
 	  position[1] = m[5];
 	  scale[0] = sx;
@@ -7002,26 +7353,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Get global scale
 	 * @return {Array.<number>}
 	 */
-
-
+	
+	
 	transformableProto.getGlobalScale = function () {
 	  var m = this.transform;
-
+	
 	  if (!m) {
 	    return [1, 1];
 	  }
-
+	
 	  var sx = Math.sqrt(m[0] * m[0] + m[1] * m[1]);
 	  var sy = Math.sqrt(m[2] * m[2] + m[3] * m[3]);
-
+	
 	  if (m[0] < 0) {
 	    sx = -sx;
 	  }
-
+	
 	  if (m[3] < 0) {
 	    sy = -sy;
 	  }
-
+	
 	  return [sx, sy];
 	};
 	/**
@@ -7031,16 +7382,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} y
 	 * @return {Array.<number>}
 	 */
-
-
+	
+	
 	transformableProto.transformCoordToLocal = function (x, y) {
 	  var v2 = [x, y];
 	  var invTransform = this.invTransform;
-
+	
 	  if (invTransform) {
 	    vector.applyTransform(v2, v2, invTransform);
 	  }
-
+	
 	  return v2;
 	};
 	/**
@@ -7050,16 +7401,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} y
 	 * @return {Array.<number>}
 	 */
-
-
+	
+	
 	transformableProto.transformCoordToGlobal = function (x, y) {
 	  var v2 = [x, y];
 	  var transform = this.transform;
-
+	
 	  if (transform) {
 	    vector.applyTransform(v2, v2, transform);
 	  }
-
+	
 	  return v2;
 	};
 	/**
@@ -7070,8 +7421,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} target.position
 	 * @param {Array.<number>} [m]
 	 */
-
-
+	
+	
 	Transformable.getLocalTransform = function (target, m) {
 	  m = m || [];
 	  mIdentity(m);
@@ -7079,35 +7430,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var scale = target.scale || [1, 1];
 	  var rotation = target.rotation || 0;
 	  var position = target.position || [0, 0];
-
+	
 	  if (origin) {
 	    // Translate to origin
 	    m[4] -= origin[0];
 	    m[5] -= origin[1];
 	  }
-
+	
 	  matrix.scale(m, m, scale);
-
+	
 	  if (rotation) {
 	    matrix.rotate(m, m, rotation);
 	  }
-
+	
 	  if (origin) {
 	    // Translate back from origin
 	    m[4] += origin[0];
 	    m[5] += origin[1];
 	  }
-
+	
 	  m[4] += position[0];
 	  m[5] += position[1];
 	  return m;
 	};
-
+	
 	var _default = Transformable;
 	module.exports = _default;
 
 /***/ },
 /* 26 */
+/*!************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/matrix.js ***!
+  \************************************************/
 /***/ function(module, exports) {
 
 	/**
@@ -7119,7 +7473,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Create a identity matrix.
 	 * @return {Float32Array|Array.<number>}
 	 */
-
+	
 	function create() {
 	  var out = new ArrayCtor(6);
 	  identity(out);
@@ -7129,8 +7483,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * 设置矩阵为单位矩阵
 	 * @param {Float32Array|Array.<number>} out
 	 */
-
-
+	
+	
 	function identity(out) {
 	  out[0] = 1;
 	  out[1] = 0;
@@ -7145,8 +7499,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Float32Array|Array.<number>} out
 	 * @param {Float32Array|Array.<number>} m
 	 */
-
-
+	
+	
 	function copy(out, m) {
 	  out[0] = m[0];
 	  out[1] = m[1];
@@ -7162,8 +7516,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Float32Array|Array.<number>} m1
 	 * @param {Float32Array|Array.<number>} m2
 	 */
-
-
+	
+	
 	function mul(out, m1, m2) {
 	  // Consider matrix.mul(m, m2, m);
 	  // where out is the same as m2.
@@ -7188,8 +7542,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Float32Array|Array.<number>} a
 	 * @param {Float32Array|Array.<number>} v
 	 */
-
-
+	
+	
 	function translate(out, a, v) {
 	  out[0] = a[0];
 	  out[1] = a[1];
@@ -7205,8 +7559,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Float32Array|Array.<number>} a
 	 * @param {number} rad
 	 */
-
-
+	
+	
 	function rotate(out, a, rad) {
 	  var aa = a[0];
 	  var ac = a[2];
@@ -7230,8 +7584,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Float32Array|Array.<number>} a
 	 * @param {Float32Array|Array.<number>} v
 	 */
-
-
+	
+	
 	function scale(out, a, v) {
 	  var vx = v[0];
 	  var vy = v[1];
@@ -7248,8 +7602,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Float32Array|Array.<number>} out
 	 * @param {Float32Array|Array.<number>} a
 	 */
-
-
+	
+	
 	function invert(out, a) {
 	  var aa = a[0];
 	  var ac = a[2];
@@ -7258,11 +7612,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var ad = a[3];
 	  var aty = a[5];
 	  var det = aa * ad - ab * ac;
-
+	
 	  if (!det) {
 	    return null;
 	  }
-
+	
 	  det = 1.0 / det;
 	  out[0] = ad * det;
 	  out[1] = -ab * det;
@@ -7276,14 +7630,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Clone a new matrix.
 	 * @param {Float32Array|Array.<number>} a
 	 */
-
-
+	
+	
 	function clone(a) {
 	  var b = create();
 	  copy(b, a);
 	  return b;
 	}
-
+	
 	exports.create = create;
 	exports.identity = identity;
 	exports.copy = copy;
@@ -7296,6 +7650,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 27 */
+/*!************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/vector.js ***!
+  \************************************************/
 /***/ function(module, exports) {
 
 	var ArrayCtor = typeof Float32Array === 'undefined' ? Array : Float32Array;
@@ -7305,18 +7662,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} [y=0]
 	 * @return {Vector2}
 	 */
-
+	
 	function create(x, y) {
 	  var out = new ArrayCtor(2);
-
+	
 	  if (x == null) {
 	    x = 0;
 	  }
-
+	
 	  if (y == null) {
 	    y = 0;
 	  }
-
+	
 	  out[0] = x;
 	  out[1] = y;
 	  return out;
@@ -7327,8 +7684,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v
 	 * @return {Vector2}
 	 */
-
-
+	
+	
 	function copy(out, v) {
 	  out[0] = v[0];
 	  out[1] = v[1];
@@ -7339,8 +7696,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v
 	 * @return {Vector2}
 	 */
-
-
+	
+	
 	function clone(v) {
 	  var out = new ArrayCtor(2);
 	  out[0] = v[0];
@@ -7354,8 +7711,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} b
 	 * @return {Vector2} 结果
 	 */
-
-
+	
+	
 	function set(out, a, b) {
 	  out[0] = a;
 	  out[1] = b;
@@ -7367,8 +7724,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v1
 	 * @param {Vector2} v2
 	 */
-
-
+	
+	
 	function add(out, v1, v2) {
 	  out[0] = v1[0] + v2[0];
 	  out[1] = v1[1] + v2[1];
@@ -7381,8 +7738,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v2
 	 * @param {number} a
 	 */
-
-
+	
+	
 	function scaleAndAdd(out, v1, v2, a) {
 	  out[0] = v1[0] + v2[0] * a;
 	  out[1] = v1[1] + v2[1] * a;
@@ -7394,8 +7751,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v1
 	 * @param {Vector2} v2
 	 */
-
-
+	
+	
 	function sub(out, v1, v2) {
 	  out[0] = v1[0] - v2[0];
 	  out[1] = v1[1] - v2[1];
@@ -7406,24 +7763,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v
 	 * @return {number}
 	 */
-
-
+	
+	
 	function len(v) {
 	  return Math.sqrt(lenSquare(v));
 	}
-
+	
 	var length = len; // jshint ignore:line
-
+	
 	/**
 	 * 向量长度平方
 	 * @param {Vector2} v
 	 * @return {number}
 	 */
-
+	
 	function lenSquare(v) {
 	  return v[0] * v[0] + v[1] * v[1];
 	}
-
+	
 	var lengthSquare = lenSquare;
 	/**
 	 * 向量乘法
@@ -7431,7 +7788,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v1
 	 * @param {Vector2} v2
 	 */
-
+	
 	function mul(out, v1, v2) {
 	  out[0] = v1[0] * v2[0];
 	  out[1] = v1[1] * v2[1];
@@ -7443,8 +7800,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v1
 	 * @param {Vector2} v2
 	 */
-
-
+	
+	
 	function div(out, v1, v2) {
 	  out[0] = v1[0] / v2[0];
 	  out[1] = v1[1] / v2[1];
@@ -7456,8 +7813,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v2
 	 * @return {number}
 	 */
-
-
+	
+	
 	function dot(v1, v2) {
 	  return v1[0] * v2[0] + v1[1] * v2[1];
 	}
@@ -7467,8 +7824,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v
 	 * @param {number} s
 	 */
-
-
+	
+	
 	function scale(out, v, s) {
 	  out[0] = v[0] * s;
 	  out[1] = v[1] * s;
@@ -7479,11 +7836,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} out
 	 * @param {Vector2} v
 	 */
-
-
+	
+	
 	function normalize(out, v) {
 	  var d = len(v);
-
+	
 	  if (d === 0) {
 	    out[0] = 0;
 	    out[1] = 0;
@@ -7491,7 +7848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    out[0] = v[0] / d;
 	    out[1] = v[1] / d;
 	  }
-
+	
 	  return out;
 	}
 	/**
@@ -7500,12 +7857,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v2
 	 * @return {number}
 	 */
-
-
+	
+	
 	function distance(v1, v2) {
 	  return Math.sqrt((v1[0] - v2[0]) * (v1[0] - v2[0]) + (v1[1] - v2[1]) * (v1[1] - v2[1]));
 	}
-
+	
 	var dist = distance;
 	/**
 	 * 向量距离平方
@@ -7513,18 +7870,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v2
 	 * @return {number}
 	 */
-
+	
 	function distanceSquare(v1, v2) {
 	  return (v1[0] - v2[0]) * (v1[0] - v2[0]) + (v1[1] - v2[1]) * (v1[1] - v2[1]);
 	}
-
+	
 	var distSquare = distanceSquare;
 	/**
 	 * 求负向量
 	 * @param {Vector2} out
 	 * @param {Vector2} v
 	 */
-
+	
 	function negate(out, v) {
 	  out[0] = -v[0];
 	  out[1] = -v[1];
@@ -7537,8 +7894,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v2
 	 * @param {number} t
 	 */
-
-
+	
+	
 	function lerp(out, v1, v2, t) {
 	  out[0] = v1[0] + t * (v2[0] - v1[0]);
 	  out[1] = v1[1] + t * (v2[1] - v1[1]);
@@ -7550,8 +7907,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vector2} v
 	 * @param {Vector2} m
 	 */
-
-
+	
+	
 	function applyTransform(out, v, m) {
 	  var x = v[0];
 	  var y = v[1];
@@ -7565,8 +7922,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Vector2} v1
 	 * @param  {Vector2} v2
 	 */
-
-
+	
+	
 	function min(out, v1, v2) {
 	  out[0] = Math.min(v1[0], v2[0]);
 	  out[1] = Math.min(v1[1], v2[1]);
@@ -7578,14 +7935,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Vector2} v1
 	 * @param  {Vector2} v2
 	 */
-
-
+	
+	
 	function max(out, v1, v2) {
 	  out[0] = Math.max(v1[0], v2[0]);
 	  out[1] = Math.max(v1[1], v2[1]);
 	  return out;
 	}
-
+	
 	exports.create = create;
 	exports.copy = copy;
 	exports.clone = clone;
@@ -7614,20 +7971,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 28 */
+/*!*****************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/mixin/Animatable.js ***!
+  \*****************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Animator = __webpack_require__(29);
-
-	var log = __webpack_require__(34);
-
-	var _util = __webpack_require__(5);
-
+	var Animator = __webpack_require__(/*! ../animation/Animator */ 29);
+	
+	var log = __webpack_require__(/*! ../core/log */ 34);
+	
+	var _util = __webpack_require__(/*! ../core/util */ 5);
+	
 	var isString = _util.isString;
 	var isFunction = _util.isFunction;
 	var isObject = _util.isObject;
 	var isArrayLike = _util.isArrayLike;
 	var indexOf = _util.indexOf;
-
+	
 	/**
 	 * @alias modue:zrender/mixin/Animatable
 	 * @constructor
@@ -7639,10 +7999,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  this.animators = [];
 	};
-
+	
 	Animatable.prototype = {
 	  constructor: Animatable,
-
+	
 	  /**
 	   * 动画
 	   *
@@ -7660,33 +8020,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var animatingShape = false;
 	    var el = this;
 	    var zr = this.__zr;
-
+	
 	    if (path) {
 	      var pathSplitted = path.split('.');
 	      var prop = el; // If animating shape
-
+	
 	      animatingShape = pathSplitted[0] === 'shape';
-
+	
 	      for (var i = 0, l = pathSplitted.length; i < l; i++) {
 	        if (!prop) {
 	          continue;
 	        }
-
+	
 	        prop = prop[pathSplitted[i]];
 	      }
-
+	
 	      if (prop) {
 	        target = prop;
 	      }
 	    } else {
 	      target = el;
 	    }
-
+	
 	    if (!target) {
 	      log('Property "' + path + '" is not existed in element ' + el.id);
 	      return;
 	    }
-
+	
 	    var animators = el.animators;
 	    var animator = new Animator(target, loop);
 	    animator.during(function (target) {
@@ -7696,14 +8056,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      animators.splice(indexOf(animators, animator), 1);
 	    });
 	    animators.push(animator); // If animate after added to the zrender
-
+	
 	    if (zr) {
 	      zr.animation.addAnimator(animator);
 	    }
-
+	
 	    return animator;
 	  },
-
+	
 	  /**
 	   * 停止动画
 	   * @param {boolean} forwardToLast If move to last frame before stop
@@ -7711,15 +8071,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  stopAnimation: function (forwardToLast) {
 	    var animators = this.animators;
 	    var len = animators.length;
-
+	
 	    for (var i = 0; i < len; i++) {
 	      animators[i].stop(forwardToLast);
 	    }
-
+	
 	    animators.length = 0;
 	    return this;
 	  },
-
+	
 	  /**
 	   * Caution: this method will stop previous animation.
 	   * So do not use this method to one element twice before
@@ -7773,38 +8133,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	          else if (!time) {
 	              time = 500;
 	            } // Stop all previous animations
-
-
+	
+	
 	    this.stopAnimation();
-
+	
 	    this._animateToShallow('', this, target, time, delay); // Animators may be removed immediately after start
 	    // if there is nothing to animate
-
-
+	
+	
 	    var animators = this.animators.slice();
 	    var count = animators.length;
-
+	
 	    function done() {
 	      count--;
-
+	
 	      if (!count) {
 	        callback && callback();
 	      }
 	    } // No animators. This should be checked before animators[i].start(),
 	    // because 'done' may be executed immediately if no need to animate.
-
-
+	
+	
 	    if (!count) {
 	      callback && callback();
 	    } // Start after all animators created
 	    // Incase any animator is done immediately when all animation properties are not changed
-
-
+	
+	
 	    for (var i = 0; i < animators.length; i++) {
 	      animators[i].done(done).start(easing, forceAnimate);
 	    }
 	  },
-
+	
 	  /**
 	   * @private
 	   * @param {string} path=''
@@ -7833,12 +8193,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _animateToShallow: function (path, source, target, time, delay) {
 	    var objShallow = {};
 	    var propertyCount = 0;
-
+	
 	    for (var name in target) {
 	      if (!target.hasOwnProperty(name)) {
 	        continue;
 	      }
-
+	
 	      if (source[name] != null) {
 	        if (isObject(target[name]) && !isArrayLike(target[name])) {
 	          this._animateToShallow(path ? path + '.' + name : name, source[name], target[name], time, delay);
@@ -7860,11 +8220,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    }
-
+	
 	    if (propertyCount > 0) {
 	      this.animate(path, false).when(time == null ? 500 : time, objShallow).delay(delay || 0);
 	    }
-
+	
 	    return this;
 	  }
 	};
@@ -7873,25 +8233,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 29 */
+/*!*******************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/animation/Animator.js ***!
+  \*******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Clip = __webpack_require__(30);
-
-	var color = __webpack_require__(32);
-
-	var _util = __webpack_require__(5);
-
+	var Clip = __webpack_require__(/*! ./Clip */ 30);
+	
+	var color = __webpack_require__(/*! ../tool/color */ 32);
+	
+	var _util = __webpack_require__(/*! ../core/util */ 5);
+	
 	var isArrayLike = _util.isArrayLike;
-
+	
 	/**
 	 * @module echarts/animation/Animator
 	 */
 	var arraySlice = Array.prototype.slice;
-
+	
 	function defaultGetter(target, key) {
 	  return target[key];
 	}
-
+	
 	function defaultSetter(target, key, value) {
 	  target[key] = value;
 	}
@@ -7901,8 +8264,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} percent
 	 * @return {number}
 	 */
-
-
+	
+	
 	function interpolateNumber(p0, p1, percent) {
 	  return (p1 - p0) * percent + p0;
 	}
@@ -7912,8 +8275,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} percent
 	 * @return {string}
 	 */
-
-
+	
+	
 	function interpolateString(p0, p1, percent) {
 	  return percent > 0.5 ? p1 : p0;
 	}
@@ -7924,18 +8287,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Array} out
 	 * @param  {number} arrDim
 	 */
-
-
+	
+	
 	function interpolateArray(p0, p1, percent, out, arrDim) {
 	  var len = p0.length;
-
+	
 	  if (arrDim == 1) {
 	    for (var i = 0; i < len; i++) {
 	      out[i] = interpolateNumber(p0[i], p1[i], percent);
 	    }
 	  } else {
 	    var len2 = len && p0[0].length;
-
+	
 	    for (var i = 0; i < len; i++) {
 	      for (var j = 0; j < len2; j++) {
 	        out[i][j] = interpolateNumber(p0[i][j], p1[i][j], percent);
@@ -7944,16 +8307,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	} // arr0 is source array, arr1 is target array.
 	// Do some preprocess to avoid error happened when interpolating from arr0 to arr1
-
-
+	
+	
 	function fillArr(arr0, arr1, arrDim) {
 	  var arr0Len = arr0.length;
 	  var arr1Len = arr1.length;
-
+	
 	  if (arr0Len !== arr1Len) {
 	    // FIXME Not work for TypedArray
 	    var isPreviousLarger = arr0Len > arr1Len;
-
+	
 	    if (isPreviousLarger) {
 	      // Cut the previous
 	      arr0.length = arr1Len;
@@ -7964,10 +8327,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  } // Handling NaN value
-
-
+	
+	
 	  var len2 = arr0[0] && arr0[0].length;
-
+	
 	  for (var i = 0; i < arr0.length; i++) {
 	    if (arrDim === 1) {
 	      if (isNaN(arr0[i])) {
@@ -7988,19 +8351,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} arrDim
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function isArraySame(arr0, arr1, arrDim) {
 	  if (arr0 === arr1) {
 	    return true;
 	  }
-
+	
 	  var len = arr0.length;
-
+	
 	  if (len !== arr1.length) {
 	    return false;
 	  }
-
+	
 	  if (arrDim === 1) {
 	    for (var i = 0; i < len; i++) {
 	      if (arr0[i] !== arr1[i]) {
@@ -8009,7 +8372,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  } else {
 	    var len2 = arr0[0].length;
-
+	
 	    for (var i = 0; i < len; i++) {
 	      for (var j = 0; j < len2; j++) {
 	        if (arr0[i][j] !== arr1[i][j]) {
@@ -8018,7 +8381,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }
-
+	
 	  return true;
 	}
 	/**
@@ -8033,18 +8396,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Array} out
 	 * @param  {number} arrDim
 	 */
-
-
+	
+	
 	function catmullRomInterpolateArray(p0, p1, p2, p3, t, t2, t3, out, arrDim) {
 	  var len = p0.length;
-
+	
 	  if (arrDim == 1) {
 	    for (var i = 0; i < len; i++) {
 	      out[i] = catmullRomInterpolate(p0[i], p1[i], p2[i], p3[i], t, t2, t3);
 	    }
 	  } else {
 	    var len2 = p0[0].length;
-
+	
 	    for (var i = 0; i < len; i++) {
 	      for (var j = 0; j < len2; j++) {
 	        out[i][j] = catmullRomInterpolate(p0[i][j], p1[i][j], p2[i][j], p3[i][j], t, t2, t3);
@@ -8063,90 +8426,90 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} t3
 	 * @return {number}
 	 */
-
-
+	
+	
 	function catmullRomInterpolate(p0, p1, p2, p3, t, t2, t3) {
 	  var v0 = (p2 - p0) * 0.5;
 	  var v1 = (p3 - p1) * 0.5;
 	  return (2 * (p1 - p2) + v0 + v1) * t3 + (-3 * (p1 - p2) - 2 * v0 - v1) * t2 + v0 * t + p1;
 	}
-
+	
 	function cloneValue(value) {
 	  if (isArrayLike(value)) {
 	    var len = value.length;
-
+	
 	    if (isArrayLike(value[0])) {
 	      var ret = [];
-
+	
 	      for (var i = 0; i < len; i++) {
 	        ret.push(arraySlice.call(value[i]));
 	      }
-
+	
 	      return ret;
 	    }
-
+	
 	    return arraySlice.call(value);
 	  }
-
+	
 	  return value;
 	}
-
+	
 	function rgba2String(rgba) {
 	  rgba[0] = Math.floor(rgba[0]);
 	  rgba[1] = Math.floor(rgba[1]);
 	  rgba[2] = Math.floor(rgba[2]);
 	  return 'rgba(' + rgba.join(',') + ')';
 	}
-
+	
 	function getArrayDim(keyframes) {
 	  var lastValue = keyframes[keyframes.length - 1].value;
 	  return isArrayLike(lastValue && lastValue[0]) ? 2 : 1;
 	}
-
+	
 	function createTrackClip(animator, easing, oneTrackDone, keyframes, propName, forceAnimate) {
 	  var getter = animator._getter;
 	  var setter = animator._setter;
 	  var useSpline = easing === 'spline';
 	  var trackLen = keyframes.length;
-
+	
 	  if (!trackLen) {
 	    return;
 	  } // Guess data type
-
-
+	
+	
 	  var firstVal = keyframes[0].value;
 	  var isValueArray = isArrayLike(firstVal);
 	  var isValueColor = false;
 	  var isValueString = false; // For vertices morphing
-
+	
 	  var arrDim = isValueArray ? getArrayDim(keyframes) : 0;
 	  var trackMaxTime; // Sort keyframe as ascending
-
+	
 	  keyframes.sort(function (a, b) {
 	    return a.time - b.time;
 	  });
 	  trackMaxTime = keyframes[trackLen - 1].time; // Percents of each keyframe
-
+	
 	  var kfPercents = []; // Value of each keyframe
-
+	
 	  var kfValues = [];
 	  var prevValue = keyframes[0].value;
 	  var isAllValueEqual = true;
-
+	
 	  for (var i = 0; i < trackLen; i++) {
 	    kfPercents.push(keyframes[i].time / trackMaxTime); // Assume value is a color when it is a string
-
+	
 	    var value = keyframes[i].value; // Check if value is equal, deep check if value is array
-
+	
 	    if (!(isValueArray && isArraySame(value, prevValue, arrDim) || !isValueArray && value === prevValue)) {
 	      isAllValueEqual = false;
 	    }
-
+	
 	    prevValue = value; // Try converting a string to a color array
-
+	
 	    if (typeof value == 'string') {
 	      var colorArray = color.parse(value);
-
+	
 	      if (colorArray) {
 	        value = colorArray;
 	        isValueColor = true;
@@ -8154,16 +8517,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        isValueString = true;
 	      }
 	    }
-
+	
 	    kfValues.push(value);
 	  }
-
+	
 	  if (!forceAnimate && isAllValueEqual) {
 	    return;
 	  }
-
+	
 	  var lastValue = kfValues[trackLen - 1]; // Polyfill array and NaN value
-
+	
 	  for (var i = 0; i < trackLen - 1; i++) {
 	    if (isValueArray) {
 	      fillArr(kfValues[i], lastValue, arrDim);
@@ -8173,10 +8536,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }
-
+	
 	  isValueArray && fillArr(getter(animator._target, propName), lastValue, arrDim); // Cache the key of last frame to speed up when
 	  // animation playback is sequency
-
+	
 	  var lastFrame = 0;
 	  var lastFramePercent = 0;
 	  var start;
@@ -8185,31 +8548,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var p1;
 	  var p2;
 	  var p3;
-
+	
 	  if (isValueColor) {
 	    var rgba = [0, 0, 0, 0];
 	  }
-
+	
 	  var onframe = function (target, percent) {
 	    // Find the range keyframes
 	    // kf1-----kf2---------current--------kf3
 	    // find kf2 and kf3 and do interpolation
 	    var frame; // In the easing function like elasticOut, percent may less than 0
-
+	
 	    if (percent < 0) {
 	      frame = 0;
 	    } else if (percent < lastFramePercent) {
 	      // Start from next key
 	      // PENDING start from lastFrame ?
 	      start = Math.min(lastFrame + 1, trackLen - 1);
-
+	
 	      for (frame = start; frame >= 0; frame--) {
 	        if (kfPercents[frame] <= percent) {
 	          break;
 	        }
 	      } // PENDING really need to do this ?
-
-
+	
+	
 	      frame = Math.min(frame, trackLen - 2);
 	    } else {
 	      for (frame = lastFrame; frame < trackLen; frame++) {
@@ -8217,31 +8580,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	          break;
 	        }
 	      }
-
+	
 	      frame = Math.min(frame - 1, trackLen - 2);
 	    }
-
+	
 	    lastFrame = frame;
 	    lastFramePercent = percent;
 	    var range = kfPercents[frame + 1] - kfPercents[frame];
-
+	
 	    if (range === 0) {
 	      return;
 	    } else {
 	      w = (percent - kfPercents[frame]) / range;
 	    }
-
+	
 	    if (useSpline) {
 	      p1 = kfValues[frame];
 	      p0 = kfValues[frame === 0 ? frame : frame - 1];
 	      p2 = kfValues[frame > trackLen - 2 ? trackLen - 1 : frame + 1];
 	      p3 = kfValues[frame > trackLen - 3 ? trackLen - 1 : frame + 2];
-
+	
 	      if (isValueArray) {
 	        catmullRomInterpolateArray(p0, p1, p2, p3, w, w * w, w * w * w, getter(target, propName), arrDim);
 	      } else {
 	        var value;
-
+	
 	        if (isValueColor) {
 	          value = catmullRomInterpolateArray(p0, p1, p2, p3, w, w * w, w * w * w, rgba, 1);
 	          value = rgba2String(rgba);
@@ -8251,7 +8614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          value = catmullRomInterpolate(p0, p1, p2, p3, w, w * w, w * w * w);
 	        }
-
+	
 	        setter(target, propName, value);
 	      }
 	    } else {
@@ -8259,7 +8622,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        interpolateArray(kfValues[frame], kfValues[frame + 1], w, getter(target, propName), arrDim);
 	      } else {
 	        var value;
-
+	
 	        if (isValueColor) {
 	          interpolateArray(kfValues[frame], kfValues[frame + 1], w, rgba, 1);
 	          value = rgba2String(rgba);
@@ -8269,12 +8632,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          value = interpolateNumber(kfValues[frame], kfValues[frame + 1], w);
 	        }
-
+	
 	        setter(target, propName, value);
 	      }
 	    }
 	  };
-
+	
 	  var clip = new Clip({
 	    target: animator._target,
 	    life: trackMaxTime,
@@ -8283,11 +8646,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    onframe: onframe,
 	    ondestroy: oneTrackDone
 	  });
-
+	
 	  if (easing && easing !== 'spline') {
 	    clip.easing = easing;
 	  }
-
+	
 	  return clip;
 	}
 	/**
@@ -8298,8 +8661,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Function} getter
 	 * @param {Function} setter
 	 */
-
-
+	
+	
 	var Animator = function (target, loop, getter, setter) {
 	  this._tracks = {};
 	  this._target = target;
@@ -8312,7 +8675,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._onframeList = [];
 	  this._clipList = [];
 	};
-
+	
 	Animator.prototype = {
 	  /**
 	   * 设置动画关键帧
@@ -8324,17 +8687,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /* ms */
 	  , props) {
 	    var tracks = this._tracks;
-
+	
 	    for (var propName in props) {
 	      if (!props.hasOwnProperty(propName)) {
 	        continue;
 	      }
-
+	
 	      if (!tracks[propName]) {
 	        tracks[propName] = []; // Invalid value
-
+	
 	        var value = this._getter(this._target, propName);
-
+	
 	        if (value == null) {
 	          // zrLog('Invalid property ' + propName);
 	          continue;
@@ -8342,8 +8705,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        //  Then props is given initialize value
 	        // Else
 	        //  Initialize value from current prop value
-
-
+	
+	
 	        if (time !== 0) {
 	          tracks[propName].push({
 	            time: 0,
@@ -8351,16 +8714,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	          });
 	        }
 	      }
-
+	
 	      tracks[propName].push({
 	        time: time,
 	        value: props[propName]
 	      });
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 添加动画每一帧的回调函数
 	   * @param  {Function} callback
@@ -8368,21 +8731,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  during: function (callback) {
 	    this._onframeList.push(callback);
-
+	
 	    return this;
 	  },
 	  pause: function () {
 	    for (var i = 0; i < this._clipList.length; i++) {
 	      this._clipList[i].pause();
 	    }
-
+	
 	    this._paused = true;
 	  },
 	  resume: function () {
 	    for (var i = 0; i < this._clipList.length; i++) {
 	      this._clipList[i].resume();
 	    }
-
+	
 	    this._paused = false;
 	  },
 	  isPaused: function () {
@@ -8391,16 +8754,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _doneCallback: function () {
 	    // Clear all tracks
 	    this._tracks = {}; // Clear all clips
-
+	
 	    this._clipList.length = 0;
 	    var doneList = this._doneList;
 	    var len = doneList.length;
-
+	
 	    for (var i = 0; i < len; i++) {
 	      doneList[i].call(this);
 	    }
 	  },
-
+	
 	  /**
 	   * 开始执行动画
 	   * @param  {string|Function} [easing]
@@ -8411,44 +8774,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	  start: function (easing, forceAnimate) {
 	    var self = this;
 	    var clipCount = 0;
-
+	
 	    var oneTrackDone = function () {
 	      clipCount--;
-
+	
 	      if (!clipCount) {
 	        self._doneCallback();
 	      }
 	    };
-
+	
 	    var lastClip;
-
+	
 	    for (var propName in this._tracks) {
 	      if (!this._tracks.hasOwnProperty(propName)) {
 	        continue;
 	      }
-
+	
 	      var clip = createTrackClip(this, easing, oneTrackDone, this._tracks[propName], propName, forceAnimate);
-
+	
 	      if (clip) {
 	        this._clipList.push(clip);
-
+	
 	        clipCount++; // If start after added to animation
-
+	
 	        if (this.animation) {
 	          this.animation.addClip(clip);
 	        }
-
+	
 	        lastClip = clip;
 	      }
 	    } // Add during callback on the last clip
-
-
+	
+	
 	    if (lastClip) {
 	      var oldOnFrame = lastClip.onframe;
-
+	
 	      lastClip.onframe = function (target, percent) {
 	        oldOnFrame(target, percent);
-
+	
 	        for (var i = 0; i < self._onframeList.length; i++) {
 	          self._onframeList[i](target, percent);
 	        }
@@ -8456,15 +8819,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } // This optimization will help the case that in the upper application
 	    // the view may be refreshed frequently, where animation will be
 	    // called repeatly but nothing changed.
-
-
+	
+	
 	    if (!clipCount) {
 	      this._doneCallback();
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 停止动画
 	   * @param {boolean} forwardToLast If move to last frame before stop
@@ -8472,21 +8835,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  stop: function (forwardToLast) {
 	    var clipList = this._clipList;
 	    var animation = this.animation;
-
+	
 	    for (var i = 0; i < clipList.length; i++) {
 	      var clip = clipList[i];
-
+	
 	      if (forwardToLast) {
 	        // Move to last frame before stop
 	        clip.onframe(this._target, 1);
 	      }
-
+	
 	      animation && animation.removeClip(clip);
 	    }
-
+	
 	    clipList.length = 0;
 	  },
-
+	
 	  /**
 	   * 设置动画延迟开始的时间
 	   * @param  {number} time 单位ms
@@ -8496,7 +8859,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._delay = time;
 	    return this;
 	  },
-
+	
 	  /**
 	   * 添加动画结束的回调
 	   * @param  {Function} cb
@@ -8506,10 +8869,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (cb) {
 	      this._doneList.push(cb);
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * @return {Array.<module:zrender/animation/Clip>}
 	   */
@@ -8522,10 +8885,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 30 */
+/*!***************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/animation/Clip.js ***!
+  \***************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var easingFuncs = __webpack_require__(31);
-
+	var easingFuncs = __webpack_require__(/*! ./easing */ 31);
+	
 	/**
 	 * 动画主控制器
 	 * @config target 动画对象，可以是数组，如果是数组的话会批量分发onframe等事件
@@ -8542,14 +8908,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function Clip(options) {
 	  this._target = options.target; // 生命周期
-
+	
 	  this._life = options.life || 1000; // 延时
-
+	
 	  this._delay = options.delay || 0; // 开始时间
 	  // this._startTime = new Date().getTime() + this._delay;// 单位毫秒
-
+	
 	  this._initialized = false; // 是否循环
-
+	
 	  this.loop = options.loop == null ? false : options.loop;
 	  this.gap = options.gap || 0;
 	  this.easing = options.easing || 'Linear';
@@ -8559,7 +8925,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._pausedTime = 0;
 	  this._paused = false;
 	}
-
+	
 	Clip.prototype = {
 	  constructor: Clip,
 	  step: function (globalTime, deltaTime) {
@@ -8569,38 +8935,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this._startTime = globalTime + this._delay;
 	      this._initialized = true;
 	    }
-
+	
 	    if (this._paused) {
 	      this._pausedTime += deltaTime;
 	      return;
 	    }
-
+	
 	    var percent = (globalTime - this._startTime - this._pausedTime) / this._life; // 还没开始
-
+	
 	    if (percent < 0) {
 	      return;
 	    }
-
+	
 	    percent = Math.min(percent, 1);
 	    var easing = this.easing;
 	    var easingFunc = typeof easing == 'string' ? easingFuncs[easing] : easing;
 	    var schedule = typeof easingFunc === 'function' ? easingFunc(percent) : percent;
 	    this.fire('frame', schedule); // 结束
-
+	
 	    if (percent == 1) {
 	      if (this.loop) {
 	        this.restart(globalTime); // 重新开始周期
 	        // 抛出而不是直接调用事件直到 stage.update 后再统一调用这些事件
-
+	
 	        return 'restart';
 	      } // 动画完成将这个控制器标识为待删除
 	      // 在Animation.update中进行批量删除
-
-
+	
+	
 	      this._needsRemove = true;
 	      return 'destroy';
 	    }
-
+	
 	    return null;
 	  },
 	  restart: function (globalTime) {
@@ -8611,7 +8977,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  fire: function (eventType, arg) {
 	    eventType = 'on' + eventType;
-
+	
 	    if (this[eventType]) {
 	      this[eventType](this._target, arg);
 	    }
@@ -8628,6 +8994,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 31 */
+/*!*****************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/animation/easing.js ***!
+  \*****************************************************/
 /***/ function(module, exports) {
 
 	/**
@@ -8643,7 +9012,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  linear: function (k) {
 	    return k;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8651,7 +9020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  quadraticIn: function (k) {
 	    return k * k;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8659,7 +9028,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  quadraticOut: function (k) {
 	    return k * (2 - k);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8668,11 +9037,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if ((k *= 2) < 1) {
 	      return 0.5 * k * k;
 	    }
-
+	
 	    return -0.5 * (--k * (k - 2) - 1);
 	  },
 	  // 三次方的缓动（t^3）
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8680,7 +9049,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  cubicIn: function (k) {
 	    return k * k * k;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8688,7 +9057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  cubicOut: function (k) {
 	    return --k * k * k + 1;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8697,11 +9066,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if ((k *= 2) < 1) {
 	      return 0.5 * k * k * k;
 	    }
-
+	
 	    return 0.5 * ((k -= 2) * k * k + 2);
 	  },
 	  // 四次方的缓动（t^4）
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8709,7 +9078,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  quarticIn: function (k) {
 	    return k * k * k * k;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8717,7 +9086,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  quarticOut: function (k) {
 	    return 1 - --k * k * k * k;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8726,11 +9095,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if ((k *= 2) < 1) {
 	      return 0.5 * k * k * k * k;
 	    }
-
+	
 	    return -0.5 * ((k -= 2) * k * k * k - 2);
 	  },
 	  // 五次方的缓动（t^5）
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8738,7 +9107,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  quinticIn: function (k) {
 	    return k * k * k * k * k;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8746,7 +9115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  quinticOut: function (k) {
 	    return --k * k * k * k * k + 1;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8755,11 +9124,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if ((k *= 2) < 1) {
 	      return 0.5 * k * k * k * k * k;
 	    }
-
+	
 	    return 0.5 * ((k -= 2) * k * k * k * k + 2);
 	  },
 	  // 正弦曲线的缓动（sin(t)）
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8767,7 +9136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  sinusoidalIn: function (k) {
 	    return 1 - Math.cos(k * Math.PI / 2);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8775,7 +9144,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  sinusoidalOut: function (k) {
 	    return Math.sin(k * Math.PI / 2);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8784,7 +9153,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return 0.5 * (1 - Math.cos(Math.PI * k));
 	  },
 	  // 指数曲线的缓动（2^t）
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8792,7 +9161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  exponentialIn: function (k) {
 	    return k === 0 ? 0 : Math.pow(1024, k - 1);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8800,7 +9169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  exponentialOut: function (k) {
 	    return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8809,19 +9178,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (k === 0) {
 	      return 0;
 	    }
-
+	
 	    if (k === 1) {
 	      return 1;
 	    }
-
+	
 	    if ((k *= 2) < 1) {
 	      return 0.5 * Math.pow(1024, k - 1);
 	    }
-
+	
 	    return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
 	  },
 	  // 圆形曲线的缓动（sqrt(1-t^2)）
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8829,7 +9198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  circularIn: function (k) {
 	    return 1 - Math.sqrt(1 - k * k);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8837,7 +9206,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  circularOut: function (k) {
 	    return Math.sqrt(1 - --k * k);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8846,11 +9215,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if ((k *= 2) < 1) {
 	      return -0.5 * (Math.sqrt(1 - k * k) - 1);
 	    }
-
+	
 	    return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
 	  },
 	  // 创建类似于弹簧在停止前来回振荡的动画
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8859,25 +9228,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var s;
 	    var a = 0.1;
 	    var p = 0.4;
-
+	
 	    if (k === 0) {
 	      return 0;
 	    }
-
+	
 	    if (k === 1) {
 	      return 1;
 	    }
-
+	
 	    if (!a || a < 1) {
 	      a = 1;
 	      s = p / 4;
 	    } else {
 	      s = p * Math.asin(1 / a) / (2 * Math.PI);
 	    }
-
+	
 	    return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8886,25 +9255,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var s;
 	    var a = 0.1;
 	    var p = 0.4;
-
+	
 	    if (k === 0) {
 	      return 0;
 	    }
-
+	
 	    if (k === 1) {
 	      return 1;
 	    }
-
+	
 	    if (!a || a < 1) {
 	      a = 1;
 	      s = p / 4;
 	    } else {
 	      s = p * Math.asin(1 / a) / (2 * Math.PI);
 	    }
-
+	
 	    return a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8913,30 +9282,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var s;
 	    var a = 0.1;
 	    var p = 0.4;
-
+	
 	    if (k === 0) {
 	      return 0;
 	    }
-
+	
 	    if (k === 1) {
 	      return 1;
 	    }
-
+	
 	    if (!a || a < 1) {
 	      a = 1;
 	      s = p / 4;
 	    } else {
 	      s = p * Math.asin(1 / a) / (2 * Math.PI);
 	    }
-
+	
 	    if ((k *= 2) < 1) {
 	      return -0.5 * (a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
 	    }
-
+	
 	    return a * Math.pow(2, -10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
 	  },
 	  // 在某一动画开始沿指示的路径进行动画处理前稍稍收回该动画的移动
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8945,7 +9314,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var s = 1.70158;
 	    return k * k * ((s + 1) * k - s);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8954,22 +9323,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var s = 1.70158;
 	    return --k * k * ((s + 1) * k + s) + 1;
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
 	  */
 	  backInOut: function (k) {
 	    var s = 1.70158 * 1.525;
-
+	
 	    if ((k *= 2) < 1) {
 	      return 0.5 * (k * k * ((s + 1) * k - s));
 	    }
-
+	
 	    return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
 	  },
 	  // 创建弹跳效果
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8977,7 +9346,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bounceIn: function (k) {
 	    return 1 - easing.bounceOut(1 - k);
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -8993,7 +9362,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
 	    }
 	  },
-
+	
 	  /**
 	  * @param {number} k
 	  * @return {number}
@@ -9002,7 +9371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (k < 0.5) {
 	      return easing.bounceIn(k * 2) * 0.5;
 	    }
-
+	
 	    return easing.bounceOut(k * 2 - 1) * 0.5 + 0.5;
 	  }
 	};
@@ -9011,10 +9380,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 32 */
+/*!***********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/tool/color.js ***!
+  \***********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var LRU = __webpack_require__(33);
-
+	var LRU = __webpack_require__(/*! ../core/LRU */ 33);
+	
 	var kCSSColorTable = {
 	  'transparent': [0, 0, 0, 0],
 	  'aliceblue': [240, 248, 255, 1],
@@ -9165,70 +9537,70 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'yellow': [255, 255, 0, 1],
 	  'yellowgreen': [154, 205, 50, 1]
 	};
-
+	
 	function clampCssByte(i) {
 	  // Clamp to integer 0 .. 255.
 	  i = Math.round(i); // Seems to be what Chrome does (vs truncation).
-
+	
 	  return i < 0 ? 0 : i > 255 ? 255 : i;
 	}
-
+	
 	function clampCssAngle(i) {
 	  // Clamp to integer 0 .. 360.
 	  i = Math.round(i); // Seems to be what Chrome does (vs truncation).
-
+	
 	  return i < 0 ? 0 : i > 360 ? 360 : i;
 	}
-
+	
 	function clampCssFloat(f) {
 	  // Clamp to float 0.0 .. 1.0.
 	  return f < 0 ? 0 : f > 1 ? 1 : f;
 	}
-
+	
 	function parseCssInt(str) {
 	  // int or percentage.
 	  if (str.length && str.charAt(str.length - 1) === '%') {
 	    return clampCssByte(parseFloat(str) / 100 * 255);
 	  }
-
+	
 	  return clampCssByte(parseInt(str, 10));
 	}
-
+	
 	function parseCssFloat(str) {
 	  // float or percentage.
 	  if (str.length && str.charAt(str.length - 1) === '%') {
 	    return clampCssFloat(parseFloat(str) / 100);
 	  }
-
+	
 	  return clampCssFloat(parseFloat(str));
 	}
-
+	
 	function cssHueToRgb(m1, m2, h) {
 	  if (h < 0) {
 	    h += 1;
 	  } else if (h > 1) {
 	    h -= 1;
 	  }
-
+	
 	  if (h * 6 < 1) {
 	    return m1 + (m2 - m1) * h * 6;
 	  }
-
+	
 	  if (h * 2 < 1) {
 	    return m2;
 	  }
-
+	
 	  if (h * 3 < 2) {
 	    return m1 + (m2 - m1) * (2 / 3 - h) * 6;
 	  }
-
+	
 	  return m1;
 	}
-
+	
 	function lerpNumber(a, b, p) {
 	  return a + (b - a) * p;
 	}
-
+	
 	function setRgba(out, r, g, b, a) {
 	  out[0] = r;
 	  out[1] = g;
@@ -9236,7 +9608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  out[3] = a;
 	  return out;
 	}
-
+	
 	function copyRgba(out, a) {
 	  out[0] = a[0];
 	  out[1] = a[1];
@@ -9244,16 +9616,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  out[3] = a[3];
 	  return out;
 	}
-
+	
 	var colorCache = new LRU(20);
 	var lastRemovedArr = null;
-
+	
 	function putToCache(colorStr, rgbaArr) {
 	  // Reuse removed array
 	  if (lastRemovedArr) {
 	    copyRgba(lastRemovedArr, rgbaArr);
 	  }
-
+	
 	  lastRemovedArr = colorCache.put(colorStr, lastRemovedArr || rgbaArr.slice());
 	}
 	/**
@@ -9262,115 +9634,115 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Array.<number>}
 	 * @memberOf module:zrender/util/color
 	 */
-
-
+	
+	
 	function parse(colorStr, rgbaArr) {
 	  if (!colorStr) {
 	    return;
 	  }
-
+	
 	  rgbaArr = rgbaArr || [];
 	  var cached = colorCache.get(colorStr);
-
+	
 	  if (cached) {
 	    return copyRgba(rgbaArr, cached);
 	  } // colorStr may be not string
-
-
+	
+	
 	  colorStr = colorStr + ''; // Remove all whitespace, not compliant, but should just be more accepting.
-
+	
 	  var str = colorStr.replace(/ /g, '').toLowerCase(); // Color keywords (and transparent) lookup.
-
+	
 	  if (str in kCSSColorTable) {
 	    copyRgba(rgbaArr, kCSSColorTable[str]);
 	    putToCache(colorStr, rgbaArr);
 	    return rgbaArr;
 	  } // #abc and #abc123 syntax.
-
-
+	
+	
 	  if (str.charAt(0) === '#') {
 	    if (str.length === 4) {
 	      var iv = parseInt(str.substr(1), 16); // TODO(deanm): Stricter parsing.
-
+	
 	      if (!(iv >= 0 && iv <= 0xfff)) {
 	        setRgba(rgbaArr, 0, 0, 0, 1);
 	        return; // Covers NaN.
 	      }
-
+	
 	      setRgba(rgbaArr, (iv & 0xf00) >> 4 | (iv & 0xf00) >> 8, iv & 0xf0 | (iv & 0xf0) >> 4, iv & 0xf | (iv & 0xf) << 4, 1);
 	      putToCache(colorStr, rgbaArr);
 	      return rgbaArr;
 	    } else if (str.length === 7) {
 	      var iv = parseInt(str.substr(1), 16); // TODO(deanm): Stricter parsing.
-
+	
 	      if (!(iv >= 0 && iv <= 0xffffff)) {
 	        setRgba(rgbaArr, 0, 0, 0, 1);
 	        return; // Covers NaN.
 	      }
-
+	
 	      setRgba(rgbaArr, (iv & 0xff0000) >> 16, (iv & 0xff00) >> 8, iv & 0xff, 1);
 	      putToCache(colorStr, rgbaArr);
 	      return rgbaArr;
 	    }
-
+	
 	    return;
 	  }
-
+	
 	  var op = str.indexOf('('),
 	      ep = str.indexOf(')');
-
+	
 	  if (op !== -1 && ep + 1 === str.length) {
 	    var fname = str.substr(0, op);
 	    var params = str.substr(op + 1, ep - (op + 1)).split(',');
 	    var alpha = 1; // To allow case fallthrough.
-
+	
 	    switch (fname) {
 	      case 'rgba':
 	        if (params.length !== 4) {
 	          setRgba(rgbaArr, 0, 0, 0, 1);
 	          return;
 	        }
-
+	
 	        alpha = parseCssFloat(params.pop());
 	      // jshint ignore:line
 	      // Fall through.
-
+	
 	      case 'rgb':
 	        if (params.length !== 3) {
 	          setRgba(rgbaArr, 0, 0, 0, 1);
 	          return;
 	        }
-
+	
 	        setRgba(rgbaArr, parseCssInt(params[0]), parseCssInt(params[1]), parseCssInt(params[2]), alpha);
 	        putToCache(colorStr, rgbaArr);
 	        return rgbaArr;
-
+	
 	      case 'hsla':
 	        if (params.length !== 4) {
 	          setRgba(rgbaArr, 0, 0, 0, 1);
 	          return;
 	        }
-
+	
 	        params[3] = parseCssFloat(params[3]);
 	        hsla2rgba(params, rgbaArr);
 	        putToCache(colorStr, rgbaArr);
 	        return rgbaArr;
-
+	
 	      case 'hsl':
 	        if (params.length !== 3) {
 	          setRgba(rgbaArr, 0, 0, 0, 1);
 	          return;
 	        }
-
+	
 	        hsla2rgba(params, rgbaArr);
 	        putToCache(colorStr, rgbaArr);
 	        return rgbaArr;
-
+	
 	      default:
 	        return;
 	    }
 	  }
-
+	
 	  setRgba(rgbaArr, 0, 0, 0, 1);
 	  return;
 	}
@@ -9379,51 +9751,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} rgba
 	 * @return {Array.<number>} rgba
 	 */
-
-
+	
+	
 	function hsla2rgba(hsla, rgba) {
 	  var h = (parseFloat(hsla[0]) % 360 + 360) % 360 / 360; // 0 .. 1
 	  // NOTE(deanm): According to the CSS spec s/l should only be
 	  // percentages, but we don't bother and let float or percentage.
-
+	
 	  var s = parseCssFloat(hsla[1]);
 	  var l = parseCssFloat(hsla[2]);
 	  var m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s;
 	  var m1 = l * 2 - m2;
 	  rgba = rgba || [];
 	  setRgba(rgba, clampCssByte(cssHueToRgb(m1, m2, h + 1 / 3) * 255), clampCssByte(cssHueToRgb(m1, m2, h) * 255), clampCssByte(cssHueToRgb(m1, m2, h - 1 / 3) * 255), 1);
-
+	
 	  if (hsla.length === 4) {
 	    rgba[3] = hsla[3];
 	  }
-
+	
 	  return rgba;
 	}
 	/**
 	 * @param {Array.<number>} rgba
 	 * @return {Array.<number>} hsla
 	 */
-
-
+	
+	
 	function rgba2hsla(rgba) {
 	  if (!rgba) {
 	    return;
 	  } // RGB from 0 to 255
-
-
+	
+	
 	  var R = rgba[0] / 255;
 	  var G = rgba[1] / 255;
 	  var B = rgba[2] / 255;
 	  var vMin = Math.min(R, G, B); // Min. value of RGB
-
+	
 	  var vMax = Math.max(R, G, B); // Max. value of RGB
-
+	
 	  var delta = vMax - vMin; // Delta RGB value
-
+	
 	  var L = (vMax + vMin) / 2;
 	  var H;
 	  var S; // HSL results from 0 to 1
-
+	
 	  if (delta === 0) {
 	    H = 0;
 	    S = 0;
@@ -9433,11 +9805,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      S = delta / (2 - vMax - vMin);
 	    }
-
+	
 	    var deltaR = ((vMax - R) / 6 + delta / 2) / delta;
 	    var deltaG = ((vMax - G) / 6 + delta / 2) / delta;
 	    var deltaB = ((vMax - B) / 6 + delta / 2) / delta;
-
+	
 	    if (R === vMax) {
 	      H = deltaB - deltaG;
 	    } else if (G === vMax) {
@@ -9445,22 +9817,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (B === vMax) {
 	      H = 2 / 3 + deltaG - deltaR;
 	    }
-
+	
 	    if (H < 0) {
 	      H += 1;
 	    }
-
+	
 	    if (H > 1) {
 	      H -= 1;
 	    }
 	  }
-
+	
 	  var hsla = [H * 360, S, L];
-
+	
 	  if (rgba[3] != null) {
 	    hsla.push(rgba[3]);
 	  }
-
+	
 	  return hsla;
 	}
 	/**
@@ -9469,11 +9841,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {string}
 	 * @memberOf module:zrender/util/color
 	 */
-
-
+	
+	
 	function lift(color, level) {
 	  var colorArr = parse(color);
-
+	
 	  if (colorArr) {
 	    for (var i = 0; i < 3; i++) {
 	      if (level < 0) {
@@ -9481,8 +9853,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else {
 	        colorArr[i] = (255 - colorArr[i]) * level + colorArr[i] | 0;
 	      }
+	
+	      if (colorArr[i] > 255) {
+	        colorArr[i] = 255;
+	      } else if (color[i] < 0) {
+	        colorArr[i] = 0;
+	      }
 	    }
-
+	
 	    return stringify(colorArr, colorArr.length === 4 ? 'rgba' : 'rgb');
 	  }
 	}
@@ -9491,11 +9869,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {string}
 	 * @memberOf module:zrender/util/color
 	 */
-
-
+	
+	
 	function toHex(color) {
 	  var colorArr = parse(color);
-
+	
 	  if (colorArr) {
 	    return ((1 << 24) + (colorArr[0] << 16) + (colorArr[1] << 8) + +colorArr[2]).toString(16).slice(1);
 	  }
@@ -9507,13 +9885,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} [out] Mapped gba color array
 	 * @return {Array.<number>} will be null/undefined if input illegal.
 	 */
-
-
+	
+	
 	function fastLerp(normalizedValue, colors, out) {
 	  if (!(colors && colors.length) || !(normalizedValue >= 0 && normalizedValue <= 1)) {
 	    return;
 	  }
-
+	
 	  out = out || [];
 	  var value = normalizedValue * (colors.length - 1);
 	  var leftIndex = Math.floor(value);
@@ -9530,8 +9908,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @deprecated
 	 */
-
-
+	
+	
 	var fastMapToColor = fastLerp;
 	/**
 	 * @param {number} normalizedValue A float between 0 and 1.
@@ -9541,12 +9919,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                           return {color: ..., leftIndex: ..., rightIndex: ..., value: ...},
 	 * @memberOf module:zrender/util/color
 	 */
-
+	
 	function lerp(normalizedValue, colors, fullOutput) {
 	  if (!(colors && colors.length) || !(normalizedValue >= 0 && normalizedValue <= 1)) {
 	    return;
 	  }
-
+	
 	  var value = normalizedValue * (colors.length - 1);
 	  var leftIndex = Math.floor(value);
 	  var rightIndex = Math.ceil(value);
@@ -9564,8 +9942,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @deprecated
 	 */
-
-
+	
+	
 	var mapToColor = lerp;
 	/**
 	 * @param {string} color
@@ -9575,10 +9953,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {string} Color string in rgba format.
 	 * @memberOf module:zrender/util/color
 	 */
-
+	
 	function modifyHSL(color, h, s, l) {
 	  color = parse(color);
-
+	
 	  if (color) {
 	    color = rgba2hsla(color);
 	    h != null && (color[0] = clampCssAngle(h));
@@ -9593,11 +9971,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {string} Color string in rgba format.
 	 * @memberOf module:zrender/util/color
 	 */
-
-
+	
+	
 	function modifyAlpha(color, alpha) {
 	  color = parse(color);
-
+	
 	  if (color && alpha != null) {
 	    color[3] = clampCssFloat(alpha);
 	    return stringify(color, 'rgba');
@@ -9608,22 +9986,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} type 'rgba', 'hsva', ...
 	 * @return {string} Result color. (If input illegal, return undefined).
 	 */
-
-
+	
+	
 	function stringify(arrColor, type) {
 	  if (!arrColor || !arrColor.length) {
 	    return;
 	  }
-
+	
 	  var colorStr = arrColor[0] + ',' + arrColor[1] + ',' + arrColor[2];
-
+	
 	  if (type === 'rgba' || type === 'hsva' || type === 'hsla') {
 	    colorStr += ',' + arrColor[3];
 	  }
-
+	
 	  return type + '(' + colorStr + ')';
 	}
-
+	
 	exports.parse = parse;
 	exports.lift = lift;
 	exports.toHex = toHex;
@@ -9637,11 +10015,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 33 */
+/*!*********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/LRU.js ***!
+  \*********************************************/
 /***/ function(module, exports) {
 
 	// Simple LRU cache use doubly linked list
 	// @module zrender/core/LRU
-
+	
 	/**
 	 * Simple double linked list. Compared with array, it has O(1) remove operation.
 	 * @constructor
@@ -9654,18 +10035,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * @type {module:zrender/core/LRU~Entry}
 	   */
-
+	
 	  this.tail = null;
 	  this._len = 0;
 	};
-
+	
 	var linkedListProto = LinkedList.prototype;
 	/**
 	 * Insert a new value at the tail
 	 * @param  {} val
 	 * @return {module:zrender/core/LRU~Entry}
 	 */
-
+	
 	linkedListProto.insert = function (val) {
 	  var entry = new Entry(val);
 	  this.insertEntry(entry);
@@ -9675,8 +10056,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Insert an entry at the tail
 	 * @param  {module:zrender/core/LRU~Entry} entry
 	 */
-
-
+	
+	
 	linkedListProto.insertEntry = function (entry) {
 	  if (!this.head) {
 	    this.head = this.tail = entry;
@@ -9686,49 +10067,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	    entry.next = null;
 	    this.tail = entry;
 	  }
-
+	
 	  this._len++;
 	};
 	/**
 	 * Remove entry.
 	 * @param  {module:zrender/core/LRU~Entry} entry
 	 */
-
-
+	
+	
 	linkedListProto.remove = function (entry) {
 	  var prev = entry.prev;
 	  var next = entry.next;
-
+	
 	  if (prev) {
 	    prev.next = next;
 	  } else {
 	    // Is head
 	    this.head = next;
 	  }
-
+	
 	  if (next) {
 	    next.prev = prev;
 	  } else {
 	    // Is tail
 	    this.tail = prev;
 	  }
-
+	
 	  entry.next = entry.prev = null;
 	  this._len--;
 	};
 	/**
 	 * @return {number}
 	 */
-
-
+	
+	
 	linkedListProto.len = function () {
 	  return this._len;
 	};
 	/**
 	 * Clear list
 	 */
-
-
+	
+	
 	linkedListProto.clear = function () {
 	  this.head = this.tail = null;
 	  this._len = 0;
@@ -9737,8 +10118,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @constructor
 	 * @param {} val
 	 */
-
-
+	
+	
 	var Entry = function (val) {
 	  /**
 	   * @type {}
@@ -9747,12 +10128,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * @type {module:zrender/core/LRU~Entry}
 	   */
-
+	
 	  this.next;
 	  /**
 	   * @type {module:zrender/core/LRU~Entry}
 	   */
-
+	
 	  this.prev;
 	};
 	/**
@@ -9760,32 +10141,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @constructor
 	 * @alias module:zrender/core/LRU
 	 */
-
-
+	
+	
 	var LRU = function (maxSize) {
 	  this._list = new LinkedList();
 	  this._map = {};
 	  this._maxSize = maxSize || 10;
 	  this._lastRemovedEntry = null;
 	};
-
+	
 	var LRUProto = LRU.prototype;
 	/**
 	 * @param  {string} key
 	 * @param  {} value
 	 * @return {} Removed value
 	 */
-
+	
 	LRUProto.put = function (key, value) {
 	  var list = this._list;
 	  var map = this._map;
 	  var removed = null;
-
+	
 	  if (map[key] == null) {
 	    var len = list.len(); // Reuse last removed entry
-
+	
 	    var entry = this._lastRemovedEntry;
-
+	
 	    if (len >= this._maxSize && len > 0) {
 	      // Remove the least recently used
 	      var leastUsedEntry = list.head;
@@ -9794,64 +10175,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	      removed = leastUsedEntry.value;
 	      this._lastRemovedEntry = leastUsedEntry;
 	    }
-
+	
 	    if (entry) {
 	      entry.value = value;
 	    } else {
 	      entry = new Entry(value);
 	    }
-
+	
 	    entry.key = key;
 	    list.insertEntry(entry);
 	    map[key] = entry;
 	  }
-
+	
 	  return removed;
 	};
 	/**
 	 * @param  {string} key
 	 * @return {}
 	 */
-
-
+	
+	
 	LRUProto.get = function (key) {
 	  var entry = this._map[key];
 	  var list = this._list;
-
+	
 	  if (entry != null) {
 	    // Put the latest used entry in the tail
 	    if (entry !== list.tail) {
 	      list.remove(entry);
 	      list.insertEntry(entry);
 	    }
-
+	
 	    return entry.value;
 	  }
 	};
 	/**
 	 * Clear the cache
 	 */
-
-
+	
+	
 	LRUProto.clear = function () {
 	  this._list.clear();
-
+	
 	  this._map = {};
 	};
-
+	
 	var _default = LRU;
 	module.exports = _default;
 
 /***/ },
 /* 34 */
+/*!*********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/log.js ***!
+  \*********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _config = __webpack_require__(35);
-
+	var _config = __webpack_require__(/*! ../config */ 35);
+	
 	var debugMode = _config.debugMode;
-
+	
 	var log = function () {};
-
+	
 	if (debugMode === 1) {
 	  log = function () {
 	    for (var k in arguments) {
@@ -9865,16 +10249,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 	}
-
+	
 	var _default = log;
 	module.exports = _default;
 
 /***/ },
 /* 35 */
+/*!*******************************************!*\
+  !*** ./~/echarts/~/zrender/lib/config.js ***!
+  \*******************************************/
 /***/ function(module, exports) {
 
 	var dpr = 1; // If in browser environment
-
+	
 	if (typeof window !== 'undefined') {
 	  dpr = Math.max(window.devicePixelRatio || 1, 1);
 	}
@@ -9883,40 +10270,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @exports zrender/config
 	 * @author Kener (@Kener-林峰, kener.linfeng@gmail.com)
 	 */
-
+	
 	/**
 	 * debug日志选项：catchBrushException为true下有效
 	 * 0 : 不生成debug数据，发布用
 	 * 1 : 异常抛出，调试用
 	 * 2 : 控制台输出，调试用
 	 */
-
-
+	
+	
 	var debugMode = 0; // retina 屏幕优化
-
+	
 	var devicePixelRatio = dpr;
 	exports.debugMode = debugMode;
 	exports.devicePixelRatio = devicePixelRatio;
 
 /***/ },
 /* 36 */
+/*!***********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/mixin/RectText.js ***!
+  \***********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var textHelper = __webpack_require__(37);
-
-	var BoundingRect = __webpack_require__(39);
-
+	var textHelper = __webpack_require__(/*! ../helper/text */ 37);
+	
+	var BoundingRect = __webpack_require__(/*! ../../core/BoundingRect */ 39);
+	
 	/**
 	 * Mixin for drawing text in a element bounding rect
 	 * @module zrender/mixin/RectText
 	 */
 	var tmpRect = new BoundingRect();
-
+	
 	var RectText = function () {};
-
+	
 	RectText.prototype = {
 	  constructor: RectText,
-
+	
 	  /**
 	   * Draw text in a rect with specified position.
 	   * @param  {CanvasRenderingContext2D} ctx
@@ -9925,21 +10315,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  drawRectText: function (ctx, rect) {
 	    var style = this.style;
 	    rect = style.textRect || rect; // Optimize, avoid normalize every time.
-
+	
 	    this.__dirty && textHelper.normalizeTextStyle(style, true);
 	    var text = style.text; // Convert to string
-
+	
 	    text != null && (text += '');
-
+	
 	    if (!textHelper.needDrawText(text, style)) {
 	      return;
 	    } // FIXME
-
-
+	
+	
 	    ctx.save(); // Transform rect to view space
-
+	
 	    var transform = this.transform;
-
+	
 	    if (!style.transformText) {
 	      if (transform) {
 	        tmpRect.copy(rect);
@@ -9949,8 +10339,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      this.setTransform(ctx);
 	    } // transformText and textRotation can not be used at the same time.
-
-
+	
+	
 	    textHelper.renderText(this, ctx, text, style, rect);
 	    ctx.restore();
 	  }
@@ -9960,25 +10350,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 37 */
+/*!********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/helper/text.js ***!
+  \********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(5);
-
+	var _util = __webpack_require__(/*! ../../core/util */ 5);
+	
 	var retrieve2 = _util.retrieve2;
 	var retrieve3 = _util.retrieve3;
 	var each = _util.each;
 	var normalizeCssArray = _util.normalizeCssArray;
 	var isString = _util.isString;
 	var isObject = _util.isObject;
-
-	var textContain = __webpack_require__(38);
-
-	var roundRectHelper = __webpack_require__(41);
-
-	var imageHelper = __webpack_require__(40);
-
-	var fixShadow = __webpack_require__(21);
-
+	
+	var textContain = __webpack_require__(/*! ../../contain/text */ 38);
+	
+	var roundRectHelper = __webpack_require__(/*! ./roundRect */ 41);
+	
+	var imageHelper = __webpack_require__(/*! ./image */ 40);
+	
+	var fixShadow = __webpack_require__(/*! ./fixShadow */ 21);
+	
 	// TODO: Have not support 'start', 'end' yet.
 	var VALID_TEXT_ALIGN = {
 	  left: 1,
@@ -9994,25 +10387,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {module:zrender/graphic/Style} style
 	 * @return {module:zrender/graphic/Style} The input style.
 	 */
-
+	
 	function normalizeTextStyle(style) {
 	  normalizeStyle(style);
 	  each(style.rich, normalizeStyle);
 	  return style;
 	}
-
+	
 	function normalizeStyle(style) {
 	  if (style) {
 	    style.font = textContain.makeFont(style);
 	    var textAlign = style.textAlign;
 	    textAlign === 'middle' && (textAlign = 'center');
 	    style.textAlign = textAlign == null || VALID_TEXT_ALIGN[textAlign] ? textAlign : 'left'; // Compatible with textBaseline.
-
+	
 	    var textVerticalAlign = style.textVerticalAlign || style.textBaseline;
 	    textVerticalAlign === 'center' && (textVerticalAlign = 'middle');
 	    style.textVerticalAlign = textVerticalAlign == null || VALID_TEXT_VERTICAL_ALIGN[textVerticalAlign] ? textVerticalAlign : 'top';
 	    var textPadding = style.textPadding;
-
+	
 	    if (textPadding) {
 	      style.textPadding = normalizeCssArray(style.textPadding);
 	    }
@@ -10025,21 +10418,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object|boolean} [rect] {x, y, width, height}
 	 *                  If set false, rect text is not used.
 	 */
-
-
+	
+	
 	function renderText(hostEl, ctx, text, style, rect) {
 	  style.rich ? renderRichText(hostEl, ctx, text, style, rect) : renderPlainText(hostEl, ctx, text, style, rect);
 	}
-
+	
 	function renderPlainText(hostEl, ctx, text, style, rect) {
 	  var font = setCtx(ctx, 'font', style.font || textContain.DEFAULT_FONT);
 	  var textPadding = style.textPadding;
 	  var contentBlock = hostEl.__textCotentBlock;
-
+	
 	  if (!contentBlock || hostEl.__dirty) {
 	    contentBlock = hostEl.__textCotentBlock = textContain.parsePlainText(text, font, textPadding, style.truncate);
 	  }
-
+	
 	  var outerHeight = contentBlock.outerHeight;
 	  var textLines = contentBlock.lines;
 	  var lineHeight = contentBlock.lineHeight;
@@ -10048,13 +10441,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var baseY = boxPos.baseY;
 	  var textAlign = boxPos.textAlign;
 	  var textVerticalAlign = boxPos.textVerticalAlign; // Origin of textRotation should be the base point of text drawing.
-
+	
 	  applyTextRotation(ctx, style, rect, baseX, baseY);
 	  var boxY = textContain.adjustTextY(baseY, outerHeight, textVerticalAlign);
 	  var textX = baseX;
 	  var textY = boxY;
 	  var needDrawBg = needDrawBackground(style);
-
+	
 	  if (needDrawBg || textPadding) {
 	    // Consider performance, do not call getTextWidth util necessary.
 	    var textWidth = textContain.getWidth(text, font);
@@ -10062,37 +10455,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	    textPadding && (outerWidth += textPadding[1] + textPadding[3]);
 	    var boxX = textContain.adjustTextX(baseX, outerWidth, textAlign);
 	    needDrawBg && drawBackground(hostEl, ctx, style, boxX, boxY, outerWidth, outerHeight);
-
+	
 	    if (textPadding) {
 	      textX = getTextXForPadding(baseX, textAlign, textPadding);
 	      textY += textPadding[0];
 	    }
 	  }
-
+	
 	  setCtx(ctx, 'textAlign', textAlign || 'left'); // Force baseline to be "middle". Otherwise, if using "top", the
 	  // text will offset downward a little bit in font "Microsoft YaHei".
-
+	
 	  setCtx(ctx, 'textBaseline', 'middle'); // Always set shadowBlur and shadowOffset to avoid leak from displayable.
-
+	
 	  setCtx(ctx, 'shadowBlur', style.textShadowBlur || 0);
 	  setCtx(ctx, 'shadowColor', style.textShadowColor || 'transparent');
 	  setCtx(ctx, 'shadowOffsetX', style.textShadowOffsetX || 0);
 	  setCtx(ctx, 'shadowOffsetY', style.textShadowOffsetY || 0); // `textBaseline` is set as 'middle'.
-
+	
 	  textY += lineHeight / 2;
 	  var textStrokeWidth = style.textStrokeWidth;
 	  var textStroke = getStroke(style.textStroke, textStrokeWidth);
 	  var textFill = getFill(style.textFill);
-
+	
 	  if (textStroke) {
 	    setCtx(ctx, 'lineWidth', textStrokeWidth);
 	    setCtx(ctx, 'strokeStyle', textStroke);
 	  }
-
+	
 	  if (textFill) {
 	    setCtx(ctx, 'fillStyle', textFill);
 	  }
-
+	
 	  for (var i = 0; i < textLines.length; i++) {
 	    // Fill after stroke so the outline will not cover the main part.
 	    textStroke && ctx.strokeText(textLines[i], textX, textY);
@@ -10100,17 +10493,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    textY += lineHeight;
 	  }
 	}
-
+	
 	function renderRichText(hostEl, ctx, text, style, rect) {
 	  var contentBlock = hostEl.__textCotentBlock;
-
+	
 	  if (!contentBlock || hostEl.__dirty) {
 	    contentBlock = hostEl.__textCotentBlock = textContain.parseRichText(text, style);
 	  }
-
+	
 	  drawRichText(hostEl, ctx, contentBlock, style, rect);
 	}
-
+	
 	function drawRichText(hostEl, ctx, contentBlock, style, rect) {
 	  var contentWidth = contentBlock.width;
 	  var outerWidth = contentBlock.outerWidth;
@@ -10121,21 +10514,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var baseY = boxPos.baseY;
 	  var textAlign = boxPos.textAlign;
 	  var textVerticalAlign = boxPos.textVerticalAlign; // Origin of textRotation should be the base point of text drawing.
-
+	
 	  applyTextRotation(ctx, style, rect, baseX, baseY);
 	  var boxX = textContain.adjustTextX(baseX, outerWidth, textAlign);
 	  var boxY = textContain.adjustTextY(baseY, outerHeight, textVerticalAlign);
 	  var xLeft = boxX;
 	  var lineTop = boxY;
-
+	
 	  if (textPadding) {
 	    xLeft += textPadding[3];
 	    lineTop += textPadding[0];
 	  }
-
+	
 	  var xRight = xLeft + contentWidth;
 	  needDrawBackground(style) && drawBackground(hostEl, ctx, style, boxX, boxY, outerWidth, outerHeight);
-
+	
 	  for (var i = 0; i < contentBlock.lines.length; i++) {
 	    var line = contentBlock.lines[i];
 	    var tokens = line.tokens;
@@ -10147,41 +10540,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var lineXRight = xRight;
 	    var rightIndex = tokenCount - 1;
 	    var token;
-
+	
 	    while (leftIndex < tokenCount && (token = tokens[leftIndex], !token.textAlign || token.textAlign === 'left')) {
 	      placeToken(hostEl, ctx, token, style, lineHeight, lineTop, lineXLeft, 'left');
 	      usedWidth -= token.width;
 	      lineXLeft += token.width;
 	      leftIndex++;
 	    }
-
+	
 	    while (rightIndex >= 0 && (token = tokens[rightIndex], token.textAlign === 'right')) {
 	      placeToken(hostEl, ctx, token, style, lineHeight, lineTop, lineXRight, 'right');
 	      usedWidth -= token.width;
 	      lineXRight -= token.width;
 	      rightIndex--;
 	    } // The other tokens are placed as textAlign 'center' if there is enough space.
-
-
+	
+	
 	    lineXLeft += (contentWidth - (lineXLeft - xLeft) - (xRight - lineXRight) - usedWidth) / 2;
-
+	
 	    while (leftIndex <= rightIndex) {
 	      token = tokens[leftIndex]; // Consider width specified by user, use 'center' rather than 'left'.
-
+	
 	      placeToken(hostEl, ctx, token, style, lineHeight, lineTop, lineXLeft + token.width / 2, 'center');
 	      lineXLeft += token.width;
 	      leftIndex++;
 	    }
-
+	
 	    lineTop += lineHeight;
 	  }
 	}
-
+	
 	function applyTextRotation(ctx, style, rect, x, y) {
 	  // textRotation only apply in RectText.
 	  if (rect && style.textRotation) {
 	    var origin = style.textOrigin;
-
+	
 	    if (origin === 'center') {
 	      x = rect.width / 2 + rect.x;
 	      y = rect.height / 2 + rect.y;
@@ -10189,66 +10582,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	      x = origin[0] + rect.x;
 	      y = origin[1] + rect.y;
 	    }
-
+	
 	    ctx.translate(x, y); // Positive: anticlockwise
-
+	
 	    ctx.rotate(-style.textRotation);
 	    ctx.translate(-x, -y);
 	  }
 	}
-
+	
 	function placeToken(hostEl, ctx, token, style, lineHeight, lineTop, x, textAlign) {
 	  var tokenStyle = style.rich[token.styleName] || {}; // 'ctx.textBaseline' is always set as 'middle', for sake of
 	  // the bias of "Microsoft YaHei".
-
+	
 	  var textVerticalAlign = token.textVerticalAlign;
 	  var y = lineTop + lineHeight / 2;
-
+	
 	  if (textVerticalAlign === 'top') {
 	    y = lineTop + token.height / 2;
 	  } else if (textVerticalAlign === 'bottom') {
 	    y = lineTop + lineHeight - token.height / 2;
 	  }
-
+	
 	  !token.isLineHolder && needDrawBackground(tokenStyle) && drawBackground(hostEl, ctx, tokenStyle, textAlign === 'right' ? x - token.width : textAlign === 'center' ? x - token.width / 2 : x, y - token.height / 2, token.width, token.height);
 	  var textPadding = token.textPadding;
-
+	
 	  if (textPadding) {
 	    x = getTextXForPadding(x, textAlign, textPadding);
 	    y -= token.height / 2 - textPadding[2] - token.textHeight / 2;
 	  }
-
+	
 	  setCtx(ctx, 'shadowBlur', retrieve3(tokenStyle.textShadowBlur, style.textShadowBlur, 0));
 	  setCtx(ctx, 'shadowColor', tokenStyle.textShadowColor || style.textShadowColor || 'transparent');
 	  setCtx(ctx, 'shadowOffsetX', retrieve3(tokenStyle.textShadowOffsetX, style.textShadowOffsetX, 0));
 	  setCtx(ctx, 'shadowOffsetY', retrieve3(tokenStyle.textShadowOffsetY, style.textShadowOffsetY, 0));
 	  setCtx(ctx, 'textAlign', textAlign); // Force baseline to be "middle". Otherwise, if using "top", the
 	  // text will offset downward a little bit in font "Microsoft YaHei".
-
+	
 	  setCtx(ctx, 'textBaseline', 'middle');
 	  setCtx(ctx, 'font', token.font || textContain.DEFAULT_FONT);
 	  var textStroke = getStroke(tokenStyle.textStroke || style.textStroke, textStrokeWidth);
 	  var textFill = getFill(tokenStyle.textFill || style.textFill);
 	  var textStrokeWidth = retrieve2(tokenStyle.textStrokeWidth, style.textStrokeWidth); // Fill after stroke so the outline will not cover the main part.
-
+	
 	  if (textStroke) {
 	    setCtx(ctx, 'lineWidth', textStrokeWidth);
 	    setCtx(ctx, 'strokeStyle', textStroke);
 	    ctx.strokeText(token.text, x, y);
 	  }
-
+	
 	  if (textFill) {
 	    setCtx(ctx, 'fillStyle', textFill);
 	    ctx.fillText(token.text, x, y);
 	  }
 	}
-
+	
 	function needDrawBackground(style) {
 	  return style.textBackgroundColor || style.textBorderWidth && style.textBorderColor;
 	} // style: {textBackgroundColor, textBorderWidth, textBorderColor, textBorderRadius}
 	// shape: {x, y, width, height}
-
-
+	
+	
 	function drawBackground(hostEl, ctx, style, x, y, width, height) {
 	  var textBackgroundColor = style.textBackgroundColor;
 	  var textBorderWidth = style.textBorderWidth;
@@ -10258,11 +10651,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  setCtx(ctx, 'shadowColor', style.textBoxShadowColor || 'transparent');
 	  setCtx(ctx, 'shadowOffsetX', style.textBoxShadowOffsetX || 0);
 	  setCtx(ctx, 'shadowOffsetY', style.textBoxShadowOffsetY || 0);
-
+	
 	  if (isPlainBg || textBorderWidth && textBorderColor) {
 	    ctx.beginPath();
 	    var textBorderRadius = style.textBorderRadius;
-
+	
 	    if (!textBorderRadius) {
 	      ctx.rect(x, y, width, height);
 	    } else {
@@ -10274,44 +10667,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	        r: textBorderRadius
 	      });
 	    }
-
+	
 	    ctx.closePath();
 	  }
-
+	
 	  if (isPlainBg) {
 	    setCtx(ctx, 'fillStyle', textBackgroundColor);
 	    ctx.fill();
 	  } else if (isObject(textBackgroundColor)) {
 	    var image = textBackgroundColor.image;
 	    image = imageHelper.createOrUpdateImage(image, null, hostEl, onBgImageLoaded, textBackgroundColor);
-
+	
 	    if (image && imageHelper.isImageReady(image)) {
 	      ctx.drawImage(image, x, y, width, height);
 	    }
 	  }
-
+	
 	  if (textBorderWidth && textBorderColor) {
 	    setCtx(ctx, 'lineWidth', textBorderWidth);
 	    setCtx(ctx, 'strokeStyle', textBorderColor);
 	    ctx.stroke();
 	  }
 	}
-
+	
 	function onBgImageLoaded(image, textBackgroundColor) {
 	  // Replace image, so that `contain/text.js#parseRichText`
 	  // will get correct result in next tick.
 	  textBackgroundColor.image = image;
 	}
-
+	
 	function getBoxPosition(blockHeiht, style, rect) {
 	  var baseX = style.x || 0;
 	  var baseY = style.y || 0;
 	  var textAlign = style.textAlign;
 	  var textVerticalAlign = style.textVerticalAlign; // Text position represented by coord
-
+	
 	  if (rect) {
 	    var textPosition = style.textPosition;
-
+	
 	    if (textPosition instanceof Array) {
 	      // Percent
 	      baseX = rect.x + parsePercent(textPosition[0], rect.width);
@@ -10320,21 +10713,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var res = textContain.adjustTextPositionOnRect(textPosition, rect, style.textDistance);
 	      baseX = res.x;
 	      baseY = res.y; // Default align and baseline when has textPosition
-
+	
 	      textAlign = textAlign || res.textAlign;
 	      textVerticalAlign = textVerticalAlign || res.textVerticalAlign;
 	    } // textOffset is only support in RectText, otherwise
 	    // we have to adjust boundingRect for textOffset.
-
-
+	
+	
 	    var textOffset = style.textOffset;
-
+	
 	    if (textOffset) {
 	      baseX += textOffset[0];
 	      baseY += textOffset[1];
 	    }
 	  }
-
+	
 	  return {
 	    baseX: baseX,
 	    baseY: baseY,
@@ -10342,7 +10735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    textVerticalAlign: textVerticalAlign
 	  };
 	}
-
+	
 	function setCtx(ctx, prop, value) {
 	  ctx[prop] = fixShadow(ctx, prop, value);
 	  return ctx[prop];
@@ -10352,30 +10745,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} [lineWidth] If specified, do not check style.textStroke.
 	 * @param {number} style
 	 */
-
-
+	
+	
 	function getStroke(stroke, lineWidth) {
 	  return stroke == null || lineWidth <= 0 || stroke === 'transparent' || stroke === 'none' ? null // TODO pattern and gradient?
 	  : stroke.image || stroke.colorStops ? '#000' : stroke;
 	}
-
+	
 	function getFill(fill) {
 	  return fill == null || fill === 'none' ? null // TODO pattern and gradient?
 	  : fill.image || fill.colorStops ? '#000' : fill;
 	}
-
+	
 	function parsePercent(value, maxValue) {
 	  if (typeof value === 'string') {
 	    if (value.lastIndexOf('%') >= 0) {
 	      return parseFloat(value) / 100 * maxValue;
 	    }
-
+	
 	    return parseFloat(value);
 	  }
-
+	
 	  return value;
 	}
-
+	
 	function getTextXForPadding(x, textAlign, textPadding) {
 	  return textAlign === 'right' ? x - textPadding[1] : textAlign === 'center' ? x + textPadding[3] / 2 - textPadding[1] / 2 : x + textPadding[3];
 	}
@@ -10384,12 +10777,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {module:zrender/Style} style
 	 * @return {boolean}
 	 */
-
-
+	
+	
 	function needDrawText(text, style) {
 	  return text != null && (text || style.textBackgroundColor || style.textBorderWidth && style.textBorderColor || style.textPadding);
 	}
-
+	
 	exports.normalizeTextStyle = normalizeTextStyle;
 	exports.renderText = renderText;
 	exports.getStroke = getStroke;
@@ -10398,14 +10791,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 38 */
+/*!*************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/contain/text.js ***!
+  \*************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var BoundingRect = __webpack_require__(39);
-
-	var imageHelper = __webpack_require__(40);
-
-	var _util = __webpack_require__(5);
-
+	var BoundingRect = __webpack_require__(/*! ../core/BoundingRect */ 39);
+	
+	var imageHelper = __webpack_require__(/*! ../graphic/helper/image */ 40);
+	
+	var _util = __webpack_require__(/*! ../core/util */ 5);
+	
 	var getContext = _util.getContext;
 	var extend = _util.extend;
 	var retrieve2 = _util.retrieve2;
@@ -10416,9 +10812,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var TEXT_CACHE_MAX = 5000;
 	var STYLE_REG = /\{([a-zA-Z0-9_]+)\|([^}]*)\}/g;
 	var DEFAULT_FONT = '12px sans-serif'; // Avoid assign to an exported variable, for transforming to cjs.
-
+	
 	var methods = {};
-
+	
 	function $override(name, fn) {
 	  methods[name] = fn;
 	}
@@ -10428,29 +10824,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} font
 	 * @return {number} width
 	 */
-
-
+	
+	
 	function getWidth(text, font) {
 	  font = font || DEFAULT_FONT;
 	  var key = text + ':' + font;
-
+	
 	  if (textWidthCache[key]) {
 	    return textWidthCache[key];
 	  }
-
+	
 	  var textLines = (text + '').split('\n');
 	  var width = 0;
-
+	
 	  for (var i = 0, l = textLines.length; i < l; i++) {
 	    // textContain.measureText may be overrided in SVG or VML
 	    width = Math.max(measureText(textLines[i], font).width, width);
 	  }
-
+	
 	  if (textWidthCacheCounter > TEXT_CACHE_MAX) {
 	    textWidthCacheCounter = 0;
 	    textWidthCache = {};
 	  }
-
+	
 	  textWidthCacheCounter++;
 	  textWidthCache[key] = width;
 	  return width;
@@ -10466,20 +10862,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} [truncate]
 	 * @return {Object} {x, y, width, height, lineHeight}
 	 */
-
-
+	
+	
 	function getBoundingRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) {
 	  return rich ? getRichTextRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) : getPlainTextRect(text, font, textAlign, textVerticalAlign, textPadding, truncate);
 	}
-
+	
 	function getPlainTextRect(text, font, textAlign, textVerticalAlign, textPadding, truncate) {
 	  var contentBlock = parsePlainText(text, font, textPadding, truncate);
 	  var outerWidth = getWidth(text, font);
-
+	
 	  if (textPadding) {
 	    outerWidth += textPadding[1] + textPadding[3];
 	  }
-
+	
 	  var outerHeight = contentBlock.outerHeight;
 	  var x = adjustTextX(0, outerWidth, textAlign);
 	  var y = adjustTextY(0, outerHeight, textVerticalAlign);
@@ -10487,7 +10883,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  rect.lineHeight = contentBlock.lineHeight;
 	  return rect;
 	}
-
+	
 	function getRichTextRect(text, font, textAlign, textVerticalAlign, textPadding, rich, truncate) {
 	  var contentBlock = parseRichText(text, {
 	    rich: rich,
@@ -10509,8 +10905,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} [textAlign='left']
 	 * @return {number} Adjusted x.
 	 */
-
-
+	
+	
 	function adjustTextX(x, width, textAlign) {
 	  // FIXME Right to left language
 	  if (textAlign === 'right') {
@@ -10518,7 +10914,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else if (textAlign === 'center') {
 	    x -= width / 2;
 	  }
-
+	
 	  return x;
 	}
 	/**
@@ -10528,15 +10924,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} [textVerticalAlign='top']
 	 * @return {number} Adjusted y.
 	 */
-
-
+	
+	
 	function adjustTextY(y, height, textVerticalAlign) {
 	  if (textVerticalAlign === 'middle') {
 	    y -= height / 2;
 	  } else if (textVerticalAlign === 'bottom') {
 	    y -= height;
 	  }
-
+	
 	  return y;
 	}
 	/**
@@ -10546,8 +10942,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} distance
 	 * @return {Object} {x, y, textAlign, textVerticalAlign}
 	 */
-
-
+	
+	
 	function adjustTextPositionOnRect(textPosition, rect, distance) {
 	  var x = rect.x;
 	  var y = rect.y;
@@ -10556,7 +10952,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var halfHeight = height / 2;
 	  var textAlign = 'left';
 	  var textVerticalAlign = 'top';
-
+	
 	  switch (textPosition) {
 	    case 'left':
 	      x -= distance;
@@ -10564,76 +10960,76 @@ return /******/ (function(modules) { // webpackBootstrap
 	      textAlign = 'right';
 	      textVerticalAlign = 'middle';
 	      break;
-
+	
 	    case 'right':
 	      x += distance + width;
 	      y += halfHeight;
 	      textVerticalAlign = 'middle';
 	      break;
-
+	
 	    case 'top':
 	      x += width / 2;
 	      y -= distance;
 	      textAlign = 'center';
 	      textVerticalAlign = 'bottom';
 	      break;
-
+	
 	    case 'bottom':
 	      x += width / 2;
 	      y += height + distance;
 	      textAlign = 'center';
 	      break;
-
+	
 	    case 'inside':
 	      x += width / 2;
 	      y += halfHeight;
 	      textAlign = 'center';
 	      textVerticalAlign = 'middle';
 	      break;
-
+	
 	    case 'insideLeft':
 	      x += distance;
 	      y += halfHeight;
 	      textVerticalAlign = 'middle';
 	      break;
-
+	
 	    case 'insideRight':
 	      x += width - distance;
 	      y += halfHeight;
 	      textAlign = 'right';
 	      textVerticalAlign = 'middle';
 	      break;
-
+	
 	    case 'insideTop':
 	      x += width / 2;
 	      y += distance;
 	      textAlign = 'center';
 	      break;
-
+	
 	    case 'insideBottom':
 	      x += width / 2;
 	      y += height - distance;
 	      textAlign = 'center';
 	      textVerticalAlign = 'bottom';
 	      break;
-
+	
 	    case 'insideTopLeft':
 	      x += distance;
 	      y += distance;
 	      break;
-
+	
 	    case 'insideTopRight':
 	      x += width - distance;
 	      y += distance;
 	      textAlign = 'right';
 	      break;
-
+	
 	    case 'insideBottomLeft':
 	      x += distance;
 	      y += height - distance;
 	      textVerticalAlign = 'bottom';
 	      break;
-
+	
 	    case 'insideBottomRight':
 	      x += width - distance;
 	      y += height - distance;
@@ -10641,7 +11037,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      textVerticalAlign = 'bottom';
 	      break;
 	  }
-
+	
 	  return {
 	    x: x,
 	    y: y,
@@ -10665,24 +11061,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} [options.placeholder=''] When all truncated, use the placeholder.
 	 * @return {string}
 	 */
-
-
+	
+	
 	function truncateText(text, containerWidth, font, ellipsis, options) {
 	  if (!containerWidth) {
 	    return '';
 	  }
-
+	
 	  var textLines = (text + '').split('\n');
 	  options = prepareTruncateOptions(containerWidth, font, ellipsis, options); // FIXME
 	  // It is not appropriate that every line has '...' when truncate multiple lines.
-
+	
 	  for (var i = 0, len = textLines.length; i < len; i++) {
 	    textLines[i] = truncateSingleLine(textLines[i], options);
 	  }
-
+	
 	  return textLines.join('\n');
 	}
-
+	
 	function prepareTruncateOptions(containerWidth, font, ellipsis, options) {
 	  options = extend({}, options);
 	  options.font = font;
@@ -10690,27 +11086,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  options.maxIterations = retrieve2(options.maxIterations, 2);
 	  var minChar = options.minChar = retrieve2(options.minChar, 0); // FIXME
 	  // Other languages?
-
+	
 	  options.cnCharWidth = getWidth('国', font); // FIXME
 	  // Consider proportional font?
-
+	
 	  var ascCharWidth = options.ascCharWidth = getWidth('a', font);
 	  options.placeholder = retrieve2(options.placeholder, ''); // Example 1: minChar: 3, text: 'asdfzxcv', truncate result: 'asdf', but not: 'a...'.
 	  // Example 2: minChar: 3, text: '维度', truncate result: '维', but not: '...'.
-
+	
 	  var contentWidth = containerWidth = Math.max(0, containerWidth - 1); // Reserve some gap.
-
+	
 	  for (var i = 0; i < minChar && contentWidth >= ascCharWidth; i++) {
 	    contentWidth -= ascCharWidth;
 	  }
-
+	
 	  var ellipsisWidth = getWidth(ellipsis);
-
+	
 	  if (ellipsisWidth > contentWidth) {
 	    ellipsis = '';
 	    ellipsisWidth = 0;
 	  }
-
+	
 	  contentWidth = containerWidth - ellipsisWidth;
 	  options.ellipsis = ellipsis;
 	  options.ellipsisWidth = ellipsisWidth;
@@ -10718,49 +11114,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	  options.containerWidth = containerWidth;
 	  return options;
 	}
-
+	
 	function truncateSingleLine(textLine, options) {
 	  var containerWidth = options.containerWidth;
 	  var font = options.font;
 	  var contentWidth = options.contentWidth;
-
+	
 	  if (!containerWidth) {
 	    return '';
 	  }
-
+	
 	  var lineWidth = getWidth(textLine, font);
-
+	
 	  if (lineWidth <= containerWidth) {
 	    return textLine;
 	  }
-
+	
 	  for (var j = 0;; j++) {
 	    if (lineWidth <= contentWidth || j >= options.maxIterations) {
 	      textLine += options.ellipsis;
 	      break;
 	    }
-
+	
 	    var subLength = j === 0 ? estimateLength(textLine, contentWidth, options.ascCharWidth, options.cnCharWidth) : lineWidth > 0 ? Math.floor(textLine.length * contentWidth / lineWidth) : 0;
 	    textLine = textLine.substr(0, subLength);
 	    lineWidth = getWidth(textLine, font);
 	  }
-
+	
 	  if (textLine === '') {
 	    textLine = options.placeholder;
 	  }
-
+	
 	  return textLine;
 	}
-
+	
 	function estimateLength(text, contentWidth, ascCharWidth, cnCharWidth) {
 	  var width = 0;
 	  var i = 0;
-
+	
 	  for (var len = text.length; i < len && width < contentWidth; i++) {
 	    var charCode = text.charCodeAt(i);
 	    width += 0 <= charCode && charCode <= 127 ? ascCharWidth : cnCharWidth;
 	  }
-
+	
 	  return i;
 	}
 	/**
@@ -10768,8 +11164,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} font
 	 * @return {number} line height
 	 */
-
-
+	
+	
 	function getLineHeight(font) {
 	  // FIXME A rough approach.
 	  return getWidth('国', font);
@@ -10780,13 +11176,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} font
 	 * @return {Object} width
 	 */
-
-
+	
+	
 	function measureText(text, font) {
 	  return methods.measureText(text, font);
 	} // Avoid assign to an exported variable, for transforming to cjs.
-
-
+	
+	
 	methods.measureText = function (text, font) {
 	  var ctx = getContext();
 	  ctx.font = font || DEFAULT_FONT;
@@ -10800,23 +11196,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Object} block: {lineHeight, lines, height, outerHeight}
 	 *  Notice: for performance, do not calculate outerWidth util needed.
 	 */
-
-
+	
+	
 	function parsePlainText(text, font, padding, truncate) {
 	  text != null && (text += '');
 	  var lineHeight = getLineHeight(font);
 	  var lines = text ? text.split('\n') : [];
 	  var height = lines.length * lineHeight;
 	  var outerHeight = height;
-
+	
 	  if (padding) {
 	    outerHeight += padding[0] + padding[2];
 	  }
-
+	
 	  if (text && truncate) {
 	    var truncOuterHeight = truncate.outerHeight;
 	    var truncOuterWidth = truncate.outerWidth;
-
+	
 	    if (truncOuterHeight != null && outerHeight > truncOuterHeight) {
 	      text = '';
 	      lines = [];
@@ -10826,13 +11222,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        placeholder: truncate.placeholder
 	      }); // FIXME
 	      // It is not appropriate that every line has '...' when truncate multiple lines.
-
+	
 	      for (var i = 0, len = lines.length; i < len; i++) {
 	        lines[i] = truncateSingleLine(lines[i], options);
 	      }
 	    }
 	  }
-
+	
 	  return {
 	    lines: lines,
 	    height: height,
@@ -10870,8 +11266,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * }
 	 * If styleName is undefined, it is plain text.
 	 */
-
-
+	
+	
 	function parseRichText(text, style) {
 	  var contentBlock = {
 	    lines: [],
@@ -10879,58 +11275,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	    height: 0
 	  };
 	  text != null && (text += '');
-
+	
 	  if (!text) {
 	    return contentBlock;
 	  }
-
+	
 	  var lastIndex = STYLE_REG.lastIndex = 0;
 	  var result;
-
+	
 	  while ((result = STYLE_REG.exec(text)) != null) {
 	    var matchedIndex = result.index;
-
+	
 	    if (matchedIndex > lastIndex) {
 	      pushTokens(contentBlock, text.substring(lastIndex, matchedIndex));
 	    }
-
+	
 	    pushTokens(contentBlock, result[2], result[1]);
 	    lastIndex = STYLE_REG.lastIndex;
 	  }
-
+	
 	  if (lastIndex < text.length) {
 	    pushTokens(contentBlock, text.substring(lastIndex, text.length));
 	  }
-
+	
 	  var lines = contentBlock.lines;
 	  var contentHeight = 0;
 	  var contentWidth = 0; // For `textWidth: 100%`
-
+	
 	  var pendingList = [];
 	  var stlPadding = style.textPadding;
 	  var truncate = style.truncate;
 	  var truncateWidth = truncate && truncate.outerWidth;
 	  var truncateHeight = truncate && truncate.outerHeight;
-
+	
 	  if (stlPadding) {
 	    truncateWidth != null && (truncateWidth -= stlPadding[1] + stlPadding[3]);
 	    truncateHeight != null && (truncateHeight -= stlPadding[0] + stlPadding[2]);
 	  } // Calculate layout info of tokens.
-
-
+	
+	
 	  for (var i = 0; i < lines.length; i++) {
 	    var line = lines[i];
 	    var lineHeight = 0;
 	    var lineWidth = 0;
-
+	
 	    for (var j = 0; j < line.tokens.length; j++) {
 	      var token = line.tokens[j];
 	      var tokenStyle = token.styleName && style.rich[token.styleName] || {}; // textPadding should not inherit from style.
-
+	
 	      var textPadding = token.textPadding = tokenStyle.textPadding; // textFont has been asigned to font by `normalizeStyle`.
-
+	
 	      var font = token.font = tokenStyle.font || style.font; // textHeight can be used when textVerticalAlign is specified in token.
-
+	
 	      var tokenHeight = token.textHeight = retrieve2( // textHeight should not be inherited, consider it can be specified
 	      // as box height of the block.
 	      tokenStyle.textHeight, getLineHeight(font));
@@ -10939,7 +11335,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      token.lineHeight = retrieve3(tokenStyle.textLineHeight, style.textLineHeight, tokenHeight);
 	      token.textAlign = tokenStyle && tokenStyle.textAlign || style.textAlign;
 	      token.textVerticalAlign = tokenStyle && tokenStyle.textVerticalAlign || 'middle';
-
+	
 	      if (truncateHeight != null && contentHeight + token.lineHeight > truncateHeight) {
 	        return {
 	          lines: [],
@@ -10947,12 +11343,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          height: 0
 	        };
 	      }
-
+	
 	      token.textWidth = getWidth(token.text, font);
 	      var tokenWidth = tokenStyle.textWidth;
 	      var tokenWidthNotSpecified = tokenWidth == null || tokenWidth === 'auto'; // Percent width, can be `100%`, can be used in drawing separate
 	      // line when box width is needed to be auto.
-
+	
 	      if (typeof tokenWidth === 'string' && tokenWidth.charAt(tokenWidth.length - 1) === '%') {
 	        token.percentWidth = tokenWidth;
 	        pendingList.push(token);
@@ -10962,7 +11358,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (tokenWidthNotSpecified) {
 	          tokenWidth = token.textWidth; // FIXME: If image is not loaded and textWidth is not specified, calling
 	          // `getBoundingRect()` will not get correct result.
-
+	
 	          var textBackgroundColor = tokenStyle.textBackgroundColor;
 	          var bgImg = textBackgroundColor && textBackgroundColor.image; // Use cases:
 	          // (1) If image is not loaded, it will be loaded at render phase and call
@@ -10974,20 +11370,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	          // `imageHelper.findExistImage` will always be called here before
 	          // `imageHelper.createOrUpdateImage` in `graphic/helper/text.js#renderRichText`
 	          // which ensures that image will not be rendered before correct size calcualted.
-
+	
 	          if (bgImg) {
 	            bgImg = imageHelper.findExistImage(bgImg);
-
+	
 	            if (imageHelper.isImageReady(bgImg)) {
 	              tokenWidth = Math.max(tokenWidth, bgImg.width * tokenHeight / bgImg.height);
 	            }
 	          }
 	        }
-
+	
 	        var paddingW = textPadding ? textPadding[1] + textPadding[3] : 0;
 	        tokenWidth += paddingW;
 	        var remianTruncWidth = truncateWidth != null ? truncateWidth - lineWidth : null;
-
+	
 	        if (remianTruncWidth != null && remianTruncWidth < tokenWidth) {
 	          if (!tokenWidthNotSpecified || remianTruncWidth < paddingW) {
 	            token.text = '';
@@ -11001,40 +11397,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 	      }
-
+	
 	      lineWidth += token.width = tokenWidth;
 	      tokenStyle && (lineHeight = Math.max(lineHeight, token.lineHeight));
 	    }
-
+	
 	    line.width = lineWidth;
 	    line.lineHeight = lineHeight;
 	    contentHeight += lineHeight;
 	    contentWidth = Math.max(contentWidth, lineWidth);
 	  }
-
+	
 	  contentBlock.outerWidth = contentBlock.width = retrieve2(style.textWidth, contentWidth);
 	  contentBlock.outerHeight = contentBlock.height = retrieve2(style.textHeight, contentHeight);
-
+	
 	  if (stlPadding) {
 	    contentBlock.outerWidth += stlPadding[1] + stlPadding[3];
 	    contentBlock.outerHeight += stlPadding[0] + stlPadding[2];
 	  }
-
+	
 	  for (var i = 0; i < pendingList.length; i++) {
 	    var token = pendingList[i];
 	    var percentWidth = token.percentWidth; // Should not base on outerWidth, because token can not be placed out of padding.
-
+	
 	    token.width = parseInt(percentWidth, 10) / 100 * contentWidth;
 	  }
-
+	
 	  return contentBlock;
 	}
-
+	
 	function pushTokens(block, str, styleName) {
 	  var isEmptyStr = str === '';
 	  var strs = str.split('\n');
 	  var lines = block.lines;
-
+	
 	  for (var i = 0; i < strs.length; i++) {
 	    var text = strs[i];
 	    var token = {
@@ -11042,7 +11438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      text: text,
 	      isLineHolder: !text && !isEmptyStr
 	    }; // The first token should be appended to the last line.
-
+	
 	    if (!i) {
 	      var tokens = (lines[lines.length - 1] || (lines[0] = {
 	        tokens: []
@@ -11053,7 +11449,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // (3) A redundant '' will affect textAlign in line.
 	      // (4) tokens with the same tplName should not be merged, because
 	      // they should be displayed in different box (with border and padding).
-
+	
 	      var tokensLen = tokens.length;
 	      tokensLen === 1 && tokens[0].isLineHolder ? tokens[0] = token : // Consider text is '', only insert when it is the "lineHolder" or
 	      // "emptyStr". Otherwise a redundant '' will affect textAlign in line.
@@ -11067,7 +11463,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	  }
 	}
-
+	
 	function makeFont(style) {
 	  // FIXME in node-canvas fontWeight is before fontStyle
 	  // Use `fontSize` `fontFamily` to check whether font properties are defined.
@@ -11075,7 +11471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  style.fontFamily || 'sans-serif'].join(' ');
 	  return font && trim(font) || style.textFont || style.font;
 	}
-
+	
 	exports.DEFAULT_FONT = DEFAULT_FONT;
 	exports.$override = $override;
 	exports.getWidth = getWidth;
@@ -11092,12 +11488,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 39 */
+/*!******************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/BoundingRect.js ***!
+  \******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var vec2 = __webpack_require__(27);
-
-	var matrix = __webpack_require__(26);
-
+	var vec2 = __webpack_require__(/*! ./vector */ 27);
+	
+	var matrix = __webpack_require__(/*! ./matrix */ 26);
+	
 	/**
 	 * @module echarts/core/BoundingRect
 	 */
@@ -11107,13 +11506,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @alias module:echarts/core/BoundingRect
 	 */
-
+	
 	function BoundingRect(x, y, width, height) {
 	  if (width < 0) {
 	    x = x + width;
 	    width = -width;
 	  }
-
+	
 	  if (height < 0) {
 	    y = y + height;
 	    height = -height;
@@ -11121,29 +11520,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * @type {number}
 	   */
-
-
+	
+	
 	  this.x = x;
 	  /**
 	   * @type {number}
 	   */
-
+	
 	  this.y = y;
 	  /**
 	   * @type {number}
 	   */
-
+	
 	  this.width = width;
 	  /**
 	   * @type {number}
 	   */
-
+	
 	  this.height = height;
 	}
-
+	
 	BoundingRect.prototype = {
 	  constructor: BoundingRect,
-
+	
 	  /**
 	   * @param {module:echarts/core/BoundingRect} other
 	   */
@@ -11155,7 +11554,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.x = x;
 	    this.y = y;
 	  },
-
+	
 	  /**
 	   * @param {Array.<number>} m
 	   * @methods
@@ -11172,7 +11571,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!m) {
 	        return;
 	      }
-
+	
 	      lt[0] = lb[0] = this.x;
 	      lt[1] = rt[1] = this.y;
 	      rb[0] = rt[0] = this.x + this.width;
@@ -11189,7 +11588,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.height = maxY - this.y;
 	    };
 	  }(),
-
+	
 	  /**
 	   * Calculate matrix of transforming from self to target rect
 	   * @param  {module:zrender/core/BoundingRect} b
@@ -11200,13 +11599,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var sx = b.width / a.width;
 	    var sy = b.height / a.height;
 	    var m = matrix.create(); // 矩阵右乘
-
+	
 	    matrix.translate(m, m, [-a.x, -a.y]);
 	    matrix.scale(m, m, [sx, sy]);
 	    matrix.translate(m, m, [b.x, b.y]);
 	    return m;
 	  },
-
+	
 	  /**
 	   * @param {(module:echarts/core/BoundingRect|Object)} b
 	   * @return {boolean}
@@ -11215,12 +11614,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!b) {
 	      return false;
 	    }
-
+	
 	    if (!(b instanceof BoundingRect)) {
 	      // Normalize negative width/height.
 	      b = BoundingRect.create(b);
 	    }
-
+	
 	    var a = this;
 	    var ax0 = a.x;
 	    var ax1 = a.x + a.width;
@@ -11236,14 +11635,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var rect = this;
 	    return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
 	  },
-
+	
 	  /**
 	   * @return {module:echarts/core/BoundingRect}
 	   */
 	  clone: function () {
 	    return new BoundingRect(this.x, this.y, this.width, this.height);
 	  },
-
+	
 	  /**
 	   * Copy from another rect
 	   */
@@ -11270,26 +11669,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} rect.height
 	 * @return {module:zrender/core/BoundingRect}
 	 */
-
+	
 	BoundingRect.create = function (rect) {
 	  return new BoundingRect(rect.x, rect.y, rect.width, rect.height);
 	};
-
+	
 	var _default = BoundingRect;
 	module.exports = _default;
 
 /***/ },
 /* 40 */
+/*!*********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/helper/image.js ***!
+  \*********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var LRU = __webpack_require__(33);
-
+	var LRU = __webpack_require__(/*! ../../core/LRU */ 33);
+	
 	var globalImageCache = new LRU(50);
 	/**
 	 * @param {string|HTMLImageElement|HTMLCanvasElement|Canvas} newImageOrSrc
 	 * @return {HTMLImageElement|HTMLCanvasElement|Canvas} image
 	 */
-
+	
 	function findExistImage(newImageOrSrc) {
 	  if (typeof newImageOrSrc === 'string') {
 	    var cachedImgObj = globalImageCache.get(newImageOrSrc);
@@ -11309,8 +11711,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} [cbPayload] Payload on cb calling.
 	 * @return {HTMLImageElement|HTMLCanvasElement|Canvas} image
 	 */
-
-
+	
+	
 	function createOrUpdateImage(newImageOrSrc, image, hostEl, cb, cbPayload) {
 	  if (!newImageOrSrc) {
 	    return image;
@@ -11320,15 +11722,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return image;
 	    } // Only when there is no existent image or existent image src
 	    // is different, this method is responsible for load.
-
-
+	
+	
 	    var cachedImgObj = globalImageCache.get(newImageOrSrc);
 	    var pendingWrap = {
 	      hostEl: hostEl,
 	      cb: cb,
 	      cbPayload: cbPayload
 	    };
-
+	
 	    if (cachedImgObj) {
 	      image = cachedImgObj.image;
 	      !isImageReady(image) && cachedImgObj.pending.push(pendingWrap);
@@ -11341,38 +11743,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	      image.src = image.__zrImageSrc = newImageOrSrc;
 	    }
-
+	
 	    return image;
 	  } // newImageOrSrc is an HTMLImageElement or HTMLCanvasElement or Canvas
 	  else {
 	      return newImageOrSrc;
 	    }
 	}
-
+	
 	function imageOnLoad() {
 	  var cachedImgObj = this.__cachedImgObj;
 	  this.onload = this.__cachedImgObj = null;
-
+	
 	  for (var i = 0; i < cachedImgObj.pending.length; i++) {
 	    var pendingWrap = cachedImgObj.pending[i];
 	    var cb = pendingWrap.cb;
 	    cb && cb(this, pendingWrap.cbPayload);
 	    pendingWrap.hostEl.dirty();
 	  }
-
+	
 	  cachedImgObj.pending.length = 0;
 	}
-
+	
 	function isImageReady(image) {
 	  return image && image.width && image.height;
 	}
-
+	
 	exports.findExistImage = findExistImage;
 	exports.createOrUpdateImage = createOrUpdateImage;
 	exports.isImageReady = isImageReady;
 
 /***/ },
 /* 41 */
+/*!*************************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/helper/roundRect.js ***!
+  \*************************************************************/
 /***/ function(module, exports) {
 
 	function buildPath(ctx, shape) {
@@ -11385,17 +11790,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var r2;
 	  var r3;
 	  var r4; // Convert width and height to positive for better borderRadius
-
+	
 	  if (width < 0) {
 	    x = x + width;
 	    width = -width;
 	  }
-
+	
 	  if (height < 0) {
 	    y = y + height;
 	    height = -height;
 	  }
-
+	
 	  if (typeof r === 'number') {
 	    r1 = r2 = r3 = r4 = r;
 	  } else if (r instanceof Array) {
@@ -11417,62 +11822,65 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    r1 = r2 = r3 = r4 = 0;
 	  }
-
+	
 	  var total;
-
+	
 	  if (r1 + r2 > width) {
 	    total = r1 + r2;
 	    r1 *= width / total;
 	    r2 *= width / total;
 	  }
-
+	
 	  if (r3 + r4 > width) {
 	    total = r3 + r4;
 	    r3 *= width / total;
 	    r4 *= width / total;
 	  }
-
+	
 	  if (r2 + r3 > height) {
 	    total = r2 + r3;
 	    r2 *= height / total;
 	    r3 *= height / total;
 	  }
-
+	
 	  if (r1 + r4 > height) {
 	    total = r1 + r4;
 	    r1 *= height / total;
 	    r4 *= height / total;
 	  }
-
+	
 	  ctx.moveTo(x + r1, y);
 	  ctx.lineTo(x + width - r2, y);
-	  r2 !== 0 && ctx.quadraticCurveTo(x + width, y, x + width, y + r2);
+	  r2 !== 0 && ctx.arc(x + width - r2, y + r2, r2, -Math.PI / 2, 0);
 	  ctx.lineTo(x + width, y + height - r3);
-	  r3 !== 0 && ctx.quadraticCurveTo(x + width, y + height, x + width - r3, y + height);
+	  r3 !== 0 && ctx.arc(x + width - r3, y + height - r3, r3, 0, Math.PI / 2);
 	  ctx.lineTo(x + r4, y + height);
-	  r4 !== 0 && ctx.quadraticCurveTo(x, y + height, x, y + height - r4);
+	  r4 !== 0 && ctx.arc(x + r4, y + height - r4, r4, Math.PI / 2, Math.PI);
 	  ctx.lineTo(x, y + r1);
-	  r1 !== 0 && ctx.quadraticCurveTo(x, y, x + r1, y);
+	  r1 !== 0 && ctx.arc(x + r1, y + r1, r1, Math.PI, Math.PI * 1.5);
 	}
-
+	
 	exports.buildPath = buildPath;
 
 /***/ },
 /* 42 */
+/*!***************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/PathProxy.js ***!
+  \***************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var curve = __webpack_require__(43);
-
-	var vec2 = __webpack_require__(27);
-
-	var bbox = __webpack_require__(44);
-
-	var BoundingRect = __webpack_require__(39);
-
-	var _config = __webpack_require__(35);
-
+	var curve = __webpack_require__(/*! ./curve */ 43);
+	
+	var vec2 = __webpack_require__(/*! ./vector */ 27);
+	
+	var bbox = __webpack_require__(/*! ./bbox */ 44);
+	
+	var BoundingRect = __webpack_require__(/*! ./BoundingRect */ 39);
+	
+	var _config = __webpack_require__(/*! ../config */ 35);
+	
 	var dpr = _config.devicePixelRatio;
-
+	
 	/**
 	 * Path 代理，可以在`buildPath`中用于替代`ctx`, 会保存每个path操作的命令到pathCommands属性中
 	 * 可以用于 isInsidePath 判断以及获取boundingRect
@@ -11499,7 +11907,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//     R: 5,
 	//     Z: 1
 	// };
-
+	
 	var min = [];
 	var max = [];
 	var min2 = [];
@@ -11515,10 +11923,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @alias module:zrender/core/PathProxy
 	 * @constructor
 	 */
-
+	
 	var PathProxy = function (notSaveData) {
 	  this._saveData = !(notSaveData || false);
-
+	
 	  if (this._saveData) {
 	    /**
 	     * Path data. Stored as flat array
@@ -11526,15 +11934,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    this.data = [];
 	  }
-
+	
 	  this._ctx = null;
 	};
 	/**
 	 * 快速计算Path包围盒（并不是最小包围盒）
 	 * @return {Object}
 	 */
-
-
+	
+	
 	PathProxy.prototype = {
 	  constructor: PathProxy,
 	  _xi: 0,
@@ -11549,7 +11957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _dashOffset: 0,
 	  _dashIdx: 0,
 	  _dashSum: 0,
-
+	
 	  /**
 	   * @readOnly
 	   */
@@ -11560,7 +11968,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  getContext: function () {
 	    return this._ctx;
 	  },
-
+	
 	  /**
 	   * @param  {CanvasRenderingContext2D} ctx
 	   * @return {module:zrender/core/PathProxy}
@@ -11569,19 +11977,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._ctx = ctx;
 	    ctx && ctx.beginPath();
 	    ctx && (this.dpr = ctx.dpr); // Reset
-
+	
 	    if (this._saveData) {
 	      this._len = 0;
 	    }
-
+	
 	    if (this._lineDash) {
 	      this._lineDash = null;
 	      this._dashOffset = 0;
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * @param  {number} x
 	   * @param  {number} y
@@ -11593,14 +12001,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // xi, yi 记录当前点, x0, y0 在 closePath 的时候回到起始点。
 	    // 有可能在 beginPath 之后直接调用 lineTo，这时候 x0, y0 需要
 	    // 在 lineTo 方法中记录，这里先不考虑这种情况，dashed line 也只在 IE10- 中不支持
-
+	
 	    this._x0 = x;
 	    this._y0 = y;
 	    this._xi = x;
 	    this._yi = y;
 	    return this;
 	  },
-
+	
 	  /**
 	   * @param  {number} x
 	   * @param  {number} y
@@ -11610,19 +12018,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var exceedUnit = mathAbs(x - this._xi) > this._ux || mathAbs(y - this._yi) > this._uy // Force draw the first segment
 	    || this._len < 5;
 	    this.addData(CMD.L, x, y);
-
+	
 	    if (this._ctx && exceedUnit) {
 	      this._needsDash() ? this._dashedLineTo(x, y) : this._ctx.lineTo(x, y);
 	    }
-
+	
 	    if (exceedUnit) {
 	      this._xi = x;
 	      this._yi = y;
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * @param  {number} x1
 	   * @param  {number} y1
@@ -11634,16 +12042,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  bezierCurveTo: function (x1, y1, x2, y2, x3, y3) {
 	    this.addData(CMD.C, x1, y1, x2, y2, x3, y3);
-
+	
 	    if (this._ctx) {
 	      this._needsDash() ? this._dashedBezierTo(x1, y1, x2, y2, x3, y3) : this._ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
 	    }
-
+	
 	    this._xi = x3;
 	    this._yi = y3;
 	    return this;
 	  },
-
+	
 	  /**
 	   * @param  {number} x1
 	   * @param  {number} y1
@@ -11653,16 +12061,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  quadraticCurveTo: function (x1, y1, x2, y2) {
 	    this.addData(CMD.Q, x1, y1, x2, y2);
-
+	
 	    if (this._ctx) {
 	      this._needsDash() ? this._dashedQuadraticTo(x1, y1, x2, y2) : this._ctx.quadraticCurveTo(x1, y1, x2, y2);
 	    }
-
+	
 	    this._xi = x2;
 	    this._yi = y2;
 	    return this;
 	  },
-
+	
 	  /**
 	   * @param  {number} cx
 	   * @param  {number} cy
@@ -11684,7 +12092,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this._ctx) {
 	      this._ctx.arcTo(x1, y1, x2, y2, radius);
 	    }
-
+	
 	    return this;
 	  },
 	  // TODO
@@ -11693,7 +12101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.addData(CMD.R, x, y, w, h);
 	    return this;
 	  },
-
+	
 	  /**
 	   * @return {module:zrender/core/PathProxy}
 	   */
@@ -11702,17 +12110,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var ctx = this._ctx;
 	    var x0 = this._x0;
 	    var y0 = this._y0;
-
+	
 	    if (ctx) {
 	      this._needsDash() && this._dashedLineTo(x0, y0);
 	      ctx.closePath();
 	    }
-
+	
 	    this._xi = x0;
 	    this._yi = y0;
 	    return this;
 	  },
-
+	
 	  /**
 	   * Context 从外部传入，因为有可能是 rebuildPath 完之后再 fill。
 	   * stroke 同样
@@ -11723,7 +12131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ctx && ctx.fill();
 	    this.toStatic();
 	  },
-
+	
 	  /**
 	   * @param {CanvasRenderingContext2D} ctx
 	   * @return {module:zrender/core/PathProxy}
@@ -11732,7 +12140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ctx && ctx.stroke();
 	    this.toStatic();
 	  },
-
+	
 	  /**
 	   * 必须在其它绘制命令前调用
 	   * Must be invoked before all other path drawing methods
@@ -11743,17 +12151,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this._lineDash = lineDash;
 	      this._dashIdx = 0;
 	      var lineDashSum = 0;
-
+	
 	      for (var i = 0; i < lineDash.length; i++) {
 	        lineDashSum += lineDash[i];
 	      }
-
+	
 	      this._dashSum = lineDashSum;
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 必须在其它绘制命令前调用
 	   * Must be invoked before all other path drawing methods
@@ -11763,7 +12171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._dashOffset = offset;
 	    return this;
 	  },
-
+	
 	  /**
 	   *
 	   * @return {boolean}
@@ -11771,24 +12179,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  len: function () {
 	    return this._len;
 	  },
-
+	
 	  /**
 	   * 直接设置 Path 数据
 	   */
 	  setData: function (data) {
 	    var len = data.length;
-
+	
 	    if (!(this.data && this.data.length == len) && hasTypedArray) {
 	      this.data = new Float32Array(len);
 	    }
-
+	
 	    for (var i = 0; i < len; i++) {
 	      this.data[i] = data[i];
 	    }
-
+	
 	    this._len = len;
 	  },
-
+	
 	  /**
 	   * 添加子路径
 	   * @param {module:zrender/core/PathProxy|Array.<module:zrender/core/PathProxy>} path
@@ -11797,30 +12205,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!(path instanceof Array)) {
 	      path = [path];
 	    }
-
+	
 	    var len = path.length;
 	    var appendSize = 0;
 	    var offset = this._len;
-
+	
 	    for (var i = 0; i < len; i++) {
 	      appendSize += path[i].len();
 	    }
-
+	
 	    if (hasTypedArray && this.data instanceof Float32Array) {
 	      this.data = new Float32Array(offset + appendSize);
 	    }
-
+	
 	    for (var i = 0; i < len; i++) {
 	      var appendPathData = path[i].data;
-
+	
 	      for (var k = 0; k < appendPathData.length; k++) {
 	        this.data[offset++] = appendPathData[k];
 	      }
 	    }
-
+	
 	    this._len = offset;
 	  },
-
+	
 	  /**
 	   * 填充 Path 数据。
 	   * 尽量复用而不申明新的数组。大部分图形重绘的指令数据长度都是不变的。
@@ -11829,36 +12237,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!this._saveData) {
 	      return;
 	    }
-
+	
 	    var data = this.data;
-
+	
 	    if (this._len + arguments.length > data.length) {
 	      // 因为之前的数组已经转换成静态的 Float32Array
 	      // 所以不够用时需要扩展一个新的动态数组
 	      this._expandData();
-
+	
 	      data = this.data;
 	    }
-
+	
 	    for (var i = 0; i < arguments.length; i++) {
 	      data[this._len++] = arguments[i];
 	    }
-
+	
 	    this._prevCmd = cmd;
 	  },
 	  _expandData: function () {
 	    // Only if data is Float32Array
 	    if (!(this.data instanceof Array)) {
 	      var newData = [];
-
+	
 	      for (var i = 0; i < this._len; i++) {
 	        newData[i] = this.data[i];
 	      }
-
+	
 	      this.data = newData;
 	    }
 	  },
-
+	
 	  /**
 	   * If needs js implemented dashed line
 	   * @return {boolean}
@@ -11884,31 +12292,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var idx;
 	    dx /= dist;
 	    dy /= dist;
-
+	
 	    if (offset < 0) {
 	      // Convert to positive offset
 	      offset = dashSum + offset;
 	    }
-
+	
 	    offset %= dashSum;
 	    x -= offset * dx;
 	    y -= offset * dy;
-
+	
 	    while (dx > 0 && x <= x1 || dx < 0 && x >= x1 || dx == 0 && (dy > 0 && y <= y1 || dy < 0 && y >= y1)) {
 	      idx = this._dashIdx;
 	      dash = lineDash[idx];
 	      x += dx * dash;
 	      y += dy * dash;
 	      this._dashIdx = (idx + 1) % nDash; // Skip positive offset
-
+	
 	      if (dx > 0 && x < x0 || dx < 0 && x > x0 || dy > 0 && y < y0 || dy < 0 && y > y0) {
 	        continue;
 	      }
-
+	
 	      ctx[idx % 2 ? 'moveTo' : 'lineTo'](dx >= 0 ? mathMin(x, x1) : mathMax(x, x1), dy >= 0 ? mathMin(y, y1) : mathMax(y, y1));
 	    } // Offset for next lineTo
-
-
+	
+	
 	    dx = x - x1;
 	    dy = y - y1;
 	    this._dashOffset = -mathSqrt(dx * dx + dy * dy);
@@ -11931,42 +12339,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var x;
 	    var y;
 	    var tmpLen = 0;
-
+	
 	    if (offset < 0) {
 	      // Convert to positive offset
 	      offset = dashSum + offset;
 	    }
-
+	
 	    offset %= dashSum; // Bezier approx length
-
+	
 	    for (t = 0; t < 1; t += 0.1) {
 	      dx = cubicAt(x0, x1, x2, x3, t + 0.1) - cubicAt(x0, x1, x2, x3, t);
 	      dy = cubicAt(y0, y1, y2, y3, t + 0.1) - cubicAt(y0, y1, y2, y3, t);
 	      bezierLen += mathSqrt(dx * dx + dy * dy);
 	    } // Find idx after add offset
-
-
+	
+	
 	    for (; idx < nDash; idx++) {
 	      tmpLen += lineDash[idx];
-
+	
 	      if (tmpLen > offset) {
 	        break;
 	      }
 	    }
-
+	
 	    t = (tmpLen - offset) / bezierLen;
-
+	
 	    while (t <= 1) {
 	      x = cubicAt(x0, x1, x2, x3, t);
 	      y = cubicAt(y0, y1, y2, y3, t); // Use line to approximate dashed bezier
 	      // Bad result if dash is long
-
+	
 	      idx % 2 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
 	      t += lineDash[idx] / bezierLen;
 	      idx = (idx + 1) % nDash;
 	    } // Finish the last segment and calculate the new offset
-
-
+	
+	
 	    idx % 2 !== 0 && ctx.lineTo(x3, y3);
 	    dx = x3 - x;
 	    dy = y3 - y;
@@ -11980,26 +12388,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    y2 = (y2 + 2 * y1) / 3;
 	    x1 = (this._xi + 2 * x1) / 3;
 	    y1 = (this._yi + 2 * y1) / 3;
-
+	
 	    this._dashedBezierTo(x1, y1, x2, y2, x3, y3);
 	  },
-
+	
 	  /**
 	   * 转成静态的 Float32Array 减少堆内存占用
 	   * Convert dynamic array to static Float32Array
 	   */
 	  toStatic: function () {
 	    var data = this.data;
-
+	
 	    if (data instanceof Array) {
 	      data.length = this._len;
-
+	
 	      if (hasTypedArray) {
 	        this.data = new Float32Array(data);
 	      }
 	    }
 	  },
-
+	
 	  /**
 	   * @return {module:zrender/core/BoundingRect}
 	   */
@@ -12011,10 +12419,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var yi = 0;
 	    var x0 = 0;
 	    var y0 = 0;
-
+	
 	    for (var i = 0; i < data.length;) {
 	      var cmd = data[i++];
-
+	
 	      if (i == 1) {
 	        // 如果第一个命令是 L, C, Q
 	        // 则 previous point 同绘制命令的第一个 point
@@ -12025,7 +12433,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        x0 = xi;
 	        y0 = yi;
 	      }
-
+	
 	      switch (cmd) {
 	        case CMD.M:
 	          // moveTo 命令重新创建一个新的 subpath, 并且更新新的起点
@@ -12039,25 +12447,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	          max2[0] = x0;
 	          max2[1] = y0;
 	          break;
-
+	
 	        case CMD.L:
 	          bbox.fromLine(xi, yi, data[i], data[i + 1], min2, max2);
 	          xi = data[i++];
 	          yi = data[i++];
 	          break;
-
+	
 	        case CMD.C:
 	          bbox.fromCubic(xi, yi, data[i++], data[i++], data[i++], data[i++], data[i], data[i + 1], min2, max2);
 	          xi = data[i++];
 	          yi = data[i++];
 	          break;
-
+	
 	        case CMD.Q:
 	          bbox.fromQuadratic(xi, yi, data[i++], data[i++], data[i], data[i + 1], min2, max2);
 	          xi = data[i++];
 	          yi = data[i++];
 	          break;
-
+	
 	        case CMD.A:
 	          // TODO Arc 判断的开销比较大
 	          var cx = data[i++];
@@ -12066,50 +12474,50 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var ry = data[i++];
 	          var startAngle = data[i++];
 	          var endAngle = data[i++] + startAngle; // TODO Arc 旋转
-
+	
 	          var psi = data[i++];
 	          var anticlockwise = 1 - data[i++];
-
+	
 	          if (i == 1) {
 	            // 直接使用 arc 命令
 	            // 第一个命令起点还未定义
 	            x0 = mathCos(startAngle) * rx + cx;
 	            y0 = mathSin(startAngle) * ry + cy;
 	          }
-
+	
 	          bbox.fromArc(cx, cy, rx, ry, startAngle, endAngle, anticlockwise, min2, max2);
 	          xi = mathCos(endAngle) * rx + cx;
 	          yi = mathSin(endAngle) * ry + cy;
 	          break;
-
+	
 	        case CMD.R:
 	          x0 = xi = data[i++];
 	          y0 = yi = data[i++];
 	          var width = data[i++];
 	          var height = data[i++]; // Use fromLine
-
+	
 	          bbox.fromLine(x0, y0, x0 + width, y0 + height, min2, max2);
 	          break;
-
+	
 	        case CMD.Z:
 	          xi = x0;
 	          yi = y0;
 	          break;
 	      } // Union
-
-
+	
+	
 	      vec2.min(min, min, min2);
 	      vec2.max(max, max, max2);
 	    } // No data
-
-
+	
+	
 	    if (i === 0) {
 	      min[0] = min[1] = max[0] = max[1] = 0;
 	    }
-
+	
 	    return new BoundingRect(min[0], min[1], max[0] - min[0], max[1] - min[1]);
 	  },
-
+	
 	  /**
 	   * Rebuild path from current data
 	   * Rebuild path will not consider javascript implemented line dash.
@@ -12123,10 +12531,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var ux = this._ux;
 	    var uy = this._uy;
 	    var len = this._len;
-
+	
 	    for (var i = 0; i < len;) {
 	      var cmd = d[i++];
-
+	
 	      if (i == 1) {
 	        // 如果第一个命令是 L, C, Q
 	        // 则 previous point 同绘制命令的第一个 point
@@ -12137,38 +12545,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	        x0 = xi;
 	        y0 = yi;
 	      }
-
+	
 	      switch (cmd) {
 	        case CMD.M:
 	          x0 = xi = d[i++];
 	          y0 = yi = d[i++];
 	          ctx.moveTo(xi, yi);
 	          break;
-
+	
 	        case CMD.L:
 	          x = d[i++];
 	          y = d[i++]; // Not draw too small seg between
-
+	
 	          if (mathAbs(x - xi) > ux || mathAbs(y - yi) > uy || i === len - 1) {
 	            ctx.lineTo(x, y);
 	            xi = x;
 	            yi = y;
 	          }
-
+	
 	          break;
-
+	
 	        case CMD.C:
 	          ctx.bezierCurveTo(d[i++], d[i++], d[i++], d[i++], d[i++], d[i++]);
 	          xi = d[i - 2];
 	          yi = d[i - 1];
 	          break;
-
+	
 	        case CMD.Q:
 	          ctx.quadraticCurveTo(d[i++], d[i++], d[i++], d[i++]);
 	          xi = d[i - 2];
 	          yi = d[i - 1];
 	          break;
-
+	
 	        case CMD.A:
 	          var cx = d[i++];
 	          var cy = d[i++];
@@ -12183,7 +12591,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var scaleY = rx > ry ? ry / rx : 1;
 	          var isEllipse = Math.abs(rx - ry) > 1e-3;
 	          var endAngle = theta + dTheta;
-
+	
 	          if (isEllipse) {
 	            ctx.translate(cx, cy);
 	            ctx.rotate(psi);
@@ -12195,24 +12603,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	          } else {
 	            ctx.arc(cx, cy, r, theta, endAngle, 1 - fs);
 	          }
-
+	
 	          if (i == 1) {
 	            // 直接使用 arc 命令
 	            // 第一个命令起点还未定义
 	            x0 = mathCos(theta) * rx + cx;
 	            y0 = mathSin(theta) * ry + cy;
 	          }
-
+	
 	          xi = mathCos(endAngle) * rx + cx;
 	          yi = mathSin(endAngle) * ry + cy;
 	          break;
-
+	
 	        case CMD.R:
 	          x0 = xi = d[i];
 	          y0 = yi = d[i + 1];
 	          ctx.rect(d[i++], d[i++], d[i++], d[i++]);
 	          break;
-
+	
 	        case CMD.Z:
 	          ctx.closePath();
 	          xi = x0;
@@ -12227,13 +12635,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 43 */
+/*!***********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/curve.js ***!
+  \***********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _vector = __webpack_require__(27);
-
+	var _vector = __webpack_require__(/*! ./vector */ 27);
+	
 	var v2Create = _vector.create;
 	var v2DistSquare = _vector.distSquare;
-
+	
 	/**
 	 * 曲线辅助模块
 	 * @module zrender/core/curve
@@ -12245,17 +12656,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EPSILON_NUMERIC = 1e-4;
 	var THREE_SQRT = mathSqrt(3);
 	var ONE_THIRD = 1 / 3; // 临时变量
-
+	
 	var _v0 = v2Create();
-
+	
 	var _v1 = v2Create();
-
+	
 	var _v2 = v2Create();
-
+	
 	function isAroundZero(val) {
 	  return val > -EPSILON && val < EPSILON;
 	}
-
+	
 	function isNotAroundZero(val) {
 	  return val > EPSILON || val < -EPSILON;
 	}
@@ -12269,8 +12680,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} t
 	 * @return {number}
 	 */
-
-
+	
+	
 	function cubicAt(p0, p1, p2, p3, t) {
 	  var onet = 1 - t;
 	  return onet * onet * (onet * p0 + 3 * t * p1) + t * t * (t * p3 + 3 * onet * p2);
@@ -12285,8 +12696,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} t
 	 * @return {number}
 	 */
-
-
+	
+	
 	function cubicDerivativeAt(p0, p1, p2, p3, t) {
 	  var onet = 1 - t;
 	  return 3 * (((p1 - p0) * onet + 2 * (p2 - p1) * t) * onet + (p3 - p2) * t * t);
@@ -12302,8 +12713,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Array.<number>} roots
 	 * @return {number} 有效根数目
 	 */
-
-
+	
+	
 	function cubicRootAt(p0, p1, p2, p3, val, roots) {
 	  // Evaluate roots of cubic functions
 	  var a = p3 + 3 * (p1 - p2) - p0;
@@ -12314,30 +12725,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var B = b * c - 9 * a * d;
 	  var C = c * c - 3 * b * d;
 	  var n = 0;
-
+	
 	  if (isAroundZero(A) && isAroundZero(B)) {
 	    if (isAroundZero(b)) {
 	      roots[0] = 0;
 	    } else {
 	      var t1 = -c / b; //t1, t2, t3, b is not zero
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        roots[n++] = t1;
 	      }
 	    }
 	  } else {
 	    var disc = B * B - 4 * A * C;
-
+	
 	    if (isAroundZero(disc)) {
 	      var K = B / A;
 	      var t1 = -b / a + K; // t1, a is not zero
-
+	
 	      var t2 = -K / 2; // t2, t3
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        roots[n++] = t1;
 	      }
-
+	
 	      if (t2 >= 0 && t2 <= 1) {
 	        roots[n++] = t2;
 	      }
@@ -12345,21 +12756,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var discSqrt = mathSqrt(disc);
 	      var Y1 = A * b + 1.5 * a * (-B + discSqrt);
 	      var Y2 = A * b + 1.5 * a * (-B - discSqrt);
-
+	
 	      if (Y1 < 0) {
 	        Y1 = -mathPow(-Y1, ONE_THIRD);
 	      } else {
 	        Y1 = mathPow(Y1, ONE_THIRD);
 	      }
-
+	
 	      if (Y2 < 0) {
 	        Y2 = -mathPow(-Y2, ONE_THIRD);
 	      } else {
 	        Y2 = mathPow(Y2, ONE_THIRD);
 	      }
-
+	
 	      var t1 = (-b - (Y1 + Y2)) / (3 * a);
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        roots[n++] = t1;
 	      }
@@ -12371,21 +12782,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var t1 = (-b - 2 * ASqrt * tmp) / (3 * a);
 	      var t2 = (-b + ASqrt * (tmp + THREE_SQRT * Math.sin(theta))) / (3 * a);
 	      var t3 = (-b + ASqrt * (tmp - THREE_SQRT * Math.sin(theta))) / (3 * a);
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        roots[n++] = t1;
 	      }
-
+	
 	      if (t2 >= 0 && t2 <= 1) {
 	        roots[n++] = t2;
 	      }
-
+	
 	      if (t3 >= 0 && t3 <= 1) {
 	        roots[n++] = t3;
 	      }
 	    }
 	  }
-
+	
 	  return n;
 	}
 	/**
@@ -12398,42 +12809,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Array.<number>} extrema
 	 * @return {number} 有效数目
 	 */
-
-
+	
+	
 	function cubicExtrema(p0, p1, p2, p3, extrema) {
 	  var b = 6 * p2 - 12 * p1 + 6 * p0;
 	  var a = 9 * p1 + 3 * p3 - 3 * p0 - 9 * p2;
 	  var c = 3 * p1 - 3 * p0;
 	  var n = 0;
-
+	
 	  if (isAroundZero(a)) {
 	    if (isNotAroundZero(b)) {
 	      var t1 = -c / b;
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        extrema[n++] = t1;
 	      }
 	    }
 	  } else {
 	    var disc = b * b - 4 * a * c;
-
+	
 	    if (isAroundZero(disc)) {
 	      extrema[0] = -b / (2 * a);
 	    } else if (disc > 0) {
 	      var discSqrt = mathSqrt(disc);
 	      var t1 = (-b + discSqrt) / (2 * a);
 	      var t2 = (-b - discSqrt) / (2 * a);
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        extrema[n++] = t1;
 	      }
-
+	
 	      if (t2 >= 0 && t2 <= 1) {
 	        extrema[n++] = t2;
 	      }
 	    }
 	  }
-
+	
 	  return n;
 	}
 	/**
@@ -12446,8 +12857,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} t
 	 * @param  {Array.<number>} out
 	 */
-
-
+	
+	
 	function cubicSubdivide(p0, p1, p2, p3, t, out) {
 	  var p01 = (p1 - p0) * t + p0;
 	  var p12 = (p2 - p1) * t + p1;
@@ -12455,12 +12866,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var p012 = (p12 - p01) * t + p01;
 	  var p123 = (p23 - p12) * t + p12;
 	  var p0123 = (p123 - p012) * t + p012; // Seg0
-
+	
 	  out[0] = p0;
 	  out[1] = p01;
 	  out[2] = p012;
 	  out[3] = p0123; // Seg1
-
+	
 	  out[4] = p0123;
 	  out[5] = p123;
 	  out[6] = p23;
@@ -12482,8 +12893,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} [out] 投射点
 	 * @return {number}
 	 */
-
-
+	
+	
 	function cubicProjectPoint(x0, y0, x1, y1, x2, y2, x3, y3, x, y, out) {
 	  // http://pomax.github.io/bezierinfo/#projections
 	  var t;
@@ -12496,32 +12907,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _v0[0] = x;
 	  _v0[1] = y; // 先粗略估计一下可能的最小距离的 t 值
 	  // PENDING
-
+	
 	  for (var _t = 0; _t < 1; _t += 0.05) {
 	    _v1[0] = cubicAt(x0, x1, x2, x3, _t);
 	    _v1[1] = cubicAt(y0, y1, y2, y3, _t);
 	    d1 = v2DistSquare(_v0, _v1);
-
+	
 	    if (d1 < d) {
 	      t = _t;
 	      d = d1;
 	    }
 	  }
-
+	
 	  d = Infinity; // At most 32 iteration
-
+	
 	  for (var i = 0; i < 32; i++) {
 	    if (interval < EPSILON_NUMERIC) {
 	      break;
 	    }
-
+	
 	    prev = t - interval;
 	    next = t + interval; // t - interval
-
+	
 	    _v1[0] = cubicAt(x0, x1, x2, x3, prev);
 	    _v1[1] = cubicAt(y0, y1, y2, y3, prev);
 	    d1 = v2DistSquare(_v1, _v0);
-
+	
 	    if (prev >= 0 && d1 < d) {
 	      t = prev;
 	      d = d1;
@@ -12530,7 +12941,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _v2[0] = cubicAt(x0, x1, x2, x3, next);
 	      _v2[1] = cubicAt(y0, y1, y2, y3, next);
 	      d2 = v2DistSquare(_v2, _v0);
-
+	
 	      if (next <= 1 && d2 < d) {
 	        t = next;
 	        d = d2;
@@ -12539,14 +12950,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  } // t
-
-
+	
+	
 	  if (out) {
 	    out[0] = cubicAt(x0, x1, x2, x3, t);
 	    out[1] = cubicAt(y0, y1, y2, y3, t);
 	  } // console.log(interval, i);
-
-
+	
+	
 	  return mathSqrt(d);
 	}
 	/**
@@ -12557,8 +12968,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} t
 	 * @return {number}
 	 */
-
-
+	
+	
 	function quadraticAt(p0, p1, p2, t) {
 	  var onet = 1 - t;
 	  return onet * (onet * p0 + 2 * t * p1) + t * t * p2;
@@ -12571,8 +12982,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} t
 	 * @return {number}
 	 */
-
-
+	
+	
 	function quadraticDerivativeAt(p0, p1, p2, t) {
 	  return 2 * ((1 - t) * (p1 - p0) + t * (p2 - p1));
 	}
@@ -12585,28 +12996,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Array.<number>} roots
 	 * @return {number} 有效根数目
 	 */
-
-
+	
+	
 	function quadraticRootAt(p0, p1, p2, val, roots) {
 	  var a = p0 - 2 * p1 + p2;
 	  var b = 2 * (p1 - p0);
 	  var c = p0 - val;
 	  var n = 0;
-
+	
 	  if (isAroundZero(a)) {
 	    if (isNotAroundZero(b)) {
 	      var t1 = -c / b;
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        roots[n++] = t1;
 	      }
 	    }
 	  } else {
 	    var disc = b * b - 4 * a * c;
-
+	
 	    if (isAroundZero(disc)) {
 	      var t1 = -b / (2 * a);
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        roots[n++] = t1;
 	      }
@@ -12614,17 +13025,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var discSqrt = mathSqrt(disc);
 	      var t1 = (-b + discSqrt) / (2 * a);
 	      var t2 = (-b - discSqrt) / (2 * a);
-
+	
 	      if (t1 >= 0 && t1 <= 1) {
 	        roots[n++] = t1;
 	      }
-
+	
 	      if (t2 >= 0 && t2 <= 1) {
 	        roots[n++] = t2;
 	      }
 	    }
 	  }
-
+	
 	  return n;
 	}
 	/**
@@ -12635,11 +13046,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} p2
 	 * @return {number}
 	 */
-
-
+	
+	
 	function quadraticExtremum(p0, p1, p2) {
 	  var divider = p0 + p2 - 2 * p1;
-
+	
 	  if (divider === 0) {
 	    // p1 is center of p0 and p2
 	    return 0.5;
@@ -12656,17 +13067,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number} t
 	 * @param  {Array.<number>} out
 	 */
-
-
+	
+	
 	function quadraticSubdivide(p0, p1, p2, t, out) {
 	  var p01 = (p1 - p0) * t + p0;
 	  var p12 = (p2 - p1) * t + p1;
 	  var p012 = (p12 - p01) * t + p01; // Seg0
-
+	
 	  out[0] = p0;
 	  out[1] = p01;
 	  out[2] = p012; // Seg1
-
+	
 	  out[3] = p012;
 	  out[4] = p12;
 	  out[5] = p2;
@@ -12685,8 +13096,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} out 投射点
 	 * @return {number}
 	 */
-
-
+	
+	
 	function quadraticProjectPoint(x0, y0, x1, y1, x2, y2, x, y, out) {
 	  // http://pomax.github.io/bezierinfo/#projections
 	  var t;
@@ -12695,32 +13106,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _v0[0] = x;
 	  _v0[1] = y; // 先粗略估计一下可能的最小距离的 t 值
 	  // PENDING
-
+	
 	  for (var _t = 0; _t < 1; _t += 0.05) {
 	    _v1[0] = quadraticAt(x0, x1, x2, _t);
 	    _v1[1] = quadraticAt(y0, y1, y2, _t);
 	    var d1 = v2DistSquare(_v0, _v1);
-
+	
 	    if (d1 < d) {
 	      t = _t;
 	      d = d1;
 	    }
 	  }
-
+	
 	  d = Infinity; // At most 32 iteration
-
+	
 	  for (var i = 0; i < 32; i++) {
 	    if (interval < EPSILON_NUMERIC) {
 	      break;
 	    }
-
+	
 	    var prev = t - interval;
 	    var next = t + interval; // t - interval
-
+	
 	    _v1[0] = quadraticAt(x0, x1, x2, prev);
 	    _v1[1] = quadraticAt(y0, y1, y2, prev);
 	    var d1 = v2DistSquare(_v1, _v0);
-
+	
 	    if (prev >= 0 && d1 < d) {
 	      t = prev;
 	      d = d1;
@@ -12729,7 +13140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _v2[0] = quadraticAt(x0, x1, x2, next);
 	      _v2[1] = quadraticAt(y0, y1, y2, next);
 	      var d2 = v2DistSquare(_v2, _v0);
-
+	
 	      if (next <= 1 && d2 < d) {
 	        t = next;
 	        d = d2;
@@ -12738,17 +13149,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  } // t
-
-
+	
+	
 	  if (out) {
 	    out[0] = quadraticAt(x0, x1, x2, t);
 	    out[1] = quadraticAt(y0, y1, y2, t);
 	  } // console.log(interval, i);
-
-
+	
+	
 	  return mathSqrt(d);
 	}
-
+	
 	exports.cubicAt = cubicAt;
 	exports.cubicDerivativeAt = cubicDerivativeAt;
 	exports.cubicRootAt = cubicRootAt;
@@ -12764,12 +13175,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 44 */
+/*!**********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/bbox.js ***!
+  \**********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var vec2 = __webpack_require__(27);
-
-	var curve = __webpack_require__(43);
-
+	var vec2 = __webpack_require__(/*! ./vector */ 27);
+	
+	var curve = __webpack_require__(/*! ./curve */ 43);
+	
 	/**
 	 * @author Yi Shen(https://github.com/pissang)
 	 */
@@ -12788,19 +13202,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {number} min
 	 * @param {number} max
 	 */
-
+	
 	function fromPoints(points, min, max) {
 	  if (points.length === 0) {
 	    return;
 	  }
-
+	
 	  var p = points[0];
 	  var left = p[0];
 	  var right = p[0];
 	  var top = p[1];
 	  var bottom = p[1];
 	  var i;
-
+	
 	  for (i = 1; i < points.length; i++) {
 	    p = points[i];
 	    left = mathMin(left, p[0]);
@@ -12808,7 +13222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    top = mathMin(top, p[1]);
 	    bottom = mathMax(bottom, p[1]);
 	  }
-
+	
 	  min[0] = left;
 	  min[1] = top;
 	  max[0] = right;
@@ -12823,15 +13237,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} min
 	 * @param {Array.<number>} max
 	 */
-
-
+	
+	
 	function fromLine(x0, y0, x1, y1, min, max) {
 	  min[0] = mathMin(x0, x1);
 	  min[1] = mathMin(y0, y1);
 	  max[0] = mathMax(x0, x1);
 	  max[1] = mathMax(y0, y1);
 	}
-
+	
 	var xDim = [];
 	var yDim = [];
 	/**
@@ -12848,7 +13262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} min
 	 * @param {Array.<number>} max
 	 */
-
+	
 	function fromCubic(x0, y0, x1, y1, x2, y2, x3, y3, min, max) {
 	  var cubicExtrema = curve.cubicExtrema;
 	  var cubicAt = curve.cubicAt;
@@ -12858,21 +13272,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  min[1] = Infinity;
 	  max[0] = -Infinity;
 	  max[1] = -Infinity;
-
+	
 	  for (i = 0; i < n; i++) {
 	    var x = cubicAt(x0, x1, x2, x3, xDim[i]);
 	    min[0] = mathMin(x, min[0]);
 	    max[0] = mathMax(x, max[0]);
 	  }
-
+	
 	  n = cubicExtrema(y0, y1, y2, y3, yDim);
-
+	
 	  for (i = 0; i < n; i++) {
 	    var y = cubicAt(y0, y1, y2, y3, yDim[i]);
 	    min[1] = mathMin(y, min[1]);
 	    max[1] = mathMax(y, max[1]);
 	  }
-
+	
 	  min[0] = mathMin(x0, min[0]);
 	  max[0] = mathMax(x0, max[0]);
 	  min[0] = mathMin(x3, min[0]);
@@ -12894,12 +13308,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} min
 	 * @param {Array.<number>} max
 	 */
-
-
+	
+	
 	function fromQuadratic(x0, y0, x1, y1, x2, y2, min, max) {
 	  var quadraticExtremum = curve.quadraticExtremum;
 	  var quadraticAt = curve.quadraticAt; // Find extremities, where derivative in x dim or y dim is zero
-
+	
 	  var tx = mathMax(mathMin(quadraticExtremum(x0, x1, x2), 1), 0);
 	  var ty = mathMax(mathMin(quadraticExtremum(y0, y1, y2), 1), 0);
 	  var x = quadraticAt(x0, x1, x2, tx);
@@ -12923,13 +13337,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>} min
 	 * @param {Array.<number>} max
 	 */
-
-
+	
+	
 	function fromArc(x, y, rx, ry, startAngle, endAngle, anticlockwise, min, max) {
 	  var vec2Min = vec2.min;
 	  var vec2Max = vec2.max;
 	  var diff = Math.abs(startAngle - endAngle);
-
+	
 	  if (diff % PI2 < 1e-4 && diff > 1e-4) {
 	    // Is a circle
 	    min[0] = x - rx;
@@ -12938,40 +13352,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	    max[1] = y + ry;
 	    return;
 	  }
-
+	
 	  start[0] = mathCos(startAngle) * rx + x;
 	  start[1] = mathSin(startAngle) * ry + y;
 	  end[0] = mathCos(endAngle) * rx + x;
 	  end[1] = mathSin(endAngle) * ry + y;
 	  vec2Min(min, start, end);
 	  vec2Max(max, start, end); // Thresh to [0, Math.PI * 2]
-
+	
 	  startAngle = startAngle % PI2;
-
+	
 	  if (startAngle < 0) {
 	    startAngle = startAngle + PI2;
 	  }
-
+	
 	  endAngle = endAngle % PI2;
-
+	
 	  if (endAngle < 0) {
 	    endAngle = endAngle + PI2;
 	  }
-
+	
 	  if (startAngle > endAngle && !anticlockwise) {
 	    endAngle += PI2;
 	  } else if (startAngle < endAngle && anticlockwise) {
 	    startAngle += PI2;
 	  }
-
+	
 	  if (anticlockwise) {
 	    var tmp = endAngle;
 	    endAngle = startAngle;
 	    startAngle = tmp;
 	  } // var number = 0;
 	  // var step = (anticlockwise ? -Math.PI : Math.PI) / 2;
-
-
+	
+	
 	  for (var angle = 0; angle < endAngle; angle += Math.PI / 2) {
 	    if (angle > startAngle) {
 	      extremity[0] = mathCos(angle) * rx + x;
@@ -12981,7 +13395,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
-
+	
 	exports.fromPoints = fromPoints;
 	exports.fromLine = fromLine;
 	exports.fromCubic = fromCubic;
@@ -12990,84 +13404,87 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 45 */
+/*!*************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/contain/path.js ***!
+  \*************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var PathProxy = __webpack_require__(42);
-
-	var line = __webpack_require__(46);
-
-	var cubic = __webpack_require__(47);
-
-	var quadratic = __webpack_require__(48);
-
-	var arc = __webpack_require__(49);
-
-	var _util = __webpack_require__(50);
-
+	var PathProxy = __webpack_require__(/*! ../core/PathProxy */ 42);
+	
+	var line = __webpack_require__(/*! ./line */ 46);
+	
+	var cubic = __webpack_require__(/*! ./cubic */ 47);
+	
+	var quadratic = __webpack_require__(/*! ./quadratic */ 48);
+	
+	var arc = __webpack_require__(/*! ./arc */ 49);
+	
+	var _util = __webpack_require__(/*! ./util */ 50);
+	
 	var normalizeRadian = _util.normalizeRadian;
-
-	var curve = __webpack_require__(43);
-
-	var windingLine = __webpack_require__(51);
-
+	
+	var curve = __webpack_require__(/*! ../core/curve */ 43);
+	
+	var windingLine = __webpack_require__(/*! ./windingLine */ 51);
+	
 	var CMD = PathProxy.CMD;
 	var PI2 = Math.PI * 2;
 	var EPSILON = 1e-4;
-
+	
 	function isAroundEqual(a, b) {
 	  return Math.abs(a - b) < EPSILON;
 	} // 临时数组
-
-
+	
+	
 	var roots = [-1, -1, -1];
 	var extrema = [-1, -1];
-
+	
 	function swapExtrema() {
 	  var tmp = extrema[0];
 	  extrema[0] = extrema[1];
 	  extrema[1] = tmp;
 	}
-
+	
 	function windingCubic(x0, y0, x1, y1, x2, y2, x3, y3, x, y) {
 	  // Quick reject
 	  if (y > y0 && y > y1 && y > y2 && y > y3 || y < y0 && y < y1 && y < y2 && y < y3) {
 	    return 0;
 	  }
-
+	
 	  var nRoots = curve.cubicRootAt(y0, y1, y2, y3, y, roots);
-
+	
 	  if (nRoots === 0) {
 	    return 0;
 	  } else {
 	    var w = 0;
 	    var nExtrema = -1;
 	    var y0_, y1_;
-
+	
 	    for (var i = 0; i < nRoots; i++) {
 	      var t = roots[i]; // Avoid winding error when intersection point is the connect point of two line of polygon
-
+	
 	      var unit = t === 0 || t === 1 ? 0.5 : 1;
 	      var x_ = curve.cubicAt(x0, x1, x2, x3, t);
-
+	
 	      if (x_ < x) {
 	        // Quick reject
 	        continue;
 	      }
-
+	
 	      if (nExtrema < 0) {
 	        nExtrema = curve.cubicExtrema(y0, y1, y2, y3, extrema);
-
+	
 	        if (extrema[1] < extrema[0] && nExtrema > 1) {
 	          swapExtrema();
 	        }
-
+	
 	        y0_ = curve.cubicAt(y0, y1, y2, y3, extrema[0]);
-
+	
 	        if (nExtrema > 1) {
 	          y1_ = curve.cubicAt(y0, y1, y2, y3, extrema[1]);
 	        }
 	      }
-
+	
 	      if (nExtrema == 2) {
 	        // 分成三段单调函数
 	        if (t < extrema[0]) {
@@ -13086,92 +13503,92 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    }
-
+	
 	    return w;
 	  }
 	}
-
+	
 	function windingQuadratic(x0, y0, x1, y1, x2, y2, x, y) {
 	  // Quick reject
 	  if (y > y0 && y > y1 && y > y2 || y < y0 && y < y1 && y < y2) {
 	    return 0;
 	  }
-
+	
 	  var nRoots = curve.quadraticRootAt(y0, y1, y2, y, roots);
-
+	
 	  if (nRoots === 0) {
 	    return 0;
 	  } else {
 	    var t = curve.quadraticExtremum(y0, y1, y2);
-
+	
 	    if (t >= 0 && t <= 1) {
 	      var w = 0;
 	      var y_ = curve.quadraticAt(y0, y1, y2, t);
-
+	
 	      for (var i = 0; i < nRoots; i++) {
 	        // Remove one endpoint.
 	        var unit = roots[i] === 0 || roots[i] === 1 ? 0.5 : 1;
 	        var x_ = curve.quadraticAt(x0, x1, x2, roots[i]);
-
+	
 	        if (x_ < x) {
 	          // Quick reject
 	          continue;
 	        }
-
+	
 	        if (roots[i] < t) {
 	          w += y_ < y0 ? unit : -unit;
 	        } else {
 	          w += y2 < y_ ? unit : -unit;
 	        }
 	      }
-
+	
 	      return w;
 	    } else {
 	      // Remove one endpoint.
 	      var unit = roots[0] === 0 || roots[0] === 1 ? 0.5 : 1;
 	      var x_ = curve.quadraticAt(x0, x1, x2, roots[0]);
-
+	
 	      if (x_ < x) {
 	        // Quick reject
 	        return 0;
 	      }
-
+	
 	      return y2 < y0 ? unit : -unit;
 	    }
 	  }
 	} // TODO
 	// Arc 旋转
-
-
+	
+	
 	function windingArc(cx, cy, r, startAngle, endAngle, anticlockwise, x, y) {
 	  y -= cy;
-
+	
 	  if (y > r || y < -r) {
 	    return 0;
 	  }
-
+	
 	  var tmp = Math.sqrt(r * r - y * y);
 	  roots[0] = -tmp;
 	  roots[1] = tmp;
 	  var diff = Math.abs(startAngle - endAngle);
-
+	
 	  if (diff < 1e-4) {
 	    return 0;
 	  }
-
+	
 	  if (diff % PI2 < 1e-4) {
 	    // Is a circle
 	    startAngle = 0;
 	    endAngle = PI2;
 	    var dir = anticlockwise ? 1 : -1;
-
+	
 	    if (x >= roots[0] + cx && x <= roots[1] + cx) {
 	      return dir;
 	    } else {
 	      return 0;
 	    }
 	  }
-
+	
 	  if (anticlockwise) {
 	    var tmp = startAngle;
 	    startAngle = normalizeRadian(endAngle);
@@ -13180,47 +13597,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	    startAngle = normalizeRadian(startAngle);
 	    endAngle = normalizeRadian(endAngle);
 	  }
-
+	
 	  if (startAngle > endAngle) {
 	    endAngle += PI2;
 	  }
-
+	
 	  var w = 0;
-
+	
 	  for (var i = 0; i < 2; i++) {
 	    var x_ = roots[i];
-
+	
 	    if (x_ + cx > x) {
 	      var angle = Math.atan2(y, x_);
 	      var dir = anticlockwise ? 1 : -1;
-
+	
 	      if (angle < 0) {
 	        angle = PI2 + angle;
 	      }
-
+	
 	      if (angle >= startAngle && angle <= endAngle || angle + PI2 >= startAngle && angle + PI2 <= endAngle) {
 	        if (angle > Math.PI / 2 && angle < Math.PI * 1.5) {
 	          dir = -dir;
 	        }
-
+	
 	        w += dir;
 	      }
 	    }
 	  }
-
+	
 	  return w;
 	}
-
+	
 	function containPath(data, lineWidth, isStroke, x, y) {
 	  var w = 0;
 	  var xi = 0;
 	  var yi = 0;
 	  var x0 = 0;
 	  var y0 = 0;
-
+	
 	  for (var i = 0; i < data.length;) {
 	    var cmd = data[i++]; // Begin a new subpath
-
+	
 	    if (cmd === CMD.M && i > 1) {
 	      // Close previous subpath
 	      if (!isStroke) {
@@ -13229,9 +13646,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // if (w !== 0) {
 	      //     return true;
 	      // }
-
+	
 	    }
-
+	
 	    if (i == 1) {
 	      // 如果第一个命令是 L, C, Q
 	      // 则 previous point 同绘制命令的第一个 point
@@ -13242,7 +13659,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      x0 = xi;
 	      y0 = yi;
 	    }
-
+	
 	    switch (cmd) {
 	      case CMD.M:
 	        // moveTo 命令重新创建一个新的 subpath, 并且更新新的起点
@@ -13252,7 +13669,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        xi = x0;
 	        yi = y0;
 	        break;
-
+	
 	      case CMD.L:
 	        if (isStroke) {
 	          if (line.containStroke(xi, yi, data[i], data[i + 1], lineWidth, x, y)) {
@@ -13262,11 +13679,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	          // NOTE 在第一个命令为 L, C, Q 的时候会计算出 NaN
 	          w += windingLine(xi, yi, data[i], data[i + 1], x, y) || 0;
 	        }
-
+	
 	        xi = data[i++];
 	        yi = data[i++];
 	        break;
-
+	
 	      case CMD.C:
 	        if (isStroke) {
 	          if (cubic.containStroke(xi, yi, data[i++], data[i++], data[i++], data[i++], data[i], data[i + 1], lineWidth, x, y)) {
@@ -13275,11 +13692,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          w += windingCubic(xi, yi, data[i++], data[i++], data[i++], data[i++], data[i], data[i + 1], x, y) || 0;
 	        }
-
+	
 	        xi = data[i++];
 	        yi = data[i++];
 	        break;
-
+	
 	      case CMD.Q:
 	        if (isStroke) {
 	          if (quadratic.containStroke(xi, yi, data[i++], data[i++], data[i], data[i + 1], lineWidth, x, y)) {
@@ -13288,11 +13705,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          w += windingQuadratic(xi, yi, data[i++], data[i++], data[i], data[i + 1], x, y) || 0;
 	        }
-
+	
 	        xi = data[i++];
 	        yi = data[i++];
 	        break;
-
+	
 	      case CMD.A:
 	        // TODO Arc 判断的开销比较大
 	        var cx = data[i++];
@@ -13301,12 +13718,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var ry = data[i++];
 	        var theta = data[i++];
 	        var dTheta = data[i++]; // TODO Arc 旋转
-
+	
 	        var psi = data[i++];
 	        var anticlockwise = 1 - data[i++];
 	        var x1 = Math.cos(theta) * rx + cx;
 	        var y1 = Math.sin(theta) * ry + cy; // 不是直接使用 arc 命令
-
+	
 	        if (i > 1) {
 	          w += windingLine(xi, yi, x1, y1, x, y);
 	        } else {
@@ -13314,10 +13731,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	          x0 = x1;
 	          y0 = y1;
 	        } // zr 使用scale来模拟椭圆, 这里也对x做一定的缩放
-
-
+	
+	
 	        var _x = (x - cx) * ry / rx + cx;
-
+	
 	        if (isStroke) {
 	          if (arc.containStroke(cx, cy, ry, theta, theta + dTheta, anticlockwise, lineWidth, _x, y)) {
 	            return true;
@@ -13325,11 +13742,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	          w += windingArc(cx, cy, ry, theta, theta + dTheta, anticlockwise, _x, y);
 	        }
-
+	
 	        xi = Math.cos(theta + dTheta) * rx + cx;
 	        yi = Math.sin(theta + dTheta) * ry + cy;
 	        break;
-
+	
 	      case CMD.R:
 	        x0 = xi = data[i++];
 	        y0 = yi = data[i++];
@@ -13337,7 +13754,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var height = data[i++];
 	        var x1 = x0 + width;
 	        var y1 = y0 + height;
-
+	
 	        if (isStroke) {
 	          if (line.containStroke(x0, y0, x1, y0, lineWidth, x, y) || line.containStroke(x1, y0, x1, y1, lineWidth, x, y) || line.containStroke(x1, y1, x0, y1, lineWidth, x, y) || line.containStroke(x0, y1, x0, y0, lineWidth, x, y)) {
 	            return true;
@@ -13347,9 +13764,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          w += windingLine(x1, y0, x1, y1, x, y);
 	          w += windingLine(x0, y1, x0, y0, x, y);
 	        }
-
+	
 	        break;
-
+	
 	      case CMD.Z:
 	        if (isStroke) {
 	          if (line.containStroke(xi, yi, x0, y0, lineWidth, x, y)) {
@@ -13363,33 +13780,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	          //     return true;
 	          // }
 	        }
-
+	
 	        xi = x0;
 	        yi = y0;
 	        break;
 	    }
 	  }
-
+	
 	  if (!isStroke && !isAroundEqual(yi, y0)) {
 	    w += windingLine(xi, yi, x0, y0, x, y) || 0;
 	  }
-
+	
 	  return w !== 0;
 	}
-
+	
 	function contain(pathData, x, y) {
 	  return containPath(pathData, 0, false, x, y);
 	}
-
+	
 	function containStroke(pathData, lineWidth, x, y) {
 	  return containPath(pathData, lineWidth, true, x, y);
 	}
-
+	
 	exports.contain = contain;
 	exports.containStroke = containStroke;
 
 /***/ },
 /* 46 */
+/*!*************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/contain/line.js ***!
+  \*************************************************/
 /***/ function(module, exports) {
 
 	/**
@@ -13407,37 +13827,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (lineWidth === 0) {
 	    return false;
 	  }
-
+	
 	  var _l = lineWidth;
 	  var _a = 0;
 	  var _b = x0; // Quick reject
-
+	
 	  if (y > y0 + _l && y > y1 + _l || y < y0 - _l && y < y1 - _l || x > x0 + _l && x > x1 + _l || x < x0 - _l && x < x1 - _l) {
 	    return false;
 	  }
-
+	
 	  if (x0 !== x1) {
 	    _a = (y0 - y1) / (x0 - x1);
 	    _b = (x0 * y1 - x1 * y0) / (x0 - x1);
 	  } else {
 	    return Math.abs(x - x0) <= _l / 2;
 	  }
-
+	
 	  var tmp = _a * x - y + _b;
-
+	
 	  var _s = tmp * tmp / (_a * _a + 1);
-
+	
 	  return _s <= _l / 2 * _l / 2;
 	}
-
+	
 	exports.containStroke = containStroke;
 
 /***/ },
 /* 47 */
+/*!**************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/contain/cubic.js ***!
+  \**************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var curve = __webpack_require__(43);
-
+	var curve = __webpack_require__(/*! ../core/curve */ 43);
+	
 	/**
 	 * 三次贝塞尔曲线描边包含判断
 	 * @param  {number}  x0
@@ -13457,27 +13880,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (lineWidth === 0) {
 	    return false;
 	  }
-
+	
 	  var _l = lineWidth; // Quick reject
-
+	
 	  if (y > y0 + _l && y > y1 + _l && y > y2 + _l && y > y3 + _l || y < y0 - _l && y < y1 - _l && y < y2 - _l && y < y3 - _l || x > x0 + _l && x > x1 + _l && x > x2 + _l && x > x3 + _l || x < x0 - _l && x < x1 - _l && x < x2 - _l && x < x3 - _l) {
 	    return false;
 	  }
-
+	
 	  var d = curve.cubicProjectPoint(x0, y0, x1, y1, x2, y2, x3, y3, x, y, null);
 	  return d <= _l / 2;
 	}
-
+	
 	exports.containStroke = containStroke;
 
 /***/ },
 /* 48 */
+/*!******************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/contain/quadratic.js ***!
+  \******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _curve = __webpack_require__(43);
-
+	var _curve = __webpack_require__(/*! ../core/curve */ 43);
+	
 	var quadraticProjectPoint = _curve.quadraticProjectPoint;
-
+	
 	/**
 	 * 二次贝塞尔曲线描边包含判断
 	 * @param  {number}  x0
@@ -13495,25 +13921,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (lineWidth === 0) {
 	    return false;
 	  }
-
+	
 	  var _l = lineWidth; // Quick reject
-
+	
 	  if (y > y0 + _l && y > y1 + _l && y > y2 + _l || y < y0 - _l && y < y1 - _l && y < y2 - _l || x > x0 + _l && x > x1 + _l && x > x2 + _l || x < x0 - _l && x < x1 - _l && x < x2 - _l) {
 	    return false;
 	  }
-
+	
 	  var d = quadraticProjectPoint(x0, y0, x1, y1, x2, y2, x, y, null);
 	  return d <= _l / 2;
 	}
-
+	
 	exports.containStroke = containStroke;
 
 /***/ },
 /* 49 */
+/*!************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/contain/arc.js ***!
+  \************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(50);
-
+	var _util = __webpack_require__(/*! ./util */ 50);
+	
 	var normalizeRadian = _util.normalizeRadian;
 	var PI2 = Math.PI * 2;
 	/**
@@ -13529,26 +13958,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {number}  y
 	 * @return {Boolean}
 	 */
-
+	
 	function containStroke(cx, cy, r, startAngle, endAngle, anticlockwise, lineWidth, x, y) {
 	  if (lineWidth === 0) {
 	    return false;
 	  }
-
+	
 	  var _l = lineWidth;
 	  x -= cx;
 	  y -= cy;
 	  var d = Math.sqrt(x * x + y * y);
-
+	
 	  if (d - _l > r || d + _l < r) {
 	    return false;
 	  }
-
+	
 	  if (Math.abs(startAngle - endAngle) % PI2 < 1e-4) {
 	    // Is a circle
 	    return true;
 	  }
-
+	
 	  if (anticlockwise) {
 	    var tmp = startAngle;
 	    startAngle = normalizeRadian(endAngle);
@@ -13557,69 +13986,79 @@ return /******/ (function(modules) { // webpackBootstrap
 	    startAngle = normalizeRadian(startAngle);
 	    endAngle = normalizeRadian(endAngle);
 	  }
-
+	
 	  if (startAngle > endAngle) {
 	    endAngle += PI2;
 	  }
-
+	
 	  var angle = Math.atan2(y, x);
-
+	
 	  if (angle < 0) {
 	    angle += PI2;
 	  }
-
+	
 	  return angle >= startAngle && angle <= endAngle || angle + PI2 >= startAngle && angle + PI2 <= endAngle;
 	}
-
+	
 	exports.containStroke = containStroke;
 
 /***/ },
 /* 50 */
+/*!*************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/contain/util.js ***!
+  \*************************************************/
 /***/ function(module, exports) {
 
 	var PI2 = Math.PI * 2;
-
+	
 	function normalizeRadian(angle) {
 	  angle %= PI2;
-
+	
 	  if (angle < 0) {
 	    angle += PI2;
 	  }
-
+	
 	  return angle;
 	}
-
+	
 	exports.normalizeRadian = normalizeRadian;
 
 /***/ },
 /* 51 */
+/*!********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/contain/windingLine.js ***!
+  \********************************************************/
 /***/ function(module, exports) {
 
 	function windingLine(x0, y0, x1, y1, x, y) {
 	  if (y > y0 && y > y1 || y < y0 && y < y1) {
 	    return 0;
 	  } // Ignore horizontal line
-
-
+	
+	
 	  if (y1 === y0) {
 	    return 0;
 	  }
-
+	
 	  var dir = y1 < y0 ? 1 : -1;
 	  var t = (y - y0) / (y1 - y0); // Avoid winding error when intersection point is the connect point of two line of polygon
-
+	
 	  if (t === 1 || t === 0) {
 	    dir = y1 < y0 ? 0.5 : -0.5;
 	  }
-
-	  var x_ = t * (x1 - x0) + x0;
-	  return x_ > x ? dir : 0;
+	
+	  var x_ = t * (x1 - x0) + x0; // If (x, y) on the line, considered as "contain".
+	
+	  return x_ === x ? Infinity : x_ > x ? dir : 0;
 	}
-
+	
 	module.exports = windingLine;
 
 /***/ },
 /* 52 */
+/*!****************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/Pattern.js ***!
+  \****************************************************/
 /***/ function(module, exports) {
 
 	var Pattern = function (image, repeat) {
@@ -13627,31 +14066,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // declard by `color: {image: ...}`, where this constructor will not be called.
 	  this.image = image;
 	  this.repeat = repeat; // Can be cloned
-
+	
 	  this.type = 'pattern';
 	};
-
+	
 	Pattern.prototype.getCanvasPattern = function (ctx) {
 	  return ctx.createPattern(this.image, this.repeat || 'repeat');
 	};
-
+	
 	var _default = Pattern;
 	module.exports = _default;
 
 /***/ },
 /* 53 */
+/*!*******************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/tool/transformPath.js ***!
+  \*******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var PathProxy = __webpack_require__(42);
-
-	var _vector = __webpack_require__(27);
-
+	var PathProxy = __webpack_require__(/*! ../core/PathProxy */ 42);
+	
+	var _vector = __webpack_require__(/*! ../core/vector */ 27);
+	
 	var v2ApplyTransform = _vector.applyTransform;
 	var CMD = PathProxy.CMD;
 	var points = [[], [], []];
 	var mathSqrt = Math.sqrt;
 	var mathAtan2 = Math.atan2;
-
+	
 	function _default(path, m) {
 	  var data = path.data;
 	  var cmd;
@@ -13666,54 +14108,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var R = CMD.R;
 	  var A = CMD.A;
 	  var Q = CMD.Q;
-
+	
 	  for (i = 0, j = 0; i < data.length;) {
 	    cmd = data[i++];
 	    j = i;
 	    nPoint = 0;
-
+	
 	    switch (cmd) {
 	      case M:
 	        nPoint = 1;
 	        break;
-
+	
 	      case L:
 	        nPoint = 1;
 	        break;
-
+	
 	      case C:
 	        nPoint = 3;
 	        break;
-
+	
 	      case Q:
 	        nPoint = 2;
 	        break;
-
+	
 	      case A:
 	        var x = m[4];
 	        var y = m[5];
 	        var sx = mathSqrt(m[0] * m[0] + m[1] * m[1]);
 	        var sy = mathSqrt(m[2] * m[2] + m[3] * m[3]);
 	        var angle = mathAtan2(-m[1] / sy, m[0] / sx); // cx
-
+	
 	        data[i] *= sx;
 	        data[i++] += x; // cy
-
+	
 	        data[i] *= sy;
 	        data[i++] += y; // Scale rx and ry
 	        // FIXME Assume psi is 0 here
-
+	
 	        data[i++] *= sx;
 	        data[i++] *= sy; // Start angle
-
+	
 	        data[i++] += angle; // end angle
-
+	
 	        data[i++] += angle; // FIXME psi
-
+	
 	        i += 2;
 	        j = i;
 	        break;
-
+	
 	      case R:
 	        // x0, y0
 	        p[0] = data[i++];
@@ -13721,40 +14163,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	        v2ApplyTransform(p, p, m);
 	        data[j++] = p[0];
 	        data[j++] = p[1]; // x1, y1
-
+	
 	        p[0] += data[i++];
 	        p[1] += data[i++];
 	        v2ApplyTransform(p, p, m);
 	        data[j++] = p[0];
 	        data[j++] = p[1];
 	    }
-
+	
 	    for (k = 0; k < nPoint; k++) {
 	      var p = points[k];
 	      p[0] = data[i++];
 	      p[1] = data[i++];
 	      v2ApplyTransform(p, p, m); // Write back
-
+	
 	      data[j++] = p[0];
 	      data[j++] = p[1];
 	    }
 	  }
 	}
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 54 */
+/*!**************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/Image.js ***!
+  \**************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Displayable = __webpack_require__(19);
-
-	var BoundingRect = __webpack_require__(39);
-
-	var zrUtil = __webpack_require__(5);
-
-	var imageHelper = __webpack_require__(40);
-
+	var Displayable = __webpack_require__(/*! ./Displayable */ 19);
+	
+	var BoundingRect = __webpack_require__(/*! ../core/BoundingRect */ 39);
+	
+	var zrUtil = __webpack_require__(/*! ../core/util */ 5);
+	
+	var imageHelper = __webpack_require__(/*! ./helper/image */ 40);
+	
 	/**
 	 * @alias zrender/graphic/Image
 	 * @extends module:zrender/graphic/Displayable
@@ -13764,17 +14209,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	function ZImage(opts) {
 	  Displayable.call(this, opts);
 	}
-
+	
 	ZImage.prototype = {
 	  constructor: ZImage,
 	  type: 'image',
 	  brush: function (ctx, prevEl) {
 	    var style = this.style;
 	    var src = style.image; // Must bind each time
-
+	
 	    style.bind(ctx, this, prevEl);
 	    var image = this._image = imageHelper.createOrUpdateImage(src, this._image, this, this.onload);
-
+	
 	    if (!image || !imageHelper.isImageReady(image)) {
 	      return;
 	    } // 图片已经加载完成
@@ -13784,14 +14229,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    //     }
 	    // }
 	    // Else is canvas
-
-
+	
+	
 	    var x = style.x || 0;
 	    var y = style.y || 0;
 	    var width = style.width;
 	    var height = style.height;
 	    var aspect = image.width / image.height;
-
+	
 	    if (width == null && height != null) {
 	      // Keep image/height ratio
 	      width = height * aspect;
@@ -13801,10 +14246,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      width = image.width;
 	      height = image.height;
 	    } // 设置transform
-
-
+	
+	
 	    this.setTransform(ctx);
-
+	
 	    if (style.sWidth && style.sHeight) {
 	      var sx = style.sx || 0;
 	      var sy = style.sy || 0;
@@ -13818,8 +14263,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      ctx.drawImage(image, x, y, width, height);
 	    } // Draw rect text
-
-
+	
+	
 	    if (style.text != null) {
 	      // Only restore transform when needs draw text.
 	      this.restoreTransform(ctx);
@@ -13828,11 +14273,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  getBoundingRect: function () {
 	    var style = this.style;
-
+	
 	    if (!this._rect) {
 	      this._rect = new BoundingRect(style.x || 0, style.y || 0, style.width || 0, style.height || 0);
 	    }
-
+	
 	    return this._rect;
 	  }
 	};
@@ -13842,14 +14287,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 55 */
+/*!****************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/container/Group.js ***!
+  \****************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
-
-	var Element = __webpack_require__(22);
-
-	var BoundingRect = __webpack_require__(39);
-
+	var zrUtil = __webpack_require__(/*! ../core/util */ 5);
+	
+	var Element = __webpack_require__(/*! ../Element */ 22);
+	
+	var BoundingRect = __webpack_require__(/*! ../core/BoundingRect */ 39);
+	
 	/**
 	 * Group是一个容器，可以插入子节点，Group的变换也会被应用到子节点上
 	 * @module zrender/graphic/Group
@@ -13868,7 +14316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     }));
 	 *     zr.add(g);
 	 */
-
+	
 	/**
 	 * @alias module:zrender/graphic/Group
 	 * @constructor
@@ -13878,27 +14326,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Group = function (opts) {
 	  opts = opts || {};
 	  Element.call(this, opts);
-
+	
 	  for (var key in opts) {
 	    if (opts.hasOwnProperty(key)) {
 	      this[key] = opts[key];
 	    }
 	  }
-
+	
 	  this._children = [];
 	  this.__storage = null;
 	  this.__dirty = true;
 	};
-
+	
 	Group.prototype = {
 	  constructor: Group,
 	  isGroup: true,
-
+	
 	  /**
 	   * @type {string}
 	   */
 	  type: 'group',
-
+	
 	  /**
 	   * 所有子孙元素是否响应鼠标事件
 	   * @name module:/zrender/container/Group#silent
@@ -13906,14 +14354,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @default false
 	   */
 	  silent: false,
-
+	
 	  /**
 	   * @return {Array.<module:zrender/Element>}
 	   */
 	  children: function () {
 	    return this._children.slice();
 	  },
-
+	
 	  /**
 	   * 获取指定 index 的儿子节点
 	   * @param  {number} idx
@@ -13922,7 +14370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  childAt: function (idx) {
 	    return this._children[idx];
 	  },
-
+	
 	  /**
 	   * 获取指定名字的儿子节点
 	   * @param  {string} name
@@ -13930,21 +14378,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  childOfName: function (name) {
 	    var children = this._children;
-
+	
 	    for (var i = 0; i < children.length; i++) {
 	      if (children[i].name === name) {
 	        return children[i];
 	      }
 	    }
 	  },
-
+	
 	  /**
 	   * @return {number}
 	   */
 	  childCount: function () {
 	    return this._children.length;
 	  },
-
+	
 	  /**
 	   * 添加子节点到最后
 	   * @param {module:zrender/Element} child
@@ -13952,13 +14400,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  add: function (child) {
 	    if (child && child !== this && child.parent !== this) {
 	      this._children.push(child);
-
+	
 	      this._doAdd(child);
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 添加子节点在 nextSibling 之前
 	   * @param {module:zrender/Element} child
@@ -13968,36 +14416,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (child && child !== this && child.parent !== this && nextSibling && nextSibling.parent === this) {
 	      var children = this._children;
 	      var idx = children.indexOf(nextSibling);
-
+	
 	      if (idx >= 0) {
 	        children.splice(idx, 0, child);
-
+	
 	        this._doAdd(child);
 	      }
 	    }
-
+	
 	    return this;
 	  },
 	  _doAdd: function (child) {
 	    if (child.parent) {
 	      child.parent.remove(child);
 	    }
-
+	
 	    child.parent = this;
 	    var storage = this.__storage;
 	    var zr = this.__zr;
-
+	
 	    if (storage && storage !== child.__storage) {
 	      storage.addToStorage(child);
-
+	
 	      if (child instanceof Group) {
 	        child.addChildrenToStorage(storage);
 	      }
 	    }
-
+	
 	    zr && zr.refresh();
 	  },
-
+	
 	  /**
 	   * 移除子节点
 	   * @param {module:zrender/Element} child
@@ -14007,26 +14455,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var storage = this.__storage;
 	    var children = this._children;
 	    var idx = zrUtil.indexOf(children, child);
-
+	
 	    if (idx < 0) {
 	      return this;
 	    }
-
+	
 	    children.splice(idx, 1);
 	    child.parent = null;
-
+	
 	    if (storage) {
 	      storage.delFromStorage(child);
-
+	
 	      if (child instanceof Group) {
 	        child.delChildrenFromStorage(storage);
 	      }
 	    }
-
+	
 	    zr && zr.refresh();
 	    return this;
 	  },
-
+	
 	  /**
 	   * 移除所有子节点
 	   */
@@ -14035,25 +14483,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var storage = this.__storage;
 	    var child;
 	    var i;
-
+	
 	    for (i = 0; i < children.length; i++) {
 	      child = children[i];
-
+	
 	      if (storage) {
 	        storage.delFromStorage(child);
-
+	
 	        if (child instanceof Group) {
 	          child.delChildrenFromStorage(storage);
 	        }
 	      }
-
+	
 	      child.parent = null;
 	    }
-
+	
 	    children.length = 0;
 	    return this;
 	  },
-
+	
 	  /**
 	   * 遍历所有子节点
 	   * @param  {Function} cb
@@ -14061,15 +14509,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  eachChild: function (cb, context) {
 	    var children = this._children;
-
+	
 	    for (var i = 0; i < children.length; i++) {
 	      var child = children[i];
 	      cb.call(context, child, i);
 	    }
-
+	
 	    return this;
 	  },
-
+	
 	  /**
 	   * 深度优先遍历所有子孙节点
 	   * @param  {Function} cb
@@ -14079,19 +14527,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for (var i = 0; i < this._children.length; i++) {
 	      var child = this._children[i];
 	      cb.call(context, child);
-
+	
 	      if (child.type === 'group') {
 	        child.traverse(cb, context);
 	      }
 	    }
-
+	
 	    return this;
 	  },
 	  addChildrenToStorage: function (storage) {
 	    for (var i = 0; i < this._children.length; i++) {
 	      var child = this._children[i];
 	      storage.addToStorage(child);
-
+	
 	      if (child instanceof Group) {
 	        child.addChildrenToStorage(storage);
 	      }
@@ -14101,7 +14549,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for (var i = 0; i < this._children.length; i++) {
 	      var child = this._children[i];
 	      storage.delFromStorage(child);
-
+	
 	      if (child instanceof Group) {
 	        child.delChildrenFromStorage(storage);
 	      }
@@ -14112,7 +14560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.__zr && this.__zr.refresh();
 	    return this;
 	  },
-
+	
 	  /**
 	   * @return {module:zrender/core/BoundingRect}
 	   */
@@ -14122,14 +14570,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var tmpRect = new BoundingRect(0, 0, 0, 0);
 	    var children = includeChildren || this._children;
 	    var tmpMat = [];
-
+	
 	    for (var i = 0; i < children.length; i++) {
 	      var child = children[i];
-
+	
 	      if (child.ignore || child.invisible) {
 	        continue;
 	      }
-
+	
 	      var childRect = child.getBoundingRect();
 	      var transform = child.getLocalTransform(tmpMat); // TODO
 	      // The boundingRect cacluated by transforming original
@@ -14138,7 +14586,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // the actual boundingRect should be the same as that not be
 	      // rotated.) But we can not find better approach to calculate
 	      // actual boundingRect yet, considering performance.
-
+	
 	      if (transform) {
 	        tmpRect.copy(childRect);
 	        tmpRect.applyTransform(transform);
@@ -14149,7 +14597,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        rect.union(childRect);
 	      }
 	    }
-
+	
 	    return rect || tmpRect;
 	  }
 	};
@@ -14159,16 +14607,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 56 */
+/*!*************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/Text.js ***!
+  \*************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Displayable = __webpack_require__(19);
-
-	var zrUtil = __webpack_require__(5);
-
-	var textContain = __webpack_require__(38);
-
-	var textHelper = __webpack_require__(37);
-
+	var Displayable = __webpack_require__(/*! ./Displayable */ 19);
+	
+	var zrUtil = __webpack_require__(/*! ../core/util */ 5);
+	
+	var textContain = __webpack_require__(/*! ../contain/text */ 38);
+	
+	var textHelper = __webpack_require__(/*! ./helper/text */ 37);
+	
 	/**
 	 * @alias zrender/graphic/Text
 	 * @extends module:zrender/graphic/Displayable
@@ -14179,42 +14630,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // jshint ignore:line
 	  Displayable.call(this, opts);
 	};
-
+	
 	Text.prototype = {
 	  constructor: Text,
 	  type: 'text',
 	  brush: function (ctx, prevEl) {
 	    var style = this.style; // Optimize, avoid normalize every time.
-
+	
 	    this.__dirty && textHelper.normalizeTextStyle(style, true); // Use props with prefix 'text'.
-
+	
 	    style.fill = style.stroke = style.shadowBlur = style.shadowColor = style.shadowOffsetX = style.shadowOffsetY = null;
 	    var text = style.text; // Convert to string
-
+	
 	    text != null && (text += ''); // Always bind style
-
+	
 	    style.bind(ctx, this, prevEl);
-
+	
 	    if (!textHelper.needDrawText(text, style)) {
 	      return;
 	    }
-
+	
 	    this.setTransform(ctx);
 	    textHelper.renderText(this, ctx, text, style);
 	    this.restoreTransform(ctx);
 	  },
 	  getBoundingRect: function () {
 	    var style = this.style; // Optimize, avoid normalize every time.
-
+	
 	    this.__dirty && textHelper.normalizeTextStyle(style, true);
-
+	
 	    if (!this._rect) {
 	      var text = style.text;
 	      text != null ? text += '' : text = '';
 	      var rect = textContain.getBoundingRect(style.text + '', style.font, style.textAlign, style.textVerticalAlign, style.textPadding, style.rich);
 	      rect.x += style.x || 0;
 	      rect.y += style.y || 0;
-
+	
 	      if (textHelper.getStroke(style.textStroke, style.textStrokeWidth)) {
 	        var w = style.textStrokeWidth;
 	        rect.x -= w / 2;
@@ -14222,10 +14673,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        rect.width += w;
 	        rect.height += w;
 	      }
-
+	
 	      this._rect = rect;
 	    }
-
+	
 	    return this._rect;
 	  }
 	};
@@ -14235,10 +14686,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 57 */
+/*!*********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/Circle.js ***!
+  \*********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
 	/**
 	 * 圆形
 	 * @module zrender/shape/Circle
@@ -14262,22 +14716,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // }
 	    // Better stroking in ShapeBundle
 	    // ctx.moveTo(shape.cx + shape.r, shape.cy);
-
-
+	
+	
 	    ctx.arc(shape.cx, shape.cy, shape.r, 0, Math.PI * 2, true);
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 58 */
+/*!*********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/Sector.js ***!
+  \*********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
-	var fixClipWithShadow = __webpack_require__(59);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
+	var fixClipWithShadow = __webpack_require__(/*! ../helper/fixClipWithShadow */ 59);
+	
 	/**
 	 * 扇形
 	 * @module zrender/graphic/shape/Sector
@@ -14308,23 +14765,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ctx.lineTo(unitX * r + x, unitY * r + y);
 	    ctx.arc(x, y, r, startAngle, endAngle, !clockwise);
 	    ctx.lineTo(Math.cos(endAngle) * r0 + x, Math.sin(endAngle) * r0 + y);
-
+	
 	    if (r0 !== 0) {
 	      ctx.arc(x, y, r0, endAngle, startAngle, clockwise);
 	    }
-
+	
 	    ctx.closePath();
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 59 */
+/*!*********************************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/helper/fixClipWithShadow.js ***!
+  \*********************************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var env = __webpack_require__(60);
-
+	var env = __webpack_require__(/*! ../../core/env */ 60);
+	
 	// Fix weird bug in some version of IE11 (like 11.0.9600.178**),
 	// where exception "unexpected call to method or property access"
 	// might be thrown when calling ctx.fill or ctx.stroke after a path
@@ -14340,20 +14800,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	//  ctx.fill();
 	// )
 	var shadowTemp = [['shadowBlur', 0], ['shadowColor', '#000'], ['shadowOffsetX', 0], ['shadowOffsetY', 0]];
-
+	
 	function _default(orignalBrush) {
 	  // version string can be: '11.0'
 	  return env.browser.ie && env.browser.version >= 11 ? function () {
 	    var clipPaths = this.__clipPaths;
 	    var style = this.style;
 	    var modified;
-
+	
 	    if (clipPaths) {
 	      for (var i = 0; i < clipPaths.length; i++) {
 	        var clipPath = clipPaths[i];
 	        var shape = clipPath && clipPath.shape;
 	        var type = clipPath && clipPath.type;
-
+	
 	        if (shape && (type === 'sector' && shape.startAngle === shape.endAngle || type === 'rect' && (!shape.width || !shape.height))) {
 	          for (var j = 0; j < shadowTemp.length; j++) {
 	            // It is save to put shadowTemp static, because shadowTemp
@@ -14361,15 +14821,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            shadowTemp[j][2] = style[shadowTemp[j][0]];
 	            style[shadowTemp[j][0]] = shadowTemp[j][1];
 	          }
-
+	
 	          modified = true;
 	          break;
 	        }
 	      }
 	    }
-
+	
 	    orignalBrush.apply(this, arguments);
-
+	
 	    if (modified) {
 	      for (var j = 0; j < shadowTemp.length; j++) {
 	        style[shadowTemp[j][0]] = shadowTemp[j][2];
@@ -14377,11 +14837,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  } : orignalBrush;
 	}
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 60 */
+/*!*********************************************!*\
+  !*** ./~/echarts/~/zrender/lib/core/env.js ***!
+  \*********************************************/
 /***/ function(module, exports) {
 
 	/**
@@ -14392,8 +14855,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @desc thanks zepto.
 	 */
 	var env = {};
-
-	if (typeof wx !== 'undefined') {
+	
+	if (typeof wx === 'object' && typeof wx.getSystemInfoSync === 'function') {
 	  // In Weixin Application
 	  env = {
 	    browser: {},
@@ -14428,11 +14891,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	} else {
 	  env = detect(navigator.userAgent);
 	}
-
+	
 	var _default = env; // Zepto.js
 	// (c) 2010-2013 Thomas Fuchs
 	// Zepto.js may be freely distributed under the MIT license.
-
+	
 	function detect(ua) {
 	  var os = {};
 	  var browser = {}; // var webkit = ua.match(/Web[kK]it[\/]{0,1}([\d.]+)/);
@@ -14449,14 +14912,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // var rimtabletos = ua.match(/(RIM\sTablet\sOS)\s([\d.]+)/);
 	  // var playbook = ua.match(/PlayBook/);
 	  // var chrome = ua.match(/Chrome\/([\d.]+)/) || ua.match(/CriOS\/([\d.]+)/);
-
+	
 	  var firefox = ua.match(/Firefox\/([\d.]+)/); // var safari = webkit && ua.match(/Mobile\//) && !chrome;
 	  // var webview = ua.match(/(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/) && !chrome;
-
+	
 	  var ie = ua.match(/MSIE\s([\d.]+)/) // IE 11 Trident/7.0; rv:11.0
 	  || ua.match(/Trident\/.+?rv:(([\d.]+))/);
 	  var edge = ua.match(/Edge\/([\d.]+)/); // IE 12 and 12+
-
+	
 	  var weChat = /micromessenger/i.test(ua); // Todo: clean this up with a better OS/browser seperation:
 	  // - discern (more) between multiple browsers on android
 	  // - decide if kindle fire in silk mode is android or not
@@ -14477,26 +14940,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // if (silk) browser.silk = true, browser.version = silk[1];
 	  // if (!silk && os.android && ua.match(/Kindle Fire/)) browser.silk = true;
 	  // if (chrome) browser.chrome = true, browser.version = chrome[1];
-
+	
 	  if (firefox) {
 	    browser.firefox = true;
 	    browser.version = firefox[1];
 	  } // if (safari && (ua.match(/Safari/) || !!os.ios)) browser.safari = true;
 	  // if (webview) browser.webview = true;
-
-
+	
+	
 	  if (ie) {
 	    browser.ie = true;
 	    browser.version = ie[1];
 	  }
-
+	
 	  if (edge) {
 	    browser.edge = true;
 	    browser.version = edge[1];
 	  } // It is difficult to detect WeChat in Win Phone precisely, because ua can
 	  // not be set on win phone. So we do not consider Win Phone.
-
-
+	
+	
 	  if (weChat) {
 	    browser.weChat = true;
 	  } // os.tablet = !!(ipad || playbook || (android && !ua.match(/Mobile/)) ||
@@ -14504,8 +14967,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // os.phone  = !!(!os.tablet && !os.ipod && (android || iphone || webos ||
 	  //     (chrome && ua.match(/Android/)) || (chrome && ua.match(/CriOS\/([\d.]+)/)) ||
 	  //     (firefox && ua.match(/Mobile/)) || (ie && ua.match(/Touch/))));
-
-
+	
+	
 	  return {
 	    browser: browser,
 	    os: os,
@@ -14523,18 +14986,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // events currently. So we dont use that on other browsers unless tested sufficiently.
 	    // Although IE 10 supports pointer event, it use old style and is different from the
 	    // standard. So we exclude that. (IE 10 is hardly used on touch device)
-	    && (browser.edge || browser.ie && browser.version >= 11)
+	    && (browser.edge || browser.ie && browser.version >= 11) // passiveSupported: detectPassiveSupport()
+	
 	  };
-	}
-
+	} // See https://github.com/WICG/EventListenerOptions/blob/gh-pages/explainer.md#feature-detection
+	// function detectPassiveSupport() {
+	//     // Test via a getter in the options object to see if the passive property is accessed
+	//     var supportsPassive = false;
+	//     try {
+	//         var opts = Object.defineProperty({}, 'passive', {
+	//             get: function() {
+	//                 supportsPassive = true;
+	//             }
+	//         });
+	//         window.addEventListener('testPassive', function() {}, opts);
+	//     } catch (e) {
+	//     }
+	//     return supportsPassive;
+	// }
+	
+	
 	module.exports = _default;
 
 /***/ },
 /* 61 */
+/*!*******************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/Ring.js ***!
+  \*******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
 	/**
 	 * 圆环
 	 * @module zrender/graphic/shape/Ring
@@ -14557,17 +15039,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ctx.arc(x, y, shape.r0, 0, PI2, true);
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 62 */
+/*!**********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/Polygon.js ***!
+  \**********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
-	var polyHelper = __webpack_require__(63);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
+	var polyHelper = __webpack_require__(/*! ../helper/poly */ 63);
+	
 	/**
 	 * 多边形
 	 * @module zrender/shape/Polygon
@@ -14583,27 +15068,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    polyHelper.buildPath(ctx, shape, true);
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 63 */
+/*!********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/helper/poly.js ***!
+  \********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var smoothSpline = __webpack_require__(64);
-
-	var smoothBezier = __webpack_require__(65);
-
+	var smoothSpline = __webpack_require__(/*! ./smoothSpline */ 64);
+	
+	var smoothBezier = __webpack_require__(/*! ./smoothBezier */ 65);
+	
 	function buildPath(ctx, shape, closePath) {
 	  var points = shape.points;
 	  var smooth = shape.smooth;
-
+	
 	  if (points && points.length >= 2) {
 	    if (smooth && smooth !== 'spline') {
 	      var controlPoints = smoothBezier(points, smooth, closePath, shape.smoothConstraint);
 	      ctx.moveTo(points[0][0], points[0][1]);
 	      var len = points.length;
-
+	
 	      for (var i = 0; i < (closePath ? len : len - 1); i++) {
 	        var cp1 = controlPoints[i * 2];
 	        var cp2 = controlPoints[i * 2 + 1];
@@ -14614,28 +15102,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (smooth === 'spline') {
 	        points = smoothSpline(points, closePath);
 	      }
-
+	
 	      ctx.moveTo(points[0][0], points[0][1]);
-
+	
 	      for (var i = 1, l = points.length; i < l; i++) {
 	        ctx.lineTo(points[i][0], points[i][1]);
 	      }
 	    }
-
+	
 	    closePath && ctx.closePath();
 	  }
 	}
-
+	
 	exports.buildPath = buildPath;
 
 /***/ },
 /* 64 */
+/*!****************************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/helper/smoothSpline.js ***!
+  \****************************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _vector = __webpack_require__(27);
-
+	var _vector = __webpack_require__(/*! ../../core/vector */ 27);
+	
 	var v2Distance = _vector.distance;
-
+	
 	/**
 	 * Catmull-Rom spline 插值折线
 	 * @module zrender/shape/util/smoothSpline
@@ -14643,7 +15134,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *         Kener (@Kener-林峰, kener.linfeng@gmail.com)
 	 *         errorrik (errorrik@gmail.com)
 	 */
-
+	
 	/**
 	 * @inner
 	 */
@@ -14658,20 +15149,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {boolean} isLoop
 	 * @return {Array}
 	 */
-
-
+	
+	
 	function _default(points, isLoop) {
 	  var len = points.length;
 	  var ret = [];
 	  var distance = 0;
-
+	
 	  for (var i = 1; i < len; i++) {
 	    distance += v2Distance(points[i - 1], points[i]);
 	  }
-
+	
 	  var segs = distance / 2;
 	  segs = segs < len ? len : segs;
-
+	
 	  for (var i = 0; i < segs; i++) {
 	    var pos = i / (segs - 1) * (isLoop ? len : len - 1);
 	    var idx = Math.floor(pos);
@@ -14680,7 +15171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var p1 = points[idx % len];
 	    var p2;
 	    var p3;
-
+	
 	    if (!isLoop) {
 	      p0 = points[idx === 0 ? idx : idx - 1];
 	      p2 = points[idx > len - 2 ? len - 1 : idx + 1];
@@ -14690,23 +15181,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	      p2 = points[(idx + 1) % len];
 	      p3 = points[(idx + 2) % len];
 	    }
-
+	
 	    var w2 = w * w;
 	    var w3 = w * w2;
 	    ret.push([interpolate(p0[0], p1[0], p2[0], p3[0], w, w2, w3), interpolate(p0[1], p1[1], p2[1], p3[1], w, w2, w3)]);
 	  }
-
+	
 	  return ret;
 	}
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 65 */
+/*!****************************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/helper/smoothBezier.js ***!
+  \****************************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _vector = __webpack_require__(27);
-
+	var _vector = __webpack_require__(/*! ../../core/vector */ 27);
+	
 	var v2Min = _vector.min;
 	var v2Max = _vector.max;
 	var v2Scale = _vector.scale;
@@ -14714,7 +15208,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var v2Add = _vector.add;
 	var v2Clone = _vector.clone;
 	var v2Sub = _vector.sub;
-
+	
 	/**
 	 * 贝塞尔平滑曲线
 	 * @module zrender/shape/util/smoothBezier
@@ -14722,7 +15216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *         Kener (@Kener-林峰, kener.linfeng@gmail.com)
 	 *         errorrik (errorrik@gmail.com)
 	 */
-
+	
 	/**
 	 * 贝塞尔平滑曲线
 	 * @alias module:zrender/shape/util/smoothBezier
@@ -14742,24 +15236,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var prevPoint;
 	  var nextPoint;
 	  var min, max;
-
+	
 	  if (constraint) {
 	    min = [Infinity, Infinity];
 	    max = [-Infinity, -Infinity];
-
+	
 	    for (var i = 0, len = points.length; i < len; i++) {
 	      v2Min(min, min, points[i]);
 	      v2Max(max, max, points[i]);
 	    } // 与指定的包围盒做并集
-
-
+	
+	
 	    v2Min(min, min, constraint[0]);
 	    v2Max(max, max, constraint[1]);
 	  }
-
+	
 	  for (var i = 0, len = points.length; i < len; i++) {
 	    var point = points[i];
-
+	
 	    if (isLoop) {
 	      prevPoint = points[i ? i - 1 : len - 1];
 	      nextPoint = points[(i + 1) % len];
@@ -14772,52 +15266,55 @@ return /******/ (function(modules) { // webpackBootstrap
 	        nextPoint = points[i + 1];
 	      }
 	    }
-
+	
 	    v2Sub(v, nextPoint, prevPoint); // use degree to scale the handle length
-
+	
 	    v2Scale(v, v, smooth);
 	    var d0 = v2Distance(point, prevPoint);
 	    var d1 = v2Distance(point, nextPoint);
 	    var sum = d0 + d1;
-
+	
 	    if (sum !== 0) {
 	      d0 /= sum;
 	      d1 /= sum;
 	    }
-
+	
 	    v2Scale(v1, v, -d0);
 	    v2Scale(v2, v, d1);
 	    var cp0 = v2Add([], point, v1);
 	    var cp1 = v2Add([], point, v2);
-
+	
 	    if (constraint) {
 	      v2Max(cp0, cp0, min);
 	      v2Min(cp0, cp0, max);
 	      v2Max(cp1, cp1, min);
 	      v2Min(cp1, cp1, max);
 	    }
-
+	
 	    cps.push(cp0);
 	    cps.push(cp1);
 	  }
-
+	
 	  if (isLoop) {
 	    cps.push(cps.shift());
 	  }
-
+	
 	  return cps;
 	}
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 66 */
+/*!***********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/Polyline.js ***!
+  \***********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
-	var polyHelper = __webpack_require__(63);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
+	var polyHelper = __webpack_require__(/*! ../helper/poly */ 63);
+	
 	/**
 	 * @module zrender/graphic/shape/Polyline
 	 */
@@ -14836,17 +15333,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    polyHelper.buildPath(ctx, shape, false);
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 67 */
+/*!*******************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/Rect.js ***!
+  \*******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
-	var roundRectHelper = __webpack_require__(41);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
+	var roundRectHelper = __webpack_require__(/*! ../helper/roundRect */ 41);
+	
 	/**
 	 * 矩形
 	 * @module zrender/graphic/shape/Rect
@@ -14870,26 +15370,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var y = shape.y;
 	    var width = shape.width;
 	    var height = shape.height;
-
+	
 	    if (!shape.r) {
 	      ctx.rect(x, y, width, height);
 	    } else {
 	      roundRectHelper.buildPath(ctx, shape);
 	    }
-
+	
 	    ctx.closePath();
 	    return;
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 68 */
+/*!*******************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/Line.js ***!
+  \*******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
 	/**
 	 * 直线
 	 * @module zrender/graphic/shape/Line
@@ -14915,21 +15418,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var x2 = shape.x2;
 	    var y2 = shape.y2;
 	    var percent = shape.percent;
-
+	
 	    if (percent === 0) {
 	      return;
 	    }
-
+	
 	    ctx.moveTo(x1, y1);
-
+	
 	    if (percent < 1) {
 	      x2 = x1 * (1 - percent) + x2 * percent;
 	      y2 = y1 * (1 - percent) + y2 * percent;
 	    }
-
+	
 	    ctx.lineTo(x2, y2);
 	  },
-
+	
 	  /**
 	   * Get point at percent
 	   * @param  {number} percent
@@ -14940,43 +15443,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return [shape.x1 * (1 - p) + shape.x2 * p, shape.y1 * (1 - p) + shape.y2 * p];
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 69 */
+/*!**************************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/BezierCurve.js ***!
+  \**************************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
-	var vec2 = __webpack_require__(27);
-
-	var _curve = __webpack_require__(43);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
+	var vec2 = __webpack_require__(/*! ../../core/vector */ 27);
+	
+	var _curve = __webpack_require__(/*! ../../core/curve */ 43);
+	
 	var quadraticSubdivide = _curve.quadraticSubdivide;
 	var cubicSubdivide = _curve.cubicSubdivide;
 	var quadraticAt = _curve.quadraticAt;
 	var cubicAt = _curve.cubicAt;
 	var quadraticDerivativeAt = _curve.quadraticDerivativeAt;
 	var cubicDerivativeAt = _curve.cubicDerivativeAt;
-
+	
 	/**
 	 * 贝塞尔曲线
 	 * @module zrender/shape/BezierCurve
 	 */
 	var out = [];
-
+	
 	function someVectorAt(shape, t, isTangent) {
 	  var cpx2 = shape.cpx2;
 	  var cpy2 = shape.cpy2;
-
+	
 	  if (cpx2 === null || cpy2 === null) {
 	    return [(isTangent ? cubicDerivativeAt : cubicAt)(shape.x1, shape.cpx1, shape.cpx2, shape.x2, t), (isTangent ? cubicDerivativeAt : cubicAt)(shape.y1, shape.cpy1, shape.cpy2, shape.y2, t)];
 	  } else {
 	    return [(isTangent ? quadraticDerivativeAt : quadraticAt)(shape.x1, shape.cpx1, shape.x2, t), (isTangent ? quadraticDerivativeAt : quadraticAt)(shape.y1, shape.cpy1, shape.y2, t)];
 	  }
 	}
-
+	
 	var _default = Path.extend({
 	  type: 'bezier-curve',
 	  shape: {
@@ -15005,13 +15511,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var cpx2 = shape.cpx2;
 	    var cpy2 = shape.cpy2;
 	    var percent = shape.percent;
-
+	
 	    if (percent === 0) {
 	      return;
 	    }
-
+	
 	    ctx.moveTo(x1, y1);
-
+	
 	    if (cpx2 == null || cpy2 == null) {
 	      if (percent < 1) {
 	        quadraticSubdivide(x1, cpx1, x2, percent, out);
@@ -15021,7 +15527,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        cpy1 = out[1];
 	        y2 = out[2];
 	      }
-
+	
 	      ctx.quadraticCurveTo(cpx1, cpy1, x2, y2);
 	    } else {
 	      if (percent < 1) {
@@ -15034,11 +15540,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        cpy2 = out[2];
 	        y2 = out[3];
 	      }
-
+	
 	      ctx.bezierCurveTo(cpx1, cpy1, cpx2, cpy2, x2, y2);
 	    }
 	  },
-
+	
 	  /**
 	   * Get point at percent
 	   * @param  {number} t
@@ -15047,7 +15553,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  pointAt: function (t) {
 	    return someVectorAt(this.shape, t, false);
 	  },
-
+	
 	  /**
 	   * Get tangent at percent
 	   * @param  {number} t
@@ -15058,15 +15564,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return vec2.normalize(p, p);
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 70 */
+/*!******************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/shape/Arc.js ***!
+  \******************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
+	var Path = __webpack_require__(/*! ../Path */ 18);
+	
 	/**
 	 * 圆弧
 	 * @module zrender/graphic/shape/Arc
@@ -15098,15 +15607,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ctx.arc(x, y, r, startAngle, endAngle, !clockwise);
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 71 */
+/*!*********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/CompoundPath.js ***!
+  \*********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Path = __webpack_require__(18);
-
+	var Path = __webpack_require__(/*! ./Path */ 18);
+	
 	// CompoundPath to improve performance
 	var _default = Path.extend({
 	  type: 'compound',
@@ -15116,60 +15628,63 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _updatePathDirty: function () {
 	    var dirtyPath = this.__dirtyPath;
 	    var paths = this.shape.paths;
-
+	
 	    for (var i = 0; i < paths.length; i++) {
 	      // Mark as dirty if any subpath is dirty
 	      dirtyPath = dirtyPath || paths[i].__dirtyPath;
 	    }
-
+	
 	    this.__dirtyPath = dirtyPath;
 	    this.__dirty = this.__dirty || dirtyPath;
 	  },
 	  beforeBrush: function () {
 	    this._updatePathDirty();
-
+	
 	    var paths = this.shape.paths || [];
 	    var scale = this.getGlobalScale(); // Update path scale
-
+	
 	    for (var i = 0; i < paths.length; i++) {
 	      if (!paths[i].path) {
 	        paths[i].createPathProxy();
 	      }
-
+	
 	      paths[i].path.setScale(scale[0], scale[1]);
 	    }
 	  },
 	  buildPath: function (ctx, shape) {
 	    var paths = shape.paths || [];
-
+	
 	    for (var i = 0; i < paths.length; i++) {
 	      paths[i].buildPath(ctx, paths[i].shape, true);
 	    }
 	  },
 	  afterBrush: function () {
 	    var paths = this.shape.paths || [];
-
+	
 	    for (var i = 0; i < paths.length; i++) {
 	      paths[i].__dirtyPath = false;
 	    }
 	  },
 	  getBoundingRect: function () {
 	    this._updatePathDirty();
-
+	
 	    return Path.prototype.getBoundingRect.call(this);
 	  }
 	});
-
+	
 	module.exports = _default;
 
 /***/ },
 /* 72 */
+/*!***********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/LinearGradient.js ***!
+  \***********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
-
-	var Gradient = __webpack_require__(73);
-
+	var zrUtil = __webpack_require__(/*! ../core/util */ 5);
+	
+	var Gradient = __webpack_require__(/*! ./Gradient */ 73);
+	
 	/**
 	 * x, y, x2, y2 are all percent from 0 to 1
 	 * @param {number} [x=0]
@@ -15187,13 +15702,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.y = y == null ? 0 : y;
 	  this.x2 = x2 == null ? 1 : x2;
 	  this.y2 = y2 == null ? 0 : y2; // Can be cloned
-
+	
 	  this.type = 'linear'; // If use global coord
-
+	
 	  this.global = globalCoord || false;
 	  Gradient.call(this, colorStops);
 	};
-
+	
 	LinearGradient.prototype = {
 	  constructor: LinearGradient
 	};
@@ -15203,6 +15718,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 73 */
+/*!*****************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/Gradient.js ***!
+  \*****************************************************/
 /***/ function(module, exports) {
 
 	/**
@@ -15211,7 +15729,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Gradient = function (colorStops) {
 	  this.colorStops = colorStops || [];
 	};
-
+	
 	Gradient.prototype = {
 	  constructor: Gradient,
 	  addColorStop: function (offset, color) {
@@ -15226,12 +15744,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 74 */
+/*!***********************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/RadialGradient.js ***!
+  \***********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var zrUtil = __webpack_require__(5);
-
-	var Gradient = __webpack_require__(73);
-
+	var zrUtil = __webpack_require__(/*! ../core/util */ 5);
+	
+	var Gradient = __webpack_require__(/*! ./Gradient */ 73);
+	
 	/**
 	 * x, y, r are all percent from 0 to 1
 	 * @param {number} [x=0.5]
@@ -15247,13 +15768,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.x = x == null ? 0.5 : x;
 	  this.y = y == null ? 0.5 : y;
 	  this.r = r == null ? 0.5 : r; // Can be cloned
-
+	
 	  this.type = 'radial'; // If use global coord
-
+	
 	  this.global = globalCoord || false;
 	  Gradient.call(this, colorStops);
 	};
-
+	
 	RadialGradient.prototype = {
 	  constructor: RadialGradient
 	};
@@ -15263,16 +15784,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 75 */
+/*!*******************************************************************!*\
+  !*** ./~/echarts/~/zrender/lib/graphic/IncrementalDisplayable.js ***!
+  \*******************************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(5);
-
+	var _util = __webpack_require__(/*! ../core/util */ 5);
+	
 	var inherits = _util.inherits;
-
-	var Displayble = __webpack_require__(19);
-
-	var BoundingRect = __webpack_require__(39);
-
+	
+	var Displayble = __webpack_require__(/*! ./Displayable */ 19);
+	
+	var BoundingRect = __webpack_require__(/*! ../core/BoundingRect */ 39);
+	
 	/**
 	 * Displayable for incremental rendering. It will be rendered in a separate layer
 	 * IncrementalDisplay have too main methods. `clearDisplayables` and `addDisplayables`
@@ -15288,9 +15812,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._cursor = 0;
 	  this.notClear = true;
 	}
-
+	
 	IncrementalDisplayble.prototype.incremental = true;
-
+	
 	IncrementalDisplayble.prototype.clearDisplaybles = function () {
 	  this._displayables = [];
 	  this._temporaryDisplayables = [];
@@ -15298,130 +15822,133 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.dirty();
 	  this.notClear = false;
 	};
-
+	
 	IncrementalDisplayble.prototype.addDisplayable = function (displayable, notPersistent) {
 	  if (notPersistent) {
 	    this._temporaryDisplayables.push(displayable);
 	  } else {
 	    this._displayables.push(displayable);
 	  }
-
+	
 	  this.dirty();
 	};
-
+	
 	IncrementalDisplayble.prototype.addDisplayables = function (displayables, notPersistent) {
 	  notPersistent = notPersistent || false;
-
+	
 	  for (var i = 0; i < displayables.length; i++) {
 	    this.addDisplayable(displayables[i], notPersistent);
 	  }
 	};
-
+	
 	IncrementalDisplayble.prototype.eachPendingDisplayable = function (cb) {
 	  for (var i = this._cursor; i < this._displayables.length; i++) {
 	    cb && cb(this._displayables[i]);
 	  }
-
+	
 	  for (var i = 0; i < this._temporaryDisplayables.length; i++) {
 	    cb && cb(this._temporaryDisplayables[i]);
 	  }
 	};
-
+	
 	IncrementalDisplayble.prototype.update = function () {
 	  this.updateTransform();
-
+	
 	  for (var i = this._cursor; i < this._displayables.length; i++) {
 	    var displayable = this._displayables[i]; // PENDING
-
+	
 	    displayable.parent = this;
 	    displayable.update();
 	    displayable.parent = null;
 	  }
-
+	
 	  for (var i = 0; i < this._temporaryDisplayables.length; i++) {
 	    var displayable = this._temporaryDisplayables[i]; // PENDING
-
+	
 	    displayable.parent = this;
 	    displayable.update();
 	    displayable.parent = null;
 	  }
 	};
-
+	
 	IncrementalDisplayble.prototype.brush = function (ctx, prevEl) {
 	  // Render persistant displayables.
 	  for (var i = this._cursor; i < this._displayables.length; i++) {
-	    var displayable = this._temporaryDisplayables[i];
+	    var displayable = this._displayables[i];
 	    displayable.beforeBrush && displayable.beforeBrush(ctx);
 	    displayable.brush(ctx, i === this._cursor ? null : this._displayables[i - 1]);
 	    displayable.afterBrush && displayable.afterBrush(ctx);
 	  }
-
+	
 	  this._cursor = i; // Render temporary displayables.
-
+	
 	  for (var i = 0; i < this._temporaryDisplayables.length; i++) {
 	    var displayable = this._temporaryDisplayables[i];
 	    displayable.beforeBrush && displayable.beforeBrush(ctx);
 	    displayable.brush(ctx, i === 0 ? null : this._temporaryDisplayables[i - 1]);
 	    displayable.afterBrush && displayable.afterBrush(ctx);
 	  }
-
+	
 	  this._temporaryDisplayables = [];
 	  this.notClear = true;
 	};
-
+	
 	var m = [];
-
+	
 	IncrementalDisplayble.prototype.getBoundingRect = function () {
 	  if (!this._rect) {
 	    var rect = new BoundingRect(Infinity, Infinity, -Infinity, -Infinity);
-
+	
 	    for (var i = 0; i < this._displayables.length; i++) {
 	      var displayable = this._displayables[i];
 	      var childRect = displayable.getBoundingRect().clone();
-
+	
 	      if (displayable.needLocalTransform()) {
 	        childRect.applyTransform(displayable.getLocalTransform(m));
 	      }
-
+	
 	      rect.union(childRect);
 	    }
-
+	
 	    this._rect = rect;
 	  }
-
+	
 	  return this._rect;
 	};
-
+	
 	IncrementalDisplayble.prototype.contain = function (x, y) {
 	  var localPos = this.transformCoordToLocal(x, y);
 	  var rect = this.getBoundingRect();
-
+	
 	  if (rect.contain(localPos[0], localPos[1])) {
 	    for (var i = 0; i < this._displayables.length; i++) {
 	      var displayable = this._displayables[i];
-
+	
 	      if (displayable.contain(x, y)) {
 	        return true;
 	      }
 	    }
 	  }
-
+	
 	  return false;
 	};
-
+	
 	inherits(IncrementalDisplayble, Displayble);
 	var _default = IncrementalDisplayble;
 	module.exports = _default;
 
 /***/ },
 /* 76 */
+/*!*********************************!*\
+  !*** ./src/liquidFillLayout.js ***!
+  \*********************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var echarts = __webpack_require__(2);
-
+	var echarts = __webpack_require__(/*! echarts/lib/echarts */ 2);
+	
 	module.exports = echarts.graphic.extendShape({
 	    type: 'ec-liquid-fill',
-
+	
 	    shape: {
 	        waveLength: 0,
 	        radius: 0,
@@ -15432,7 +15959,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        phase: 0,
 	        inverse: false
 	    },
-
+	
 	    buildPath: function (ctx, shape) {
 	        /**
 	         * We define a sine wave having 4 waves, and make sure at least 8 curves
@@ -15443,7 +15970,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            Math.ceil(2 * shape.radius / shape.waveLength * 4) * 2,
 	            8
 	        );
-
+	
 	        // map phase to [-Math.PI * 2, 0]
 	        while (shape.phase < -Math.PI * 2) {
 	            shape.phase += Math.PI * 2;
@@ -15452,9 +15979,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            shape.phase -= Math.PI * 2;
 	        }
 	        var phase = shape.phase / Math.PI / 2 * shape.waveLength;
-
+	
 	        var left = shape.cx - shape.radius + phase - shape.radius * 2;
-
+	
 	        /**
 	         * top-left corner as start point
 	         *
@@ -15466,7 +15993,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         *  +------+
 	         */
 	        ctx.moveTo(left, shape.waterLevel);
-
+	
 	        /**
 	         * top wave
 	         *
@@ -15482,12 +16009,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            ctx.bezierCurveTo(pos[0][0] + left, -pos[0][1] + shape.waterLevel,
 	                pos[1][0] + left, -pos[1][1] + shape.waterLevel,
 	                pos[2][0] + left, -pos[2][1] + shape.waterLevel);
-
+	
 	            if (c === curves - 1) {
 	                waveRight = pos[2][0];
 	            }
 	        }
-
+	
 	        if (shape.inverse) {
 	            /**
 	             * top-right corner
@@ -15516,13 +16043,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            ctx.lineTo(left, shape.cy + shape.radius);
 	            ctx.lineTo(left, shape.waterLevel);
 	        }
-
+	
 	        ctx.closePath();
 	    }
 	});
-
-
-
+	
+	
+	
 	/**
 	 * Using Bezier curves to fit sine wave.
 	 * There is 4 control points for each curve of wave,
@@ -15579,12 +16106,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 77 */
+/*!*******************************************!*\
+  !*** ./~/echarts/lib/visual/dataColor.js ***!
+  \*******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(5);
-
+	var _util = __webpack_require__(/*! zrender/lib/core/util */ 5);
+	
 	var createHashMap = _util.createHashMap;
-
+	
+	/*
+	* Licensed to the Apache Software Foundation (ASF) under one
+	* or more contributor license agreements.  See the NOTICE file
+	* distributed with this work for additional information
+	* regarding copyright ownership.  The ASF licenses this file
+	* to you under the Apache License, Version 2.0 (the
+	* "License"); you may not use this file except in compliance
+	* with the License.  You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing,
+	* software distributed under the License is distributed on an
+	* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	* KIND, either express or implied.  See the License for the
+	* specific language governing permissions and limitations
+	* under the License.
+	*/
 	// Pick color from palette for each data item.
 	// Applicable for charts that require applying color palette
 	// in data level (like pie, funnel, chord).
@@ -15610,16 +16158,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	      dataAll.each(function (rawIdx) {
 	        var filteredIdx = idxMap[rawIdx]; // If series.itemStyle.normal.color is a function. itemVisual may be encoded
-
+	
 	        var singleDataColor = filteredIdx != null && data.getItemVisual(filteredIdx, 'color', true);
-
+	
 	        if (!singleDataColor) {
 	          // FIXME Performance
 	          var itemModel = dataAll.getItemModel(rawIdx);
-	          var color = itemModel.get('itemStyle.color') || seriesModel.getColorFromPalette(dataAll.getName(rawIdx), seriesModel.__paletteScope, dataAll.count()); // Legend may use the visual info in data before processed
-
+	          var color = itemModel.get('itemStyle.color') || seriesModel.getColorFromPalette(dataAll.getName(rawIdx) || rawIdx + '', seriesModel.__paletteScope, dataAll.count()); // Legend may use the visual info in data before processed
+	
 	          dataAll.setItemVisual(rawIdx, 'color', color); // Data is not filtered
-
+	
 	          if (filteredIdx != null) {
 	            data.setItemVisual(filteredIdx, 'color', color);
 	          }
@@ -15631,10 +16179,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  };
 	}
-
+	
 	module.exports = _default;
 
 /***/ }
 /******/ ])
 });
 ;
+//# sourceMappingURL=echarts-liquidfill.js.map

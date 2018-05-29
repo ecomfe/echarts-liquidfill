@@ -120,19 +120,35 @@ echarts.extendChartView({
                 // new wave is used to calculate position, but not added
                 var newWave = getWave(newIdx, false, waveElement);
 
-                // Shallow copy shape and style to avoid comparing style.host
-                // when animating
-                var shape = Object.assign({}, newWave.shape);
-                var style = Object.assign({}, newWave.style);
-                style.host = null;
+                // changes with animation
+                var shape = {};
+                var shapeAttrs = ['amplitude', 'cx', 'cy', 'phase', 'radius', 'waterLevel', 'waveLength'];
+                for (var i = 0; i < shapeAttrs.length; ++i) {
+                    var attr = shapeAttrs[i];
+                    if (newWave.shape.hasOwnProperty(attr)) {
+                        shape[attr] = newWave.shape[attr];
+                    }
+                }
 
-                // update old wave with parameters of new wave
+                var style = {};
+                var styleAttrs = ['fill', 'opacity', 'shadowBlur', 'shadowColor'];
+                for (var i = 0; i < styleAttrs.length; ++i) {
+                    var attr = shapeAttrs[i];
+                    if (newWave.style.hasOwnProperty(attr)) {
+                        style[attr] = newWave.style[attr];
+                    }
+                }
+
+                // changes with animation
                 echarts.graphic.updateProps(waveElement, {
                     shape: shape,
                     style: style
                 }, seriesModel);
+
+                // instant changes
                 waveElement.position = newWave.position;
                 waveElement.setClipPath(newWave.clipPath);
+                waveElement.shape.inverse = newWave.inverse;
 
                 setWaveAnimation(newIdx, waveElement, waveElement);
                 group.add(waveElement);

@@ -133,7 +133,7 @@ echarts.extendChartView({
                 var style = {};
                 var styleAttrs = ['fill', 'opacity', 'shadowBlur', 'shadowColor'];
                 for (var i = 0; i < styleAttrs.length; ++i) {
-                    var attr = shapeAttrs[i];
+                    var attr = styleAttrs[i];
                     if (newWave.style.hasOwnProperty(attr)) {
                         style[attr] = newWave.style[attr];
                     }

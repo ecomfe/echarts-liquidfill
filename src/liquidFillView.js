@@ -76,7 +76,7 @@ echarts.extendChartView({
             innerRadius = outterRadius - outlineBorderWidth / 2;
             paddingRadius = parsePercent(outlineDistance, size);
 
-            radius = innerRadius - paddingRadius;
+            radius = Math.max(innerRadius - paddingRadius, 0);
         }
 
         if (showOutline) {

@@ -67,8 +67,8 @@ echarts.extendChartView({
             ];
 
             radius = [
-                innerRadius[0] - paddingRadius[0],
-                innerRadius[1] - paddingRadius[1]
+                Math.max(innerRadius[0] - paddingRadius[0], 0),
+                Math.max(innerRadius[1] - paddingRadius[1], 0)
             ];
         }
         else {
@@ -100,7 +100,7 @@ echarts.extendChartView({
                 var wave = getWave(idx, false);
 
                 var waterLevel = wave.shape.waterLevel;
-                wave.shape.waterLevel = isFillContainer ? radius[1] : radius;
+                wave.shape.waterLevel = isFillContainer ? height / 2 : radius;
                 echarts.graphic.initProps(wave, {
                     shape: {
                         waterLevel: waterLevel
@@ -137,6 +137,10 @@ echarts.extendChartView({
                     if (newWave.style.hasOwnProperty(attr)) {
                         style[attr] = newWave.style[attr];
                     }
+                }
+
+                if (isFillContainer) {
+                    shape.radiusY = height / 2;
                 }
 
                 // changes with animation
@@ -275,7 +279,7 @@ echarts.extendChartView({
          */
         function getWave(idx, isInverse, oldWave) {
             var radiusX = isFillContainer ? radius[0] : radius;
-            var radiusY = isFillContainer ? radius[1] : radius;
+            var radiusY = isFillContainer ? height / 2 : radius;
 
             var itemModel = data.getItemModel(idx);
             var itemStyleModel = itemModel.getModel('itemStyle');
@@ -301,6 +305,7 @@ echarts.extendChartView({
                 shape: {
                     waveLength: waveLength,
                     radius: radiusX,
+                    radiusY: radiusY,
                     cx: x,
                     cy: 0,
                     waterLevel: waterLevel,

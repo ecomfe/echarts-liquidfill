@@ -6,6 +6,7 @@ module.exports = echarts.graphic.extendShape({
     shape: {
         waveLength: 0,
         radius: 0,
+        radiusY: 0,
         cx: 0,
         cy: 0,
         waterLevel: 0,
@@ -15,6 +16,10 @@ module.exports = echarts.graphic.extendShape({
     },
 
     buildPath: function (ctx, shape) {
+        if (shape.radiusY == null) {
+            shape.radiusY = shape.radius;
+        }
+
         /**
          * We define a sine wave having 4 waves, and make sure at least 8 curves
          * is drawn. Otherwise, it may cause blank area for some waves when
@@ -78,8 +83,8 @@ module.exports = echarts.graphic.extendShape({
              * 3. draws this line -> |      | <- 1. draws this line
              *                       ~~~~~~~~
              */
-            ctx.lineTo(waveRight + left, shape.cy - shape.radius);
-            ctx.lineTo(left, shape.cy - shape.radius);
+            ctx.lineTo(waveRight + left, shape.cy - shape.radiusY);
+            ctx.lineTo(left, shape.cy - shape.radiusY);
             ctx.lineTo(left, shape.waterLevel);
         }
         else {
@@ -93,8 +98,8 @@ module.exports = echarts.graphic.extendShape({
              *                          |
              *                  2. draws this line
              */
-            ctx.lineTo(waveRight + left, shape.cy + shape.radius);
-            ctx.lineTo(left, shape.cy + shape.radius);
+            ctx.lineTo(waveRight + left, shape.cy + shape.radiusY);
+            ctx.lineTo(left, shape.cy + shape.radiusY);
             ctx.lineTo(left, shape.waterLevel);
         }
 

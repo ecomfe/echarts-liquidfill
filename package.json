@@ -9,7 +9,7 @@
     "url": "http://zhangwenli.com"
   },
   "license": "BSD",
-  "dependencies": {
+  "peerDependencies": {
     "echarts": "^4.1.0",
     "zrender": "^4.0.4"
   },

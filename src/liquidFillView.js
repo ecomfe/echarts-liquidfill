@@ -122,7 +122,7 @@ echarts.extendChartView({
 
                 // changes with animation
                 var shape = {};
-                var shapeAttrs = ['amplitude', 'cx', 'cy', 'phase', 'radius', 'waterLevel', 'waveLength'];
+                var shapeAttrs = ['amplitude', 'cx', 'cy', 'phase', 'radius', 'radiusY', 'waterLevel', 'waveLength'];
                 for (var i = 0; i < shapeAttrs.length; ++i) {
                     var attr = shapeAttrs[i];
                     if (newWave.shape.hasOwnProperty(attr)) {
@@ -280,6 +280,7 @@ echarts.extendChartView({
         function getWave(idx, isInverse, oldWave) {
             var radiusX = isFillContainer ? radius[0] : radius;
             var radiusY = isFillContainer ? height / 2 : radius;
+            console.log(radiusY);
 
             var itemModel = data.getItemModel(idx);
             var itemStyleModel = itemModel.getModel('itemStyle');

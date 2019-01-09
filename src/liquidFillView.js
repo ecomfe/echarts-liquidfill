@@ -280,7 +280,6 @@ echarts.extendChartView({
         function getWave(idx, isInverse, oldWave) {
             var radiusX = isFillContainer ? radius[0] : radius;
             var radiusY = isFillContainer ? height / 2 : radius;
-            console.log(radiusY);
 
             var itemModel = data.getItemModel(idx);
             var itemStyleModel = itemModel.getModel('itemStyle');

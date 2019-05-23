@@ -1,6 +1,6 @@
 {
   "name": "echarts-liquidfill",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "ECharts liquid fill extension",
   "main": "index.js",
   "author": {
@@ -8,17 +8,17 @@
     "email": "me@zhangwenli.com",
     "url": "http://zhangwenli.com"
   },
-  "license": "BSD",
+  "license": "MIT",
   "peerDependencies": {
-    "echarts": "^4.1.0",
-    "zrender": "^4.0.4"
+    "echarts": "^4.2.1",
+    "zrender": "^4.0.7"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/ecomfe/echarts-liquidfill"
   },
   "devDependencies": {
-    "webpack": "^1.13.3",
+    "webpack": "^1.15.0",
     "webpack-link": "^0.2.0"
   }
 }

@@ -145,9 +145,10 @@ echarts.extendChartView({
 
                 // changes with animation
                 echarts.graphic.updateProps(waveElement, {
-                    shape: shape,
-                    style: style
+                    shape: shape
                 }, seriesModel);
+
+                waveElement.useStyle(style);
 
                 // instant changes
                 waveElement.position = newWave.position;

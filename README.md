@@ -28,22 +28,25 @@ npm install echarts-liquidfill
 npm will warn you that you have to install peer dependencies by yourself:
 
 ```
-npm WARN echarts-liquidfill@2.0.4 requires a peer of echarts@^4.2.1 but none is installed. You must install peer dependencies yourself.
-npm WARN echarts-liquidfill@2.0.4 requires a peer of zrender@^4.0.7 but none is installed. You must install peer dependencies yourself.
+npm WARN echarts-liquidfill@2.0.6 requires a peer of echarts@^4.8.0 but none is installed. You must install peer dependencies yourself.
+npm WARN echarts-liquidfill@2.0.6 requires a peer of zrender@^4.3.1 but none is installed. You must install peer dependencies yourself.
 ```
 
-Note that the version number may change in your case. Install will the version it shows.
+**Note that the version numbers may not be exactly the same with the above message. Use the version numbers in the warning or refer to package.json for echarts and zrender version numbers.**
 
 ```
-npm i echarts@^4.2.1 zrender@^4.0.7
+npm i echarts@^4.8.0 zrender@^4.3.1
 ```
+
+Remember to install echarts and zrender manually with the above command.
 
 ## Download echarts-liquidfill from GitHub
 
-You may download the lastest ECharts files on [ECharts official site](http://echarts.baidu.com/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist). Note that if you need tooltip for Liquid Fill Chart, you need the complete ECharts version. Otherwise, simple version will do.
+You may download the lastest ECharts files on [ECharts official site](http://echarts.baidu.com/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist).
 
+**Note that if you need tooltip for Liquid Fill Chart, you need the complete ECharts version. Otherwise, the simple version will be competent.**
 
-## Notes
+## Important Notes
 
 ### Omitted `normal`
 

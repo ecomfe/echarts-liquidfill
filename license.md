@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2017, Baidu Inc.
+Copyright (c) 2020, Baidu Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

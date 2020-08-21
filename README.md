@@ -1,6 +1,6 @@
-# ECharts Liquid Fill Chart
+# Liquid Fill Chart for Apache ECharts (incubating)
 
-Liquid Fill Chart plugin for [ECharts](https://github.com/ecomfe/echarts), which is usually used to represent data in percentage.
+Liquid Fill Chart plugin for [Apache ECharts (incubating)](https://github.com/apache/incubator-echarts), which is usually used to represent data in percentage.
 
 ![Rendering Results](http://g.recordit.co/zHeMqqlh4j.gif)
 

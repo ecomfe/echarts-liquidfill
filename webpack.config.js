@@ -1,6 +1,5 @@
-module.exports = env => {
+module.exports = (env, options) => {
     return {
-        mode: env.production ? 'production' : 'development',
         entry: {
             'echarts-liquidfill': __dirname + '/index.js'
         },
@@ -8,7 +7,10 @@ module.exports = env => {
             libraryTarget: 'umd',
             library: ['echarts-liquidfill'],
             path: __dirname + '/dist',
-            filename: env.production ? '[name].min.js' : '[name].js'
+            filename: options.mode === 'production' ? '[name].min.js' : '[name].js'
+        },
+        optimization: {
+            concatenateModules: true
         },
         externals: {
             'echarts/lib/echarts': 'echarts'
@@ -18,9 +20,6 @@ module.exports = env => {
             alias: {
                 'echarts/lib/echarts': 'echarts'
             }
-        },
-        optimization: {
-            minimize: env.production
         }
     }
 };

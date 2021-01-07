@@ -22,23 +22,15 @@ ECharts can be downloaded at [GitHub dist directory](https://github.com/ecomfe/e
 ## Install echarts-liquidfill with npm
 
 ```sh
+# install echarts as peer dependency
+npm install echarts
 npm install echarts-liquidfill
 ```
 
-npm will warn you that you have to install peer dependencies by yourself:
+NOTE:
 
-```
-npm WARN echarts-liquidfill@2.0.6 requires a peer of echarts@^4.8.0 but none is installed. You must install peer dependencies yourself.
-npm WARN echarts-liquidfill@2.0.6 requires a peer of zrender@^4.3.1 but none is installed. You must install peer dependencies yourself.
-```
-
-**Note that the version numbers may not be exactly the same with the above message. Use the version numbers in the warning or refer to package.json for echarts and zrender version numbers.**
-
-```
-npm i echarts@^4.8.0 zrender@^4.3.1
-```
-
-Remember to install echarts and zrender manually with the above command.
+echarts-liquidfill@3 is compitable with echarts@5
+echarts-liquidfill@2 is compitable with echarts@4
 
 ## Download echarts-liquidfill from GitHub
 

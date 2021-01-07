@@ -1,13 +1,10 @@
-var echarts = require('echarts/lib/echarts');
-var numberUtil = echarts.number;
-var symbolUtil = require('echarts/lib/util/symbol');
-var parsePercent = numberUtil.parsePercent;
+import * as echarts from 'echarts/lib/echarts';
+import * as symbolUtil from './dep/symbol';
+import * as numberUtil from 'echarts/lib/util/number';
+import LiquidShape from './liquidFillShape';
+import {createTextStyle} from 'echarts/lib/label/labelStyle';
 
-var LiquidLayout = require('./liquidFillLayout');
-
-function getShallow(model, path) {
-    return model && model.getShallow(path);
-}
+const parsePercent = numberUtil.parsePercent;
 
 echarts.extendChartView({
 
@@ -152,7 +149,7 @@ echarts.extendChartView({
 
                 // instant changes
                 waveElement.position = newWave.position;
-                waveElement.setClipPath(newWave.clipPath);
+                waveElement.setClipPath(newWave.getClipPath());
                 waveElement.shape.inverse = newWave.inverse;
 
                 setWaveAnimation(newIdx, waveElement, waveElement);
@@ -302,7 +299,7 @@ echarts.extendChartView({
             }
 
             var x = radiusX * 2;
-            var wave = new LiquidLayout({
+            var wave = new LiquidShape({
                 shape: {
                     waveLength: waveLength,
                     radius: radiusX,
@@ -322,7 +319,8 @@ echarts.extendChartView({
             var hoverStyle = itemModel.getModel('emphasis.itemStyle')
                 .getItemStyle();
             hoverStyle.lineWidth = 0;
-            echarts.graphic.setHoverStyle(wave, hoverStyle);
+
+            wave.ensureState('emphasis').style = hoverStyle;
 
             // clip out the part outside the circle
             var clip = getPath(radius, true);
@@ -414,7 +412,7 @@ echarts.extendChartView({
                 return formatted == null ? defaultLabel : formatted;
             }
 
-            var textOption = {
+            var textRectOption = {
                 z2: 10,
                 shape: {
                     x: left,
@@ -423,22 +421,34 @@ echarts.extendChartView({
                     height: (isFillContainer ? radius[1] : radius) * 2
                 },
                 style: {
-                    fill: 'transparent',
-                    text: formatLabel(),
-                    textAlign: labelModel.get('align'),
-                    textVerticalAlign: labelModel.get('baseline')
+                    fill: 'transparent'
+                },
+                textConfig: {
+                    position: labelModel.get('position') || 'inside'
                 },
                 silent: true
             };
+            var textOption = {
+                style: {
+                    text: formatLabel(),
+                    textAlign: labelModel.get('align'),
+                    textVerticalAlign: labelModel.get('baseline')
+                }
+            };
+            Object.assign(textOption.style, createTextStyle(labelModel));
 
-            var outsideTextRect = new echarts.graphic.Rect(textOption);
-            var color = labelModel.get('color');
-            echarts.graphic.setText(outsideTextRect.style, labelModel, color);
+            var outsideTextRect = new echarts.graphic.Rect(textRectOption);
+            var insideTextRect = new echarts.graphic.Rect(textRectOption);
+            insideTextRect.disableLabelAnimation = true;
+            outsideTextRect.disableLabelAnimation = true;
 
-            var insideTextRect = new echarts.graphic.Rect(textOption);
+            var outsideText = new echarts.graphic.Text(textOption);
+            var insideText = new echarts.graphic.Text(textOption);
+            outsideTextRect.setTextContent(outsideText);
+
+            insideTextRect.setTextContent(insideText);
             var insColor = labelModel.get('insideColor');
-            echarts.graphic.setText(insideTextRect.style, labelModel, insColor);
-            insideTextRect.style.textFill = insColor;
+            insideText.style.fill = insColor;
 
             var group = new echarts.graphic.Group();
             group.add(outsideTextRect);

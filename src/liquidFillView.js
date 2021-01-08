@@ -1,8 +1,6 @@
 import * as echarts from 'echarts/lib/echarts';
-import * as symbolUtil from './dep/symbol';
 import * as numberUtil from 'echarts/lib/util/number';
 import LiquidShape from './liquidFillShape';
-import {createTextStyle} from 'echarts/lib/label/labelStyle';
 
 const parsePercent = numberUtil.parsePercent;
 
@@ -209,7 +207,7 @@ echarts.extendChartView({
                     // fully fill the container
                     var x = isForClipping ? -r[0] : cx - r[0];
                     var y = isForClipping ? -r[1] : cy - r[1];
-                    return symbolUtil.createSymbol(
+                    return echarts.helper.createSymbol(
                         'rect', x, y, r[0] * 2, r[1] * 2
                     );
                 }
@@ -222,7 +220,7 @@ echarts.extendChartView({
                     else if (symbol === 'arrow') {
                         y -= r;
                     }
-                    return symbolUtil.createSymbol(symbol, x, y, r * 2, r * 2);
+                    return echarts.helper.createSymbol(symbol, x, y, r * 2, r * 2);
                 }
             }
 
@@ -321,6 +319,7 @@ echarts.extendChartView({
             hoverStyle.lineWidth = 0;
 
             wave.ensureState('emphasis').style = hoverStyle;
+            echarts.helper.enableHoverEmphasis(wave);
 
             // clip out the part outside the circle
             var clip = getPath(radius, true);
@@ -435,7 +434,7 @@ echarts.extendChartView({
                     textVerticalAlign: labelModel.get('baseline')
                 }
             };
-            Object.assign(textOption.style, createTextStyle(labelModel));
+            Object.assign(textOption.style, echarts.helper.createTextStyle(labelModel));
 
             var outsideTextRect = new echarts.graphic.Rect(textRectOption);
             var insideTextRect = new echarts.graphic.Rect(textRectOption);

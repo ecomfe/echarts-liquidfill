@@ -1,6 +1,6 @@
 # Liquid Fill Chart
 
-Liquid Fill Chart plugin for [Apache ECharts](https://github.com/apache/incubator-echarts), which is usually used to represent data in percentage.
+Liquid Fill Chart plugin for [Apache ECharts](https://github.com/apache/echarts), which is usually used to represent data in percentage.
 
 ![Rendering Results](http://g.recordit.co/zHeMqqlh4j.gif)
 
@@ -13,11 +13,11 @@ To use ECharts plugins, you need to include the plugin JavaScript file after ECh
 <script src='echarts-liquidfill.js'></script>
 ```
 
-ECharts can be downloaded at [GitHub dist directory](https://github.com/ecomfe/echarts/tree/master/dist) or [Download page of Official Website](http://echarts.baidu.com/download.html) (in Chinese).
+ECharts can be downloaded at [GitHub dist directory](https://github.com/apache/echarts/tree/master/dist) or [Download page of Official Website](https://echarts.apache.org/zh/download.html) (in Chinese).
 
 >#### NOTE
 >
-> The minimum package of ECharts required by LiquidFill Chart is [simple version](https://github.com/ecomfe/echarts/blob/master/dist/echarts.simple.js) on GitHub, or selecting nothing in [online builder](http://echarts.baidu.com/builder.html) (in Chinese). If you need other chart types or components in your other chart, you should include them accordingly.
+> The minimum package of ECharts required by LiquidFill Chart is [simple version](https://github.com/apache/echarts/blob/master/dist/echarts.simple.js) on GitHub, or selecting nothing in [online builder](https://echarts.apache.org/zh/download.html) (in Chinese). If you need other chart types or components in your other chart, you should include them accordingly.
 
 ## Install echarts-liquidfill with npm
 
@@ -34,7 +34,7 @@ echarts-liquidfill@2 is compitable with echarts@4
 
 ## Download echarts-liquidfill from GitHub
 
-You may download the lastest ECharts files on [ECharts official site](http://echarts.baidu.com/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist).
+You may download the lastest ECharts files on [ECharts official site](https://echarts.apache.org/zh/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist).
 
 **Note that if you need tooltip for Liquid Fill Chart, you need the complete ECharts version. Otherwise, the simple version will be competent.**
 
@@ -42,18 +42,18 @@ You may download the lastest ECharts files on [ECharts official site](http://ech
 
 ### Omitted `normal`
 
-Since [ECharts v4.0.0]((https://github.com/ecomfe/echarts/releases/tag/4.0.0)), `normal` is no longer needed for `itemStyle` or `label`.
+Since [ECharts v4.0.0]((https://github.com/apache/echarts/releases/tag/4.0.0)), `normal` is no longer needed for `itemStyle` or `label`.
 
 ### Flatten `textStyle`
 
-Since [ECharts v3.7.0](https://github.com/ecomfe/echarts/releases/tag/3.7.0), `textStyle` option is flatten, so that `series.label[normal|emphasis].textStyle.xxx` is now can be written in `series.label[normal|emphasis].textStyle`. This is supported from [echarts-liquidfill](https://github.com/ecomfe/echarts-liquidfill/releases/tag/v1.0.6) v1.0.6. So if you found examples with `textStyle` in old demo, don't be too surprised.
+Since [ECharts v3.7.0](https://github.com/apache/echarts/releases/tag/3.7.0), `textStyle` option is flatten, so that `series.label[normal|emphasis].textStyle.xxx` is now can be written in `series.label[normal|emphasis].textStyle`. This is supported from [echarts-liquidfill](https://github.com/ecomfe/echarts-liquidfill/releases/tag/v1.0.6) v1.0.6. So if you found examples with `textStyle` in old demo, don't be too surprised.
 
 
 
 ## Quick Start
 
 - [API](https://github.com/ecomfe/echarts-liquidfill#api)
-- [Examples at ECharts Gallery](http://gallery.echartsjs.com/explore.html#tags=liquidFill~sort=rank~timeframe=all~author=all)
+- [Examples at ECharts Gallery](https://www.makeapie.com/explore.html#tags=liquidFill~sort=rank~timeframe=all~author=all)
 
 Here are some common uses:
 
@@ -72,7 +72,7 @@ Here are some common uses:
 - [Click event](https://github.com/ecomfe/echarts-liquidfill#click-event)
 - [Make an element non-interactable](https://github.com/ecomfe/echarts-liquidfill#non-interactable)
 
-To ask a question, you may fork [Liquid Fill Chart Example on Gallery](http://gallery.echartsjs.com/editor.html?c=xr1XplzB4e) and copy your code there. Then you may [open an issue](https://github.com/ecomfe/echarts-liquidfill/issues/new) in this project.
+To ask a question, you may fork [Liquid Fill Chart Example on Gallery](https://www.makeapie.com/editor.html?c=xr1XplzB4e) and copy your code there. Then you may [open an issue](https://github.com/ecomfe/echarts-liquidfill/issues/new) in this project.
 
 
 ## Examples
@@ -92,7 +92,7 @@ var option = {
 
 ![A simple liquid fill chart](http://g.recordit.co/RsjUlo69JN.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xr1XplzB4e)
+[Run](https://www.makeapie.com/editor.html?c=xr1XplzB4e)
 
 
 ### Multiple Waves
@@ -112,7 +112,7 @@ This creates a chart wit waves at position of 60%, 50%, 40%, and 30%.
 
 ![Multiple waves](http://g.recordit.co/HJ3z3ITqzL.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xSyIEWMBNl)
+[Run](https://www.makeapie.com/editor.html?c=xSyIEWMBNl)
 
 
 ### Color and Opacity
@@ -139,7 +139,7 @@ var option = {
 
 ![Color and opacity](http://g.recordit.co/ZVRBdxO6oY.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xrJpDC704l)
+[Run](https://www.makeapie.com/editor.html?c=xrJpDC704l)
 
 You may also set the color and opacity of a single data item by:
 
@@ -165,7 +165,7 @@ var option = {
 
 ![Color and opacity of a single data item](http://g.recordit.co/Smz5G8ypvO.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xBJPCRXR4l)
+[Run](https://www.makeapie.com/editor.html?c=xBJPCRXR4l)
 
 
 ### Static Waves
@@ -186,7 +186,7 @@ var option = {
 
 ![Static waves](http://g.recordit.co/Wze7eblLPM.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xH1VfVVREx)
+[Run](https://www.makeapie.com/editor.html?c=xH1VfVVREx)
 
 
 ### Still Water
@@ -208,7 +208,7 @@ It is recommended to set `waveAnimation` to be false in this case to disable ani
 
 ![Still water](http://g.recordit.co/EQ5pnYDAtN.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xHy1NHVCNx)
+[Run](https://www.makeapie.com/editor.html?c=xHy1NHVCNx)
 
 ### Change A Single Wave
 
@@ -231,7 +231,7 @@ var option = {
 
 ![Change a single wave](http://g.recordit.co/31VHgsRV2y.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xry6CHNCVl)
+[Run](https://www.makeapie.com/editor.html?c=xry6CHNCVl)
 
 ### Background Style
 
@@ -253,7 +253,7 @@ var option = {
 
 ![Change border width and color](http://g.recordit.co/nXCxOcV4IQ.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xSkJoa_kBx)
+[Run](https://www.makeapie.com/editor.html?c=xSkJoa_kBx)
 
 ### Outline Style
 
@@ -273,7 +273,7 @@ var option = {
 
 ![No outline](http://g.recordit.co/nIxiw5KAGC.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xSySxR_JBg)
+[Run](https://www.makeapie.com/editor.html?c=xSySxR_JBg)
 
 
 ### Shape
@@ -296,7 +296,7 @@ var options = [{
 
 ![Diamond wave](http://g.recordit.co/1v9490ijKg.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xry0tUfcBe)
+[Run](https://www.makeapie.com/editor.html?c=xry0tUfcBe)
 
 ```
 option = {
@@ -313,7 +313,7 @@ option = {
 
 ![Fill the container](http://g.recordit.co/iuMJckv5lB.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xrko4E9zKb&v=1)
+[Run](https://www.makeapie.com/editor.html?c=xrko4E9zKb&v=1)
 
 ```js
 var option = {
@@ -345,7 +345,7 @@ var option = {
 
 ![ECharts Liquid Fill](http://g.recordit.co/CfZq1v9tzv.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xH1HouM9Sl)
+[Run](https://www.makeapie.com/editor.html?c=xH1HouM9Sl)
 
 
 ### Animation
@@ -381,7 +381,7 @@ setTimeout(function () {
 
 ![Update animation](http://g.recordit.co/qt87aYQ9SO.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xSk8I5JcHe)
+[Run](https://www.makeapie.com/editor.html?c=xSk8I5JcHe)
 
 ### Change Text
 
@@ -412,7 +412,7 @@ Label text of this example is `'Liquid Fill\nFirst Data\nValue: 0.6'`.
 
 ![Label formatter as string](http://g.recordit.co/3Zcftu8tpL.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xrkwSn1qHx)
+[Run](https://www.makeapie.com/editor.html?c=xrkwSn1qHx)
 
 This has the same result as using `formatter` as a function:
 
@@ -437,7 +437,7 @@ var option = {
 };
 ```
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xHk5831cHg)
+[Run](https://www.makeapie.com/editor.html?c=xHk5831cHg)
 
 Text position is at the center by default. `label.position` can be set to be `'inside'`, `'left'`, `'right'`, `'top'`, `'bottom'`, or horizontal and vertical positions like `['10%', '20%']`, which means `'10%'` to the left (controlled by `label.align`, which can be `'left'`, `'center'`, or `'right'`) and `'20%'` to the top (controlled by `label.baseline`, which can be `'top'`, `'middle'`, or `'bottom'`).
 
@@ -469,7 +469,7 @@ var option = {
 
 ![Change shadow](http://g.recordit.co/nIy6lZaS8C.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xrJO4CyqSl)
+[Run](https://www.makeapie.com/editor.html?c=xrJO4CyqSl)
 
 ### Tooltip
 
@@ -490,7 +490,7 @@ var option = {
 
 ![Tooltip](http://g.recordit.co/S1zQTS6B0G.gif)
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xSJqXeg5He)
+[Run](https://www.makeapie.com/editor.html?c=xSJqXeg5He)
 
 ### Click Event
 
@@ -526,7 +526,7 @@ var option = {
 };
 ```
 
-[Run](http://gallery.echartsjs.com/editor.html?c=xSJqev71Jb)
+[Run](https://www.makeapie.com/editor.html?c=xSJqev71Jb)
 
 
 ## API

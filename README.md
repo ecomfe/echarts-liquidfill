@@ -46,6 +46,8 @@ import * as echarts from 'echarts/core';
 import 'echarts-liquidfill'
 ```
 
+[Here](https://codesandbox.io/s/brave-rosalind-dj280?file=/src/index.js) is the basic example on CodeSandbox
+
 ## Download echarts-liquidfill from GitHub
 
 You may download the lastest ECharts files on [ECharts official site](https://echarts.apache.org/zh/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist).

@@ -32,6 +32,20 @@ NOTE:
 echarts-liquidfill@3 is compitable with echarts@5
 echarts-liquidfill@2 is compitable with echarts@4
 
+Import:
+
+```js
+import * as echarts from 'echarts';
+import 'echarts-liquidfill'
+```
+
+Or:
+
+```js
+import * as echarts from 'echarts/core';
+import 'echarts-liquidfill'
+```
+
 ## Download echarts-liquidfill from GitHub
 
 You may download the lastest ECharts files on [ECharts official site](https://echarts.apache.org/zh/download.html) and download this plugin in [dist directory](https://github.com/ecomfe/echarts-liquidfill/tree/master/dist).

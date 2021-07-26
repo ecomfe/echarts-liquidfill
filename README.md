@@ -15,7 +15,8 @@ To use ECharts plugins, you need to include the plugin JavaScript file after ECh
 
 ECharts can be downloaded at [GitHub dist directory](https://github.com/apache/echarts/tree/master/dist) or [Download page of Official Website](https://echarts.apache.org/zh/download.html) (in Chinese).
 
->#### NOTE
+#### NOTE
+
 >
 > The minimum package of ECharts required by LiquidFill Chart is [simple version](https://github.com/apache/echarts/blob/master/dist/echarts.simple.js) on GitHub, or selecting nothing in [online builder](https://echarts.apache.org/zh/download.html) (in Chinese). If you need other chart types or components in your other chart, you should include them accordingly.
 

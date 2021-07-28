@@ -146,7 +146,8 @@ echarts.extendChartView({
                 waveElement.useStyle(style);
 
                 // instant changes
-                waveElement.position = newWave.position;
+                waveElement.x = newWave.x;
+                waveElement.y = newWave.y
                 waveElement.setClipPath(newWave.getClipPath());
                 waveElement.shape.inverse = newWave.inverse;
 
@@ -199,7 +200,8 @@ echarts.extendChartView({
                         new echarts.graphic.BoundingRect(left, top, w, h)
                     );
                     if (isForClipping) {
-                        path.position = [-w / 2, -h / 2];
+                        path.x = -w / 2;
+                        path.y = -h / 2;
                     }
                     return path;
                 }
@@ -310,7 +312,8 @@ echarts.extendChartView({
                     inverse: isInverse
                 },
                 style: normalStyle,
-                position: [cx, cy]
+                x: cx,
+                y: cy,
             });
             wave.shape._waterLevel = waterLevel;
 
@@ -460,7 +463,8 @@ echarts.extendChartView({
                 shape: {
                     paths: waves
                 },
-                position: [cx, cy]
+                x: cx,
+                y: cy
             });
 
             wavePath.setClipPath(boundingCircle);

@@ -1265,7 +1265,7 @@ external_echarts_.extendChartView({
                     y: newWave.y
                 }, seriesModel);
 
-                if (seriesModel && seriesModel.isUniversalTransitionEnabled()) {
+                if (seriesModel.isUniversalTransitionEnabled && seriesModel.isUniversalTransitionEnabled()) {
                     external_echarts_.graphic.updateProps(waveElement, {
                         style: style
                     }, seriesModel);

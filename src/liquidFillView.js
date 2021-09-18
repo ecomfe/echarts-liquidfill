@@ -150,7 +150,7 @@ echarts.extendChartView({
                     y: newWave.y
                 }, seriesModel);
 
-                if (seriesModel && seriesModel.isUniversalTransitionEnabled()) {
+                if (seriesModel.isUniversalTransitionEnabled && seriesModel.isUniversalTransitionEnabled()) {
                     echarts.graphic.updateProps(waveElement, {
                         style: style
                     }, seriesModel);

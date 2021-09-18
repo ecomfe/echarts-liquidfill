@@ -1117,13 +1117,18 @@ function getWaterPositions(x, stage, waveLength, amplitude) {
 
 
 
-const liquidFillView_parsePercent = parsePercent;
+var liquidFillView_parsePercent = parsePercent;
+
+function isPathSymbol(symbol) {
+    return symbol && symbol.indexOf('path://') === 0
+}
 
 external_echarts_.extendChartView({
 
     type: 'liquidFill',
 
     render: function (seriesModel, ecModel, api) {
+        var self = this;
         var group = this.group;
         group.removeAll();
 
@@ -1255,15 +1260,37 @@ external_echarts_.extendChartView({
 
                 // changes with animation
                 external_echarts_.graphic.updateProps(waveElement, {
-                    shape: shape
+                    shape: shape,
+                    x: newWave.x,
+                    y: newWave.y
                 }, seriesModel);
 
-                waveElement.useStyle(style);
+                if (seriesModel && seriesModel.isUniversalTransitionEnabled()) {
+                    external_echarts_.graphic.updateProps(waveElement, {
+                        style: style
+                    }, seriesModel);
+                }
+                else {
+                    waveElement.useStyle(style);
+                }
 
                 // instant changes
-                waveElement.position = newWave.position;
+                var oldWaveClipPath = waveElement.getClipPath();
+                var newWaveClipPath = newWave.getClipPath();
+
                 waveElement.setClipPath(newWave.getClipPath());
                 waveElement.shape.inverse = newWave.inverse;
+
+                if (oldWaveClipPath && newWaveClipPath
+                    && self._shape === symbol
+                    // TODO use zrender morphing to apply complex symbol animation.
+                    && !isPathSymbol(symbol)
+                ) {
+                    // Can be animated.
+                    external_echarts_.graphic.updateProps(newWaveClipPath, {
+                        shape: oldWaveClipPath.shape
+                    }, seriesModel, { isFrom: true });
+                }
 
                 setWaveAnimation(newIdx, waveElement, waveElement);
                 group.add(waveElement);
@@ -1280,6 +1307,7 @@ external_echarts_.extendChartView({
             group.add(getText(waves));
         }
 
+        this._shape = symbol;
         this._data = data;
 
         /**
@@ -1292,7 +1320,7 @@ external_echarts_.extendChartView({
         function getPath(r, isForClipping) {
             if (symbol) {
                 // customed symbol path
-                if (symbol.indexOf('path://') === 0) {
+                if (isPathSymbol(symbol)) {
                     var path = external_echarts_.graphic.makePath(symbol.slice(7), {});
                     var bouding = path.getBoundingRect();
                     var w = bouding.width;
@@ -1314,7 +1342,8 @@ external_echarts_.extendChartView({
                         new external_echarts_.graphic.BoundingRect(left, top, w, h)
                     );
                     if (isForClipping) {
-                        path.position = [-w / 2, -h / 2];
+                        path.x = -w / 2;
+                        path.y = -h / 2;
                     }
                     return path;
                 }
@@ -1425,7 +1454,8 @@ external_echarts_.extendChartView({
                     inverse: isInverse
                 },
                 style: normalStyle,
-                position: [cx, cy]
+                x: cx,
+                y: cy,
             });
             wave.shape._waterLevel = waterLevel;
 
@@ -1575,7 +1605,8 @@ external_echarts_.extendChartView({
                 shape: {
                     paths: waves
                 },
-                position: [cx, cy]
+                x: cx,
+                y: cy
             });
 
             wavePath.setClipPath(boundingCircle);

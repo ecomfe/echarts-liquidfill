@@ -1,6 +1,6 @@
 {
   "name": "echarts-liquidfill",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "ECharts liquid fill extension",
   "main": "dist/echarts-liquidfill.js",
   "module": "index.js",
@@ -23,7 +23,7 @@
     "url": "https://github.com/ecomfe/echarts-liquidfill"
   },
   "devDependencies": {
-    "echarts": "^5.0.1",
+    "echarts": "^5.2.0",
     "webpack": "^5.11.1",
     "webpack-cli": "^4.3.1"
   }
